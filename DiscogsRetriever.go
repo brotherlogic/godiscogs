@@ -1,4 +1,4 @@
-package main
+package github.com/brotherlogic/godiscogs
 
 import (
 	"encoding/json"
