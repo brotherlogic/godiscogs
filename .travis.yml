@@ -2,6 +2,10 @@ language: go
 
 go:
   - 1.5
+  
+branches:
+  only:
+    - master
 
 before_install:
 - go get github.com/axw/gocov/gocov
