@@ -1,18 +1,42 @@
-package github.com/brotherlogic/godiscogs
+package discogsgo
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 )
+
+type jsonUnmarshaller interface {
+	Unmarshal([]byte, interface{}) error
+}
+type prodUnmarshaller struct{}
+
+func (jsonUnmarshaller prodUnmarshaller) Unmarshal(inp []byte, v interface{}) error {
+	return json.Unmarshal(inp, v)
+}
+
+type httpGetter interface {
+     Get(url string) (*http.Response, error)
+     }
+type prodHTTPGetter struct{}
+func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
+  return http.Get(url)
+}
 
 // DiscogsRetriever Main retriever type
 type DiscogsRetriever struct {
 	userAgent        string
 	lastRetrieveTime int64
 	userToken        string
+	unmarshaller     jsonUnmarshaller
+	getter		 httpGetter	 
+}
+
+// NewDiscogsRetriever Build a production retriever
+func NewDiscogsRetriever() *DiscogsRetriever {
+	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}}
 }
 
 // Release a release in the discogs sense
@@ -22,37 +46,29 @@ type Release struct {
 }
 
 // GetRelease returns a release from the discogs system
-func (r *DiscogsRetriever) GetRelease(id int) Release {
-	jsonString := r.retrieve("/releases/" + strconv.Itoa(id))
+func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
+	jsonString, _ := r.retrieve("/releases/" + strconv.Itoa(id))
+	log.Printf("Returned %v", string(jsonString))
 	var release Release
-	err := json.Unmarshal(jsonString, &release)
+	err := r.unmarshaller.Unmarshal(jsonString, &release)
 
 	if err != nil {
-		panic(err)
+		return release, err
 	}
 
-	return release
+	return release, nil
 }
 
-func (r *DiscogsRetriever) retrieve(path string) []byte {
+
+func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
-	response, err := http.Get(urlv)
+	response, err := r.getter.Get(urlv)
 
 	if err != nil {
-		panic(err)
-	} else {
-		defer response.Body.Close()
-		body, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			panic(err)
-		}
-		return body
+		return make([]byte, 0), err
 	}
-
-	return make([]byte, 0)
-}
-
-func main() {
-	retr := DiscogsRetriever{}
-	fmt.Printf("%v\n", retr.GetRelease(249504))
+	
+		defer response.Body.Close()
+		body, _ := ioutil.ReadAll(response.Body)
+		return body, nil
 }
