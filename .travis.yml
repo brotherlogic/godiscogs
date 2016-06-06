@@ -1,0 +1,12 @@
+language: go
+
+go:
+  - 1.5
+
+before_install:
+- go get github.com/golang/lint/golint
+- go get github.com/GeertJohan/fgt
+
+script:
+- fgt golint $(find ./ | grep .go$)
+- go test -v ./...

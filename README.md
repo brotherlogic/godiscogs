@@ -1,0 +1,1 @@
+Golang interface to discogs.

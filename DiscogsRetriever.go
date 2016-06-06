@@ -8,16 +8,20 @@ import (
 	"strconv"
 )
 
+// DiscogsRetriever Main retriever type
 type DiscogsRetriever struct {
 	userAgent        string
 	lastRetrieveTime int64
 	userToken        string
 }
 
+// Release a release in the discogs sense
 type Release struct {
-	Id int
+	ID    int
+	Title string
 }
 
+// GetRelease returns a release from the discogs system
 func (r *DiscogsRetriever) GetRelease(id int) Release {
 	jsonString := r.retrieve("/releases/" + strconv.Itoa(id))
 	var release Release
