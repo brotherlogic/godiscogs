@@ -48,12 +48,6 @@ func NewDiscogsRetriever() *DiscogsRetriever {
 	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}}
 }
 
-// Release a release in the discogs sense
-type Release struct {
-	ID    int
-	Title string
-}
-
 // GetRelease returns a release from the discogs system
 func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	jsonString, _ := r.retrieve("/releases/" + strconv.Itoa(id))

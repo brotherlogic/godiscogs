@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message Release {
+	// The id number of the release
+	int32 id = 1;
+
+	// The title of the release
+	string title = 2;
+}
