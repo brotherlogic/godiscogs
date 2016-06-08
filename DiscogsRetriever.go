@@ -1,4 +1,4 @@
-package discogsgo
+package godiscogs
 
 import (
 	"encoding/json"
@@ -17,11 +17,20 @@ func (jsonUnmarshaller prodUnmarshaller) Unmarshal(inp []byte, v interface{}) er
 	return json.Unmarshal(inp, v)
 }
 
+var httpCount int
+
+// GetHTTPGetCount The number of http gets performed
+func GetHTTPGetCount() int {
+  return httpCount
+}
+
 type httpGetter interface {
      Get(url string) (*http.Response, error)
      }
 type prodHTTPGetter struct{}
 func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
+  httpCount++
+  log.Printf("Retrieving %v", url)
   return http.Get(url)
 }
 
@@ -48,7 +57,6 @@ type Release struct {
 // GetRelease returns a release from the discogs system
 func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	jsonString, _ := r.retrieve("/releases/" + strconv.Itoa(id))
-	log.Printf("Returned %v", string(jsonString))
 	var release Release
 	err := r.unmarshaller.Unmarshal(jsonString, &release)
 
