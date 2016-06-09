@@ -49,6 +49,9 @@ func TestGetRelease(t *testing.T) {
 	if release.Title != "Never Gonna Give You Up" {
 		t.Errorf("Wrong title: %v", release)
 	}
+	if release.Artists[0].Name != "Rick Astley" {
+		t.Errorf("Wrong artist name: %v", release.Artists[0].Name)
+	}
 }
 
 func TestRetrieve(t *testing.T) {

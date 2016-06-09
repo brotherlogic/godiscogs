@@ -1,9 +1,20 @@
 syntax = "proto3";
 
+message Artist {
+        // The id number of the artist
+        int32 id = 1;
+
+        //The name of the artist
+        string name = 2;
+}
+
 message Release {
 	// The id number of the release
 	int32 id = 1;
 
 	// The title of the release
 	string title = 2;
+
+        // Artists associated with the release
+        repeated Artist artists = 3;
 }
