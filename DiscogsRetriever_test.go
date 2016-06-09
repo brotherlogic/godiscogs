@@ -14,7 +14,7 @@ type testFileGetter struct{}
 
 func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 	response := &http.Response{}
-	strippedURL := url[24:]
+	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, err := os.Open("testdata" + strippedURL)
 	if err != nil {
 		log.Printf("Error opening test file %v", err)
@@ -23,14 +23,14 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 	return response, nil
 }
 
-func NewTestDiscogsRetriever() *DiscogsRetriever {
-	retr := NewDiscogsRetriever()
+func NewTestDiscogsRetriever(token string) *DiscogsRetriever {
+	retr := NewDiscogsRetriever(token)
 	retr.getter = testFileGetter{}
 	return retr
 }
 
 func TestRetrieveLimiting(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
+	retr := NewTestDiscogsRetriever("token")
 	start := time.Now()
 	for i := 0; i < 3; i++ {
 		retr.retrieve("/releases/249504")
@@ -44,7 +44,7 @@ func TestRetrieveLimiting(t *testing.T) {
 }
 
 func TestGetRelease(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
+	retr := NewTestDiscogsRetriever("token")
 	release, _ := retr.GetRelease(249504)
 	if release.Title != "Never Gonna Give You Up" {
 		t.Errorf("Wrong title: %v", release)
@@ -56,7 +56,7 @@ func TestGetRelease(t *testing.T) {
 
 func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
-	retr := NewTestDiscogsRetriever()
+	retr := NewTestDiscogsRetriever("token")
 	retr.getter = prodHTTPGetter{}
 	body, _ := retr.retrieve("/releases/249504")
 	if !strings.Contains(string(body), "Astley") {
@@ -76,7 +76,7 @@ func (httpGetter testFailGetter) Get(url string) (*http.Response, error) {
 }
 
 func TestFailGet(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
+	retr := NewTestDiscogsRetriever("token")
 	retr.getter = testFailGetter{}
 	_, err := retr.retrieve("/releases/249504")
 	if err == nil {
@@ -91,11 +91,29 @@ func (jsonUnmarshaller testFailUnmarshaller) Unmarshal(inp []byte, v interface{}
 }
 
 func TestFailMarshal(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
+	retr := NewTestDiscogsRetriever("token")
 	retr.unmarshaller = testFailUnmarshaller{}
 	_, err := retr.GetRelease(249504)
 	if err == nil {
 		t.Errorf("Error handling failed to fail on unmarshal")
+	}
+}
+
+func TestGetCollection(t *testing.T) {
+	retr := NewTestDiscogsRetriever("token")
+	collection := retr.GetCollection()
+	if len(collection) != 1918 {
+		t.Errorf("Collection retrieve is short: %v", len(collection))
+	}
+	found := false
+	for _, record := range collection {
+		if record.Id == 679324 {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("Collection does not contain Earth Rot")
 	}
 }
 

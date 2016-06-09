@@ -46,8 +46,8 @@ type DiscogsRetriever struct {
 }
 
 // NewDiscogsRetriever Build a production retriever
-func NewDiscogsRetriever() *DiscogsRetriever {
-	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}}
+func NewDiscogsRetriever(token string) *DiscogsRetriever {
+	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token}
 }
 
 // GetRelease returns a release from the discogs system
@@ -64,6 +64,46 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 }
 
 var lastTimeRetrieved time.Time
+
+// Urls list of urls in pagination
+type Urls struct {
+	Next string
+}
+
+// Pagination the pagination structure
+type Pagination struct {
+	Pages int
+	Page  int
+	Urls  Urls
+}
+
+// CollectionResponse returned from discogs
+type CollectionResponse struct {
+	Pagination Pagination
+	Releases   []Release
+}
+
+// GetCollection gets all the releases in the users collection
+func (r *DiscogsRetriever) GetCollection() []Release {
+	jsonString, _ := r.retrieve("/users/brotherlogic/collection/folders/0/releases?per_page=100&token=" + r.userToken)
+
+	var releases []Release
+	var response CollectionResponse
+	r.unmarshaller.Unmarshal(jsonString, &response)
+
+	releases = append(releases, response.Releases...)
+	end := response.Pagination.Pages == response.Pagination.Page
+
+	for !end {
+		jsonString, _ = r.retrieve(response.Pagination.Urls.Next[23:])
+		r.unmarshaller.Unmarshal(jsonString, &response)
+
+		releases = append(releases, response.Releases...)
+		end = response.Pagination.Pages == response.Pagination.Page
+	}
+
+	return releases
+}
 
 func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
