@@ -105,6 +105,25 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 	return releases
 }
 
+// FoldersResponse returned from discogs
+type FoldersResponse struct {
+	Pagination Pagination
+	Folders    []Folder
+}
+
+// GetFolders gets all the folders for a given user
+func (r *DiscogsRetriever) GetFolders() []Folder {
+	jsonString, _ := r.retrieve("/users/brotherlogic/collection/folders?token=" + r.userToken)
+
+	var folders []Folder
+	var response FoldersResponse
+	r.unmarshaller.Unmarshal(jsonString, &response)
+
+	folders = append(folders, response.Folders...)
+
+	return folders
+}
+
 func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
 
