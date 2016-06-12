@@ -23,15 +23,19 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 	return response, nil
 }
 
-func NewTestDiscogsRetriever(token string) *DiscogsRetriever {
-	retr := NewDiscogsRetriever(token)
+func NewTestDiscogsRetriever() *DiscogsRetriever {
+	retr := NewDiscogsRetriever("token")
 	retr.getter = testFileGetter{}
+	retr.getSleep = 0.0
 	return retr
 }
 
 func TestRetrieveLimiting(t *testing.T) {
-	retr := NewTestDiscogsRetriever("token")
+	//Ignore the get Sleep override
+	retr := NewDiscogsRetriever("token")
+	retr.getter = testFileGetter{}
 	start := time.Now()
+
 	for i := 0; i < 3; i++ {
 		retr.retrieve("/releases/249504")
 	}
@@ -44,7 +48,7 @@ func TestRetrieveLimiting(t *testing.T) {
 }
 
 func TestGetRelease(t *testing.T) {
-	retr := NewTestDiscogsRetriever("token")
+	retr := NewTestDiscogsRetriever()
 	release, _ := retr.GetRelease(249504)
 	if release.Title != "Never Gonna Give You Up" {
 		t.Errorf("Wrong title: %v", release)
@@ -56,7 +60,7 @@ func TestGetRelease(t *testing.T) {
 
 func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
-	retr := NewTestDiscogsRetriever("token")
+	retr := NewTestDiscogsRetriever()
 	retr.getter = prodHTTPGetter{}
 	body, _ := retr.retrieve("/releases/249504")
 	if !strings.Contains(string(body), "Astley") {
@@ -76,7 +80,7 @@ func (httpGetter testFailGetter) Get(url string) (*http.Response, error) {
 }
 
 func TestFailGet(t *testing.T) {
-	retr := NewTestDiscogsRetriever("token")
+	retr := NewTestDiscogsRetriever()
 	retr.getter = testFailGetter{}
 	_, err := retr.retrieve("/releases/249504")
 	if err == nil {
@@ -91,7 +95,7 @@ func (jsonUnmarshaller testFailUnmarshaller) Unmarshal(inp []byte, v interface{}
 }
 
 func TestFailMarshal(t *testing.T) {
-	retr := NewTestDiscogsRetriever("token")
+	retr := NewTestDiscogsRetriever()
 	retr.unmarshaller = testFailUnmarshaller{}
 	_, err := retr.GetRelease(249504)
 	if err == nil {
@@ -100,7 +104,7 @@ func TestFailMarshal(t *testing.T) {
 }
 
 func TestGetCollection(t *testing.T) {
-	retr := NewTestDiscogsRetriever("token")
+	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
 	if len(collection) != 1918 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
@@ -118,7 +122,7 @@ func TestGetCollection(t *testing.T) {
 }
 
 func TestGetFolders(t *testing.T) {
-	retr := NewTestDiscogsRetriever("token")
+	retr := NewTestDiscogsRetriever()
 	folders := retr.GetFolders()
 	if len(folders) == 0 {
 		t.Errorf("Folder retrieve is short: %v", len(folders))

@@ -43,11 +43,12 @@ type DiscogsRetriever struct {
 	userToken        string
 	unmarshaller     jsonUnmarshaller
 	getter           httpGetter
+	getSleep         int
 }
 
 // NewDiscogsRetriever Build a production retriever
 func NewDiscogsRetriever(token string) *DiscogsRetriever {
-	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token}
+	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 500}
 }
 
 // GetRelease returns a release from the discogs system
@@ -130,8 +131,8 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	//Sleep here
 	if lastTimeRetrieved.Second() > 0 {
 		diff := lastTimeRetrieved.Sub(time.Now())
-		if diff.Seconds() < float64(0.5) {
-			time.Sleep(time.Duration(500)*time.Millisecond - diff)
+		if diff < time.Duration(r.getSleep)*time.Millisecond {
+			time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 		}
 	}
 
