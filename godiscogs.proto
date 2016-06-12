@@ -1,5 +1,13 @@
 syntax = "proto3";
 
+message Folder {
+        //The id number of the folder
+        int32 id = 1;
+
+        //The name of the folder
+        string name = 2;
+}
+
 message Artist {
         // The id number of the artist
         int32 id = 1;

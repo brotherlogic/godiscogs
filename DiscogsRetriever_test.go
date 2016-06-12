@@ -117,6 +117,24 @@ func TestGetCollection(t *testing.T) {
 	}
 }
 
+func TestGetFolders(t *testing.T) {
+	retr := NewTestDiscogsRetriever("token")
+	folders := retr.GetFolders()
+	if len(folders) == 0 {
+		t.Errorf("Folder retrieve is short: %v", len(folders))
+	}
+	found := false
+	for _, folder := range folders {
+		if folder.Name == "ListeningPile" {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("Collection does not have ListeningPile: %v", folders)
+	}
+}
+
 func TestMain(m *testing.M) {
 	val := m.Run()
 	if GetHTTPGetCount() > 1 {
