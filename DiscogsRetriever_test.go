@@ -110,14 +110,20 @@ func TestGetCollection(t *testing.T) {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
+	var foundRecord Release
 	for _, record := range collection {
 		if record.Id == 679324 {
 			found = true
+			foundRecord = record
 		}
 	}
 
 	if !found {
 		t.Errorf("Collection does not contain Earth Rot")
+	}
+
+	if foundRecord.FolderId != 242017 {
+		t.Errorf("Earth Rot is not in the right folder: %v", foundRecord.FolderId)
 	}
 }
 
