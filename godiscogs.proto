@@ -25,4 +25,7 @@ message Release {
 
         // Artists associated with the release
         repeated Artist artists = 3;
+
+        // The folder in which the record is stored
+        int32 folder_id = 4;
 }
