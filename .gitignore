@@ -25,3 +25,4 @@ _testmain.go
 
 go-discogs
 *~
+prod_cache
