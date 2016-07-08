@@ -1,6 +1,6 @@
 mkdir -p testdata/releases
 mkdir -p testdata/users/brotherlogic/collection/folders/0/
-curl "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504
+curl "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504_token=token
 sleep 1
 curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token
 sleep 1
@@ -44,4 +44,4 @@ curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?p
 sleep 1
 curl "https://api.discogs.com/users/brotherlogic/collection/folders?token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders_token=token
 sleep 1
-curl "https://api.discogs.com/releases/6099374" > testdata/releases/6099374
+curl "https://api.discogs.com/releases/6099374?token=$1" > testdata/releases/6099374_token=token
