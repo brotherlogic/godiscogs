@@ -56,6 +56,9 @@ func TestGetRelease(t *testing.T) {
 	if release.Artists[0].Name != "Rick Astley" {
 		t.Errorf("Wrong artist name: %v", release.Artists[0].Name)
 	}
+	if !strings.Contains(release.Images[0].Uri, "https") {
+		t.Errorf("Image has not been retrieved: %v", release)
+	}
 }
 
 func TestRetrieve(t *testing.T) {
@@ -106,7 +109,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 1926 {
+	if len(collection) != 1965 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
