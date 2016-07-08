@@ -16,6 +16,14 @@ message Artist {
         string name = 2;
 }
 
+message Image {
+        // The uri to the image
+        string uri = 1;
+
+        // The type of image
+        string type = 2;
+}
+
 message Release {
 	// The id number of the release
 	int32 id = 1;
@@ -28,4 +36,7 @@ message Release {
 
         // The folder in which the record is stored
         int32 folder_id = 4;
+
+        // Images associated with the release
+        repeated Image images = 5;
 }

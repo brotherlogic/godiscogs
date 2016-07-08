@@ -1,6 +1,6 @@
 mkdir -p testdata/releases
 mkdir -p testdata/users/brotherlogic/collection/folders/0/
-curl "https://api.discogs.com/releases/249504" > testdata/releases/249504
+curl "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504
 sleep 1
 curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token
 sleep 1
