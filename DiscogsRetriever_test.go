@@ -36,9 +36,9 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 }
 
 func TestPost(t *testing.T) {
-     retr := NewDiscogsRetriever("token")
-     retr.getter = prodHTTPGetter{}
-     retr.post("blah")     
+	retr := NewDiscogsRetriever("token")
+	retr.getter = prodHTTPGetter{}
+	retr.post("blah")
 }
 
 func TestRetrieveLimiting(t *testing.T) {
@@ -73,14 +73,13 @@ func TestGetRelease(t *testing.T) {
 }
 
 func TestAddToFolder(t *testing.T) {
-     retr := NewTestDiscogsRetriever()
-     retr.AddToFolder(10, 10)
+	retr := NewTestDiscogsRetriever()
+	retr.AddToFolder(10, 10)
 }
 
-
 func TestMoveToUncateogrized(t *testing.T) {
-     retr := NewTestDiscogsRetriever()
-     retr.MoveToUncategorized(10, 10, 10)
+	retr := NewTestDiscogsRetriever()
+	retr.MoveToUncategorized(10, 10, 10)
 }
 
 func TestRetrieve(t *testing.T) {
@@ -154,9 +153,11 @@ func TestGetCollection(t *testing.T) {
 	if foundRecord.FolderId != 242017 {
 		t.Errorf("Earth Rot is not in the right folder: %v", foundRecord.FolderId)
 	}
+
+	if foundRecord.InstanceId != 19867228 {
+		t.Errorf("Instance ID is not right: %v", foundRecord.InstanceId)
+	}
 }
-
-
 
 func TestGetFolders(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
