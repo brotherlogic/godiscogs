@@ -39,4 +39,7 @@ message Release {
 
         // Images associated with the release
         repeated Image images = 5;
+
+        // The instance id of this release
+        int32 instance_id = 6;
 }
