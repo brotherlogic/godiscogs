@@ -23,11 +23,22 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 	return response, nil
 }
 
+func (httpGetter testFileGetter) Post(url string) (*http.Response, error) {
+	response := &http.Response{}
+	return response, nil
+}
+
 func NewTestDiscogsRetriever() *DiscogsRetriever {
 	retr := NewDiscogsRetriever("token")
 	retr.getter = testFileGetter{}
 	retr.getSleep = 0.0
 	return retr
+}
+
+func TestPost(t *testing.T) {
+     retr := NewDiscogsRetriever("token")
+     retr.getter = prodHTTPGetter{}
+     retr.post("blah")     
 }
 
 func TestRetrieveLimiting(t *testing.T) {
@@ -61,6 +72,17 @@ func TestGetRelease(t *testing.T) {
 	}
 }
 
+func TestAddToFolder(t *testing.T) {
+     retr := NewTestDiscogsRetriever()
+     retr.AddToFolder(10, 10)
+}
+
+
+func TestMoveToUncateogrized(t *testing.T) {
+     retr := NewTestDiscogsRetriever()
+     retr.MoveToUncategorized(10, 10, 10)
+}
+
 func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
 	retr := NewTestDiscogsRetriever()
@@ -79,6 +101,10 @@ func TestRetrieve(t *testing.T) {
 type testFailGetter struct{}
 
 func (httpGetter testFailGetter) Get(url string) (*http.Response, error) {
+	return nil, errors.New("Built To Fail")
+}
+
+func (httpGetter testFailGetter) Post(url string) (*http.Response, error) {
 	return nil, errors.New("Built To Fail")
 }
 
@@ -130,6 +156,8 @@ func TestGetCollection(t *testing.T) {
 	}
 }
 
+
+
 func TestGetFolders(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	folders := retr.GetFolders()
@@ -150,7 +178,7 @@ func TestGetFolders(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	val := m.Run()
-	if GetHTTPGetCount() > 1 {
+	if GetHTTPGetCount() > 2 {
 		log.Printf("Too many http get calls: %v", GetHTTPGetCount())
 		val = 2
 	}

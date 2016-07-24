@@ -27,6 +27,7 @@ func GetHTTPGetCount() int {
 
 type httpGetter interface {
 	Get(url string) (*http.Response, error)
+	Post(url string) (*http.Response, error)	
 }
 type prodHTTPGetter struct{}
 
@@ -35,6 +36,13 @@ func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
 	log.Printf("Retrieving %v", url)
 	return http.Get(url)
 }
+
+func (httpGetter prodHTTPGetter) Post(url string) (*http.Response, error) {
+	httpCount++
+	log.Printf("Posting %v", url)
+	return http.Post(url, "", nil)	 
+}
+
 
 // DiscogsRetriever Main retriever type
 type DiscogsRetriever struct {
@@ -106,6 +114,16 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 	return releases
 }
 
+// AddToFolder adds the release to the given folder
+func (r *DiscogsRetriever) AddToFolder(folderID int, releaseID int) {
+     r.post("/users/brotherlogic/collection/folders/" + strconv.Itoa(folderID) + "/releases/" + strconv.Itoa(releaseID))
+}
+
+// MoveToUncategorized Moves the given release to the uncategorized folder
+func (r *DiscogsRetriever) MoveToUncategorized(folderID int, releaseID int, instanceID int) {
+     r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/" + strconv.Itoa(instanceID))
+}
+
 // FoldersResponse returned from discogs
 type FoldersResponse struct {
 	Pagination Pagination
@@ -124,6 +142,8 @@ func (r *DiscogsRetriever) GetFolders() []Folder {
 
 	return folders
 }
+
+
 
 func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
@@ -146,4 +166,18 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	body, _ := ioutil.ReadAll(response.Body)
 	lastTimeRetrieved = time.Now()
 	return body, nil
+}
+
+func (r *DiscogsRetriever) post(path string) {
+	urlv := "https://api.discogs.com/" + path
+
+	//Sleep here
+	if lastTimeRetrieved.Second() > 0 {
+		diff := lastTimeRetrieved.Sub(time.Now())
+		if diff < time.Duration(r.getSleep)*time.Millisecond {
+			time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
+		}
+	}
+
+	r.getter.Post(urlv)
 }
