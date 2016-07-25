@@ -1,6 +1,7 @@
 package godiscogs
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -27,7 +28,7 @@ func GetHTTPGetCount() int {
 
 type httpGetter interface {
 	Get(url string) (*http.Response, error)
-	Post(url string) (*http.Response, error)	
+	Post(url string, data string) (*http.Response, error)
 }
 type prodHTTPGetter struct{}
 
@@ -37,12 +38,11 @@ func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
 	return http.Get(url)
 }
 
-func (httpGetter prodHTTPGetter) Post(url string) (*http.Response, error) {
+func (httpGetter prodHTTPGetter) Post(url string, data string) (*http.Response, error) {
 	httpCount++
 	log.Printf("Posting %v", url)
-	return http.Post(url, "", nil)	 
+	return http.Post(url, "application/json", bytes.NewBuffer([]byte(data)))
 }
-
 
 // DiscogsRetriever Main retriever type
 type DiscogsRetriever struct {
@@ -116,12 +116,12 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 
 // AddToFolder adds the release to the given folder
 func (r *DiscogsRetriever) AddToFolder(folderID int, releaseID int) {
-     r.post("/users/brotherlogic/collection/folders/" + strconv.Itoa(folderID) + "/releases/" + strconv.Itoa(releaseID))
+	r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 }
 
-// MoveToUncategorized Moves the given release to the uncategorized folder
-func (r *DiscogsRetriever) MoveToUncategorized(folderID int, releaseID int, instanceID int) {
-     r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/" + strconv.Itoa(instanceID))
+// MoveToFolder Moves the given release to the new folder
+func (r *DiscogsRetriever) MoveToFolder(folderID int, releaseID int, instanceID int, newFolderID int) {
+	r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
 }
 
 // FoldersResponse returned from discogs
@@ -142,8 +142,6 @@ func (r *DiscogsRetriever) GetFolders() []Folder {
 
 	return folders
 }
-
-
 
 func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
@@ -168,7 +166,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	return body, nil
 }
 
-func (r *DiscogsRetriever) post(path string) {
+func (r *DiscogsRetriever) post(path string, data string) {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -179,5 +177,5 @@ func (r *DiscogsRetriever) post(path string) {
 		}
 	}
 
-	r.getter.Post(urlv)
+	r.getter.Post(urlv, data)
 }

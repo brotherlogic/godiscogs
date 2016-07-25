@@ -23,7 +23,7 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 	return response, nil
 }
 
-func (httpGetter testFileGetter) Post(url string) (*http.Response, error) {
+func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	return response, nil
 }
@@ -38,7 +38,7 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 func TestPost(t *testing.T) {
 	retr := NewDiscogsRetriever("token")
 	retr.getter = prodHTTPGetter{}
-	retr.post("blah")
+	retr.post("blah", "madeup")
 }
 
 func TestRetrieveLimiting(t *testing.T) {
@@ -79,7 +79,7 @@ func TestAddToFolder(t *testing.T) {
 
 func TestMoveToUncateogrized(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	retr.MoveToUncategorized(10, 10, 10)
+	retr.MoveToFolder(10, 10, 10, 10)
 }
 
 func TestRetrieve(t *testing.T) {
@@ -103,7 +103,7 @@ func (httpGetter testFailGetter) Get(url string) (*http.Response, error) {
 	return nil, errors.New("Built To Fail")
 }
 
-func (httpGetter testFailGetter) Post(url string) (*http.Response, error) {
+func (httpGetter testFailGetter) Post(url string, data string) (*http.Response, error) {
 	return nil, errors.New("Built To Fail")
 }
 
@@ -134,7 +134,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 1965 {
+	if len(collection) != 1986 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
