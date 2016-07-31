@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package godiscogs;
+
 message Label {
         // The name of the label
         string name = 1;
