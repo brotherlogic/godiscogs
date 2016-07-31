@@ -45,3 +45,9 @@ sleep 1
 curl "https://api.discogs.com/users/brotherlogic/collection/folders?token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders_token=token
 sleep 1
 curl "https://api.discogs.com/releases/6099374?token=$1" > testdata/releases/6099374_token=token
+sleep 1
+curl "https://api.discogs.com/releases/3362530?token=$1" > testdata/releases/3362530_token=token
+sleep 1
+curl "https://api.discogs.com/releases/2331612token=$1" > testdata/releases/2331612_token=token
+sleep 1
+curl "https://api.discogs.com/releases/228202?token=$1" > testdata/releases/228202_token=token

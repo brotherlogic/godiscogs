@@ -1,5 +1,10 @@
 syntax = "proto3";
 
+message Label {
+        // The name of the label
+        string name = 1;
+}
+
 message Folder {
         //The id number of the folder
         int32 id = 1;
@@ -42,4 +47,7 @@ message Release {
 
         // The instance id of this release
         int32 instance_id = 6;
+
+        // The labels connected to this release
+        repeated Label labels = 7;
 }
