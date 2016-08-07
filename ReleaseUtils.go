@@ -48,7 +48,6 @@ func Split(releases []*Release, n float64) [][]*Release{
      	 if currentValue + float64(rel.FormatQuantity) > boundaryValue {
 	    solution = append(solution, currentReleases)
 	    currentReleases = make([]*Release, 0)
-	    currentValue = 0.0
 	    boundaryValue += boundaryAccumulator
 	 }
 
@@ -56,6 +55,6 @@ func Split(releases []*Release, n float64) [][]*Release{
 	 currentValue += float64(rel.FormatQuantity)
      }
 	    solution = append(solution, currentReleases)
-	    
+
      return solution
 }
