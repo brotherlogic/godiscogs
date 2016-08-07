@@ -11,9 +11,14 @@ func GetReleaseArtist(rel Release) string {
 	return artistString
 }
 
-// Sort sorts two releases into the order we like
-func Sort(rel1 Release, rel2 Release) int {
-	//First sort by label - just use the first one in the list
+// ByLabelCat is a sorting function that sorts by label name, then catalogue number
+type ByLabelCat []*Release
+
+func (a ByLabelCat) Len() int           { return len(a) }
+func (a ByLabelCat) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByLabelCat) Less(i, j int) bool { return sortByLabelCat(*a[i], *a[j]) < 0 }
+
+func sortByLabelCat(rel1 Release, rel2 Release) int {
 	label1 := rel1.Labels[0]
 	label2 := rel2.Labels[0]
 
