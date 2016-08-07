@@ -42,6 +42,8 @@ curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?p
 sleep 1
 curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=20" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=20
 sleep 1
+curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=21" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=21
+sleep 1
 curl "https://api.discogs.com/users/brotherlogic/collection/folders?token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders_token=token
 sleep 1
 curl "https://api.discogs.com/releases/6099374?token=$1" > testdata/releases/6099374_token=token
@@ -51,3 +53,5 @@ sleep 1
 curl "https://api.discogs.com/releases/2331612token=$1" > testdata/releases/2331612_token=token
 sleep 1
 curl "https://api.discogs.com/releases/228202?token=$1" > testdata/releases/228202_token=token
+sleep 1
+curl "https://api.discogs.com/releases/1052359?token=$1" > testdata/releases/1052359_token=token

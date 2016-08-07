@@ -134,7 +134,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 1989 {
+	if len(collection) != 2030 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
