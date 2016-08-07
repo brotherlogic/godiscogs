@@ -29,3 +29,33 @@ func sortByLabelCat(rel1 Release, rel2 Release) int {
 
 	return 0
 }
+
+// Split splits a releases list into buckets
+func Split(releases []*Release, n float64) [][]*Release{
+     var solution [][]*Release
+
+     var count int32
+     count = 0
+     for _, rel := range releases {
+     	 count += rel.FormatQuantity
+     }
+
+     boundaryAccumulator := float64(count) / n
+     boundaryValue := boundaryAccumulator
+     currentValue := 0.0
+     var currentReleases []*Release
+     for _, rel := range releases {
+     	 if currentValue + float64(rel.FormatQuantity) > boundaryValue {
+	    solution = append(solution, currentReleases)
+	    currentReleases = make([]*Release, 0)
+	    currentValue = 0.0
+	    boundaryValue += boundaryAccumulator
+	 }
+
+	 currentReleases = append(currentReleases, rel)
+	 currentValue += float64(rel.FormatQuantity)
+     }
+	    solution = append(solution, currentReleases)
+	    
+     return solution
+}

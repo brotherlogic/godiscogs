@@ -52,4 +52,7 @@ message Release {
 
         // The labels connected to this release
         repeated Label labels = 7;
+
+	// The number of discs in the release
+	int32 format_quantity = 8;
 }
