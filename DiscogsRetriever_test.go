@@ -157,6 +157,10 @@ func TestGetCollection(t *testing.T) {
 	if foundRecord.InstanceId != 19867228 {
 		t.Errorf("Instance ID is not right: %v", foundRecord.InstanceId)
 	}
+
+	if foundRecord.Rating != 5 {
+		t.Errorf("Rating is not right: %v", foundRecord)
+	}
 }
 
 func TestGetFolders(t *testing.T) {
