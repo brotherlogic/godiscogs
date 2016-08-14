@@ -38,21 +38,24 @@ message Release {
 	// The title of the release
 	string title = 2;
 
-        // Artists associated with the release
-        repeated Artist artists = 3;
+  // Artists associated with the release
+  repeated Artist artists = 3;
 
-        // The folder in which the record is stored
-        int32 folder_id = 4;
+  // The folder in which the record is stored
+  int32 folder_id = 4;
 
-        // Images associated with the release
-        repeated Image images = 5;
+  // Images associated with the release
+  repeated Image images = 5;
 
-        // The instance id of this release
-        int32 instance_id = 6;
+  // The instance id of this release
+  int32 instance_id = 6;
 
-        // The labels connected to this release
-        repeated Label labels = 7;
+  // The labels connected to this release
+  repeated Label labels = 7;
 
 	// The number of discs in the release
 	int32 format_quantity = 8;
+
+  // The rating given to this release
+  int32 rating = 9;
 }
