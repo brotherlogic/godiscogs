@@ -152,7 +152,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
-	diff := lastTimeRetrieved.Sub(time.Now())
+	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
@@ -172,13 +172,16 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 func (r *DiscogsRetriever) post(path string, data string) {
 	urlv := "https://api.discogs.com/" + path
 
+	log.Printf("POST = %v", urlv)
+
 	//Sleep here
-	if lastTimeRetrieved.Second() > 0 {
-		diff := lastTimeRetrieved.Sub(time.Now())
-		if diff < time.Duration(r.getSleep)*time.Millisecond {
-			time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
-		}
+	diff := time.Now().Sub(lastTimeRetrieved)
+	log.Printf("DIFF = %v", diff)
+	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		log.Printf("Sleeping for %v from %v, %v", time.Duration(r.getSleep)*time.Millisecond-diff, diff, time.Duration(r.getSleep)*time.Millisecond)
+		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
+	lastTimeRetrieved = time.Now()
 	r.getter.Post(urlv, data)
 }
