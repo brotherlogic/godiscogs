@@ -181,6 +181,27 @@ func TestGetFolders(t *testing.T) {
 	}
 }
 
+func TestPostTiming(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getSleep = 200
+
+	start := time.Now()
+	for i := 0; i < 3; i++ {
+		//Insert 200 ms of sleep here
+		if i == 2 {
+			time.Sleep(time.Millisecond * 200)
+		}
+
+		retr.post("madeup", "")
+	}
+	end := time.Now()
+	diff := end.Sub(start) / time.Millisecond
+
+	if diff > 700 || diff < 500 {
+		t.Errorf("Timing on posts is quite wrong: %v", diff)
+	}
+}
+
 func TestMain(m *testing.M) {
 	val := m.Run()
 	if GetHTTPGetCount() > 2 {
