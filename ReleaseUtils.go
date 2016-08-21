@@ -1,6 +1,15 @@
 package godiscogs
 
-import "strings"
+import (
+	"regexp"
+	"strconv"
+	"strings"
+	"unicode"
+)
+
+func split(str string) []string {
+	return regexp.MustCompile("[0-9]+|[a-z]+|[A-Z]+").FindAllString(str, -1)
+}
 
 // GetReleaseArtist Gets a string of the release artist of this record
 func GetReleaseArtist(rel Release) string {
@@ -27,9 +36,27 @@ func sortByLabelCat(rel1 Release, rel2 Release) int {
 		return labelSort
 	}
 
-	catNoSort := strings.Compare(label1.Catno, label2.Catno)
-	if catNoSort != 0 {
-		return catNoSort
+	cat1Elems := split(label1.Catno)
+	cat2Elems := split(label2.Catno)
+	toCheck := len(cat1Elems)
+	if len(cat2Elems) < toCheck {
+		toCheck = len(cat2Elems)
+	}
+	for i := 0; i < toCheck; i++ {
+		if unicode.IsNumber(rune(cat1Elems[i][0])) {
+			num1, _ := strconv.Atoi(cat1Elems[i])
+			num2, _ := strconv.Atoi(cat2Elems[i])
+			if num1 > num2 {
+				return 1
+			} else if num2 > num1 {
+				return -1
+			}
+		} else {
+			catComp := strings.Compare(cat1Elems[i], cat2Elems[i])
+			if catComp != 0 {
+				return catComp
+			}
+		}
 	}
 
 	return 0
