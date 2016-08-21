@@ -5,6 +5,9 @@ package godiscogs;
 message Label {
         // The name of the label
         string name = 1;
+
+        // The catalogue number
+        string catno = 2;
 }
 
 message Folder {
