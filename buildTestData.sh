@@ -1,57 +1,62 @@
 mkdir -p testdata/releases
 mkdir -p testdata/users/brotherlogic/collection/folders/0/
-curl "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504_token=token
+mkdir -p testdata/masters/67464
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504_token=token
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=2" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=2
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=2" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=2
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=3" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=3
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=3" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=3
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=4" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=4
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=4" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=4
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=5" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=5
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=5" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=5
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=6" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=6
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=6" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=6
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=7" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=7
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=7" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=7
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=8" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=8
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=8" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=8
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=9" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=9
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=9" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=9
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=10" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=10
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=10" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=10
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=11" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=11
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=11" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=11
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=12" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=12
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=12" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=12
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=13" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=13
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=13" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=13
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=14" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=14
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=14" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=14
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=15" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=15
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=15" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=15
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=16" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=16
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=16" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=16
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=17" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=17
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=17" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=17
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=18" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=18
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=18" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=18
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=19" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=19
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=19" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=19
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=20" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=20
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=20" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=20
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=21" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=21
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=21" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=21
 sleep 1
-curl "https://api.discogs.com/users/brotherlogic/collection/folders?token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders_token=token
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders?token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders_token=token
 sleep 1
-curl "https://api.discogs.com/releases/6099374?token=$1" > testdata/releases/6099374_token=token
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/6099374?token=$1" > testdata/releases/6099374_token=token
 sleep 1
-curl "https://api.discogs.com/releases/3362530?token=$1" > testdata/releases/3362530_token=token
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/3362530?token=$1" > testdata/releases/3362530_token=token
 sleep 1
-curl "https://api.discogs.com/releases/2331612token=$1" > testdata/releases/2331612_token=token
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/2331612token=$1" > testdata/releases/2331612_token=token
 sleep 1
-curl "https://api.discogs.com/releases/228202?token=$1" > testdata/releases/228202_token=token
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/228202?token=$1" > testdata/releases/228202_token=token
 sleep 1
-curl "https://api.discogs.com/releases/1052359?token=$1" > testdata/releases/1052359_token=token
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/1052359?token=$1" > testdata/releases/1052359_token=token
+sleep 1
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/1823781?token=$1" > testdata/releases/1823781_token=token
+sleep 1
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/masters/67464/versions?per_page=500&token=$1" > testdata/masters/67464/versions_per_page=500_token=token

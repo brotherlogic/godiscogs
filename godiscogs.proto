@@ -61,4 +61,10 @@ message Release {
 
   // The rating given to this release
   int32 rating = 9;
+
+  // The earliest release date of this record
+  int64 earliest_release_date = 10;
+
+  // The master ID of this release
+  int32 master_id = 11;
 }
