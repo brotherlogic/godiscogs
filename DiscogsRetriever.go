@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -69,6 +70,83 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 		return release, err
 	}
 
+	// Now get the earliest release date
+	jsonString, _ = r.retrieve("/masters/" + strconv.Itoa(int(release.MasterId)) + "/versions?per_page=500&token=" + r.userToken)
+	var versions VersionsResponse
+	r.unmarshaller.Unmarshal(jsonString, &versions)
+
+	bestDate := int64(-1)
+	for _, version := range versions.Versions {
+		log.Printf("VERSION RELEASE: %v (%v)", version.Released, strings.Count(version.Released, "-"))
+
+		if strings.Count(version.Released, "-") == 2 {
+			//Check that the date is legit
+			if strings.Split(version.Released, "-")[1] == "00" {
+				dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
+				date := dateV.Unix()
+				log.Printf("HERE_SPEC = %v", date)
+				if bestDate < 0 || date < bestDate {
+					bestDate = date
+				}
+			} else {
+				dateV, _ := time.Parse("2006-02-01", version.Released)
+				date := dateV.Unix()
+				log.Printf("HERE = %v (%v)", date, dateV)
+				if bestDate < 0 || date < bestDate {
+					bestDate = date
+				}
+			}
+		} else if strings.Count(version.Released, "-") == 0 {
+			dateV, _ := time.Parse("2006", version.Released)
+			date := dateV.Unix()
+			log.Printf("HERE = %v (%v with %v)", date, dateV, dateV.Year())
+			if bestDate < 0 || date < bestDate {
+				bestDate = date
+			}
+		}
+	}
+	end := versions.Pagination.Pages == versions.Pagination.Page
+
+	for !end {
+		jsonString, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
+		r.unmarshaller.Unmarshal(jsonString, &versions)
+
+		for _, version := range versions.Versions {
+			log.Printf("VERSION RELEASE: %v (%v)", version.Released, strings.Count(version.Released, "-"))
+
+			if strings.Count(version.Released, "-") == 2 {
+				//Check that the date is legit
+				if strings.Split(version.Released, "-")[1] == "00" {
+					dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
+					date := dateV.Unix()
+					log.Printf("HERE_SPEC = %v", date)
+					if bestDate < 0 || date < bestDate {
+						bestDate = date
+					}
+				}
+				dateV, _ := time.Parse("2006-02-01", version.Released)
+				date := dateV.Unix()
+				log.Printf("HERE = %v", date)
+				if bestDate < 0 || date < bestDate {
+					bestDate = date
+				}
+			} else if strings.Count(version.Released, "-") == 0 {
+				dateV, _ := time.Parse("2006", version.Released)
+				date := dateV.Unix()
+				log.Printf("HERE = %v", date)
+				if bestDate < 0 || date < bestDate {
+					bestDate = date
+				}
+			}
+		}
+		end = versions.Pagination.Pages == versions.Pagination.Page
+	}
+
+	log.Printf("BEST = %v -> %v", bestDate, time.Unix(bestDate, 0))
+
+	if bestDate > 0 {
+		release.EarliestReleaseDate = bestDate
+	}
 	return release, nil
 }
 
@@ -90,6 +168,17 @@ type Pagination struct {
 type CollectionResponse struct {
 	Pagination Pagination
 	Releases   []Release
+}
+
+// Version a version of a master release
+type Version struct {
+	Released string
+}
+
+// VersionsResponse returned from discogs
+type VersionsResponse struct {
+	Pagination Pagination
+	Versions   []Version
 }
 
 // GetCollection gets all the releases in the users collection
