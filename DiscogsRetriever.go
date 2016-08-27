@@ -89,7 +89,7 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 					bestDate = date
 				}
 			} else {
-				dateV, _ := time.Parse("2006-02-01", version.Released)
+				dateV, _ := time.Parse("2006-01-02", version.Released)
 				date := dateV.Unix()
 				log.Printf("HERE = %v (%v)", date, dateV)
 				if bestDate < 0 || date < bestDate {
