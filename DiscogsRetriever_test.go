@@ -83,6 +83,17 @@ func TestGetEarliestReleaseDate(t *testing.T) {
 	}
 }
 
+func TestGetEarliestReleaseDateOrdering(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, _ := retr.GetRelease(603365)
+	if release.Title != "Live At The Witch Trials" {
+		t.Errorf("Wrong title: %v", release)
+	}
+	if time.Unix(release.EarliestReleaseDate, 0).In(time.UTC).Year() != 1979 {
+		t.Errorf("Release has wrong date: (%v->%v) %v", release.EarliestReleaseDate, time.Unix(release.EarliestReleaseDate, 0).Year(), release)
+	}
+}
+
 func TestAddToFolder(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.AddToFolder(10, 10)
@@ -145,7 +156,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 2049 {
+	if len(collection) != 2061 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
