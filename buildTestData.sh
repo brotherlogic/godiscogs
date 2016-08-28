@@ -2,6 +2,7 @@ mkdir -p testdata/releases
 mkdir -p testdata/users/brotherlogic/collection/folders/0/
 mkdir -p testdata/masters/67464
 mkdir -p testdata/masters/38998
+mkdir -p testdata/masters/5251
 curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504_token=token
 sleep 1
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token
@@ -67,3 +68,7 @@ sleep 1
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/masters/38998/versions?per_page=500&token=$1" > testdata/masters/38998/versions_per_page=500_token=token
 sleep 1
 curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/1668957?token=$1" > testdata/releases/1668957_token=token
+sleep 1
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/668315?token=$1" > testdata/releases/668315_token=token
+sleep 1
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/masters/5251/versions?per_page=500&token=$1" > testdata/masters/5251/versions_per_page=500_token=token
