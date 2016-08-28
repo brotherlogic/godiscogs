@@ -74,11 +74,11 @@ func TestGetRelease(t *testing.T) {
 
 func TestGetEarliestReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(1668957)
-	if release.Title != "I Am As Pure As Oranj" {
+	release, _ := retr.GetRelease(668315)
+	if release.Title != "Totale's Turns (It's Now Or Never)" {
 		t.Errorf("Wrong title: %v", release)
 	}
-	if time.Unix(release.EarliestReleaseDate, 0).In(time.UTC).Year() != 2000 {
+	if time.Unix(release.EarliestReleaseDate, 0).In(time.UTC).Year() != 1980 {
 		t.Errorf("Release has wrong date: (%v->%v) %v", release.EarliestReleaseDate, time.Unix(release.EarliestReleaseDate, 0).Year(), release)
 	}
 }

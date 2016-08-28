@@ -83,6 +83,8 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	for _, version := range versions.Versions {
 		log.Printf("VERSION RELEASE: %v (%v)", version.Released, strings.Count(version.Released, "-"))
 
+		log.Printf("BEST_SO_FAR = %v", bestDate)
+
 		if strings.Count(version.Released, "-") == 2 {
 			//Check that the date is legit
 			if strings.Split(version.Released, "-")[1] == "00" {
@@ -100,7 +102,7 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 					bestDate = date
 				}
 			}
-		} else if strings.Count(version.Released, "-") == 0 {
+		} else if strings.Count(version.Released, "-") == 0 && len(version.Released) > 0 {
 			dateV, _ := time.Parse("2006", version.Released)
 			date := dateV.Unix()
 			log.Printf("HERE = %v (%v with %v)", date, dateV, dateV.Year())
@@ -110,6 +112,7 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 		}
 	}
 	end := versions.Pagination.Pages == versions.Pagination.Page
+	log.Printf("BEST_SO_FAR = %v", bestDate)
 
 	for !end {
 		jsonString, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
