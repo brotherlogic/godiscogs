@@ -67,4 +67,7 @@ message Release {
 
   // The master ID of this release
   int32 master_id = 11;
+
+  // The release date of this release
+  string released = 12;
 }

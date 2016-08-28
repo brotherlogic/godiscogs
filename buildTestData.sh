@@ -65,3 +65,5 @@ sleep 1
 curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/603365?token=$1" > testdata/releases/603365_token=token
 sleep 1
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/masters/38998/versions?per_page=500&token=$1" > testdata/masters/38998/versions_per_page=500_token=token
+sleep 1
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/1668957?token=$1" > testdata/releases/1668957_token=token

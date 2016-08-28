@@ -70,11 +70,15 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 		return release, err
 	}
 
-	// Now get the earliest release date
-	jsonString, _ = r.retrieve("/masters/" + strconv.Itoa(int(release.MasterId)) + "/versions?per_page=500&token=" + r.userToken)
 	var versions VersionsResponse
-	r.unmarshaller.Unmarshal(jsonString, &versions)
-
+	if release.MasterId != 0 {
+		// Now get the earliest release date
+		jsonString, _ = r.retrieve("/masters/" + strconv.Itoa(int(release.MasterId)) + "/versions?per_page=500&token=" + r.userToken)
+		r.unmarshaller.Unmarshal(jsonString, &versions)
+	} else {
+		tmpVersion := Version{Released: release.Released}
+		versions.Versions = append(versions.Versions, tmpVersion)
+	}
 	bestDate := int64(-1)
 	for _, version := range versions.Versions {
 		log.Printf("VERSION RELEASE: %v (%v)", version.Released, strings.Count(version.Released, "-"))
