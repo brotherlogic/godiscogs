@@ -59,7 +59,9 @@ func sortByLabelCat(rel1 Release, rel2 Release) int {
 		}
 	}
 
-	return 0
+	//Fallout to sorting by title
+	titleComp := strings.Compare(rel1.Title, rel2.Title)
+	return titleComp
 }
 
 // Split splits a releases list into buckets

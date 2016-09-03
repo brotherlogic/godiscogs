@@ -33,6 +33,9 @@ var sortTests = []struct {
 	{Release{Labels: []*Label{&Label{Name: "TestOne"}}},
 		Release{Labels: []*Label{&Label{Name: "TestTwo"}}}},
 
+	{Release{Title: "Low", Labels: []*Label{&Label{Name: "TestOne"}}},
+		Release{Title: "VeryLow", Labels: []*Label{&Label{Name: "TestOne"}}}},
+
 	{Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "First"}}},
 		Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "Second"}}}},
 
