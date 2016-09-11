@@ -63,6 +63,18 @@ func TestFullSort(t *testing.T) {
 	}
 }
 
+func TestFullSortWithAmbigousLabels(t *testing.T) {
+	var releases []*Release
+	releases = append(releases, &Release{Title: "First", Labels: []*Label{&Label{Name: "ToBeIgnore"}, &Label{Name: "TestOne"}}})
+	releases = append(releases, &Release{Title: "Last", Labels: []*Label{&Label{Name: "ToBeIgnore"}, &Label{Name: "TestTwo"}}})
+	releases = append(releases, &Release{Labels: []*Label{&Label{Name: "TestThree"}}})
+	sort.Sort(ByLabelCat(releases))
+
+	if releases[0].Title != "First" || releases[2].Title != "Last" {
+		t.Errorf("Releases are not sorted correctly: %v", releases)
+	}
+}
+
 func TestSortingByLabelCat(t *testing.T) {
 	for _, tt := range sortTests {
 		sValue := sortByLabelCat(tt.r1, tt.r2)

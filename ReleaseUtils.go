@@ -28,8 +28,8 @@ func (a ByLabelCat) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByLabelCat) Less(i, j int) bool { return sortByLabelCat(*a[i], *a[j]) < 0 }
 
 func sortByLabelCat(rel1 Release, rel2 Release) int {
-	label1 := rel1.Labels[0]
-	label2 := rel2.Labels[0]
+	label1 := GetMainLabel(rel1.Labels)
+	label2 := GetMainLabel(rel2.Labels)
 
 	labelSort := strings.Compare(label1.Name, label2.Name)
 	if labelSort != 0 {
@@ -62,6 +62,29 @@ func sortByLabelCat(rel1 Release, rel2 Release) int {
 	//Fallout to sorting by title
 	titleComp := strings.Compare(rel1.Title, rel2.Title)
 	return titleComp
+}
+
+// GetMainLabel gets the main label from the release - this is the label to be used in e.g. sorting
+func GetMainLabel(labels []*Label) *Label {
+	if len(labels) == 0 {
+		return nil
+	} else if len(labels) == 1 {
+		return labels[0]
+	} else {
+		labelName := labels[0].Name
+		labelCat := labels[0].Catno
+		labelIndex := 0
+
+		for i, label := range labels[1:] {
+			if strings.Compare(labelName, label.Name) > 0 || (strings.Compare(labelName, label.Name) == 0 && strings.Compare(labelCat, label.Catno) > 0) {
+				labelName = label.Name
+				labelCat = label.Catno
+				labelIndex = i + 1
+			}
+		}
+
+		return labels[labelIndex]
+	}
 }
 
 // Split splits a releases list into buckets
