@@ -1,7 +1,14 @@
 package godiscogs
 
-import "sort"
-import "testing"
+import (
+	"io/ioutil"
+	"log"
+	"math/rand"
+	"sort"
+	"testing"
+
+	"github.com/golang/protobuf/proto"
+)
 
 var splitTests = []struct {
 	str string
@@ -73,6 +80,53 @@ func TestFullSortWithAmbigousLabels(t *testing.T) {
 	if releases[0].Title != "First" || releases[2].Title != "Last" {
 		t.Errorf("Releases are not sorted correctly: %v", releases)
 	}
+}
+
+func TestSortingOrderConsistency(t *testing.T) {
+	data1, err := ioutil.ReadFile("testdata/sort_test/1/3139381.release")
+	data2, _ := ioutil.ReadFile("testdata/sort_test/1/1531104.release")
+	data3, _ := ioutil.ReadFile("testdata/sort_test/1/6512427.release")
+
+	log.Printf("ERR %v", err)
+
+	release1 := &Release{}
+	release2 := &Release{}
+	release3 := &Release{}
+	proto.Unmarshal(data1, release1)
+	proto.Unmarshal(data2, release2)
+	proto.Unmarshal(data3, release3)
+
+	log.Printf("WAH %v, %v", release1, data1)
+
+	var cReleases []*Release
+	cReleases = append(cReleases, release1)
+	cReleases = append(cReleases, release2)
+	cReleases = append(cReleases, release3)
+	sort.Sort(ByLabelCat(cReleases))
+
+	for i := 0; i < 100; i++ {
+		var releases []*Release
+		perm := rand.Perm(3)
+		releases = append(releases, cReleases[perm[0]])
+		releases = append(releases, cReleases[perm[1]])
+		releases = append(releases, cReleases[perm[2]])
+		sort.Sort(ByLabelCat(releases))
+
+		failed := false
+		for i := range releases {
+			if releases[i].Id != cReleases[i].Id {
+				failed = true
+			}
+		}
+
+		if failed {
+			t.Errorf("Sorting is not unique:")
+			for j := range releases {
+				t.Errorf("%v. %v -> %v", j, cReleases[j].Id, releases[j].Id)
+			}
+		}
+	}
+
 }
 
 func TestSortingByLabelCat(t *testing.T) {

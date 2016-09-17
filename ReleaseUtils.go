@@ -38,12 +38,13 @@ func sortByLabelCat(rel1 Release, rel2 Release) int {
 
 	cat1Elems := split(label1.Catno)
 	cat2Elems := split(label2.Catno)
+
 	toCheck := len(cat1Elems)
 	if len(cat2Elems) < toCheck {
 		toCheck = len(cat2Elems)
 	}
 	for i := 0; i < toCheck; i++ {
-		if unicode.IsNumber(rune(cat1Elems[i][0])) {
+		if unicode.IsNumber(rune(cat1Elems[i][0])) && unicode.IsNumber(rune(cat2Elems[i][0])) {
 			num1, _ := strconv.Atoi(cat1Elems[i])
 			num2, _ := strconv.Atoi(cat2Elems[i])
 			if num1 > num2 {
