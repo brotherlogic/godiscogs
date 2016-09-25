@@ -28,6 +28,19 @@ func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, 
 	return response, nil
 }
 
+func TestGetWantlist(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	wantlist, err := retr.GetWantlist()
+
+	if err != nil {
+		t.Errorf("Error retrieving want list: %v", err)
+	}
+
+	if len(wantlist) == 0 {
+		t.Errorf("Wantlist has come back empty")
+	}
+}
+
 func NewTestDiscogsRetriever() *DiscogsRetriever {
 	retr := NewDiscogsRetriever("token")
 	retr.getter = testFileGetter{}
@@ -156,7 +169,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 2061 {
+	if len(collection) != 2371 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false

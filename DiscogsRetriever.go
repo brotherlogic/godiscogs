@@ -177,6 +177,12 @@ type CollectionResponse struct {
 	Releases   []Release
 }
 
+// WantlistResponse returned from discogs
+type WantlistResponse struct {
+	Pagination Pagination
+	Wants      []Release
+}
+
 // Version a version of a master release
 type Version struct {
 	Released string
@@ -186,6 +192,28 @@ type Version struct {
 type VersionsResponse struct {
 	Pagination Pagination
 	Versions   []Version
+}
+
+// GetWantlist returns the wantlist for the given user
+func (r *DiscogsRetriever) GetWantlist() ([]Release, error) {
+	jsonString, _ := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
+
+	var releases []Release
+	var response WantlistResponse
+	r.unmarshaller.Unmarshal(jsonString, &response)
+
+	releases = append(releases, response.Wants...)
+	end := response.Pagination.Pages == response.Pagination.Page
+
+	for !end {
+		jsonString, _ = r.retrieve(response.Pagination.Urls.Next[23:])
+		r.unmarshaller.Unmarshal(jsonString, &response)
+
+		releases = append(releases, response.Wants...)
+		end = response.Pagination.Pages == response.Pagination.Page
+	}
+
+	return releases, nil
 }
 
 // GetCollection gets all the releases in the users collection
