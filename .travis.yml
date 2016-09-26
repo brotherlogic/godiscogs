@@ -18,4 +18,4 @@ before_install:
 script:
 - fgt golint $(find ./ | grep .go$ | grep -v discogs.pb.go)
 - go test ./...
-#- $HOME/gopath/bin/goveralls -service=travis-ci -ignore godiscogs.pb.go github.com/brotherlogic/godiscogs
+#- $HOME/gopath/bin/goveralls -service=travis-ci -ignore godiscogs.pb.go -package github.com/brotherlogic/godiscogs
