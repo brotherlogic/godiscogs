@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -35,13 +34,11 @@ type prodHTTPGetter struct{}
 
 func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
 	httpCount++
-	log.Printf("Retrieving %v", url)
 	return http.Get(url)
 }
 
 func (httpGetter prodHTTPGetter) Post(url string, data string) (*http.Response, error) {
 	httpCount++
-	log.Printf("Posting %v", url)
 	return http.Post(url, "application/json", bytes.NewBuffer([]byte(data)))
 }
 
@@ -81,23 +78,17 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	}
 	bestDate := int64(-1)
 	for _, version := range versions.Versions {
-		log.Printf("VERSION RELEASE: %v (%v)", version.Released, strings.Count(version.Released, "-"))
-
-		log.Printf("BEST_SO_FAR = %v", bestDate)
-
 		if strings.Count(version.Released, "-") == 2 {
 			//Check that the date is legit
 			if strings.Split(version.Released, "-")[1] == "00" {
 				dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
 				date := dateV.Unix()
-				log.Printf("HERE_SPEC = %v", date)
 				if bestDate < 0 || date < bestDate {
 					bestDate = date
 				}
 			} else {
 				dateV, _ := time.Parse("2006-01-02", version.Released)
 				date := dateV.Unix()
-				log.Printf("HERE = %v (%v)", date, dateV)
 				if bestDate < 0 || date < bestDate {
 					bestDate = date
 				}
@@ -105,42 +96,36 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 		} else if strings.Count(version.Released, "-") == 0 && len(version.Released) > 0 {
 			dateV, _ := time.Parse("2006", version.Released)
 			date := dateV.Unix()
-			log.Printf("HERE = %v (%v with %v)", date, dateV, dateV.Year())
 			if bestDate < 0 || date < bestDate {
 				bestDate = date
 			}
 		}
 	}
 	end := versions.Pagination.Pages == versions.Pagination.Page
-	log.Printf("BEST_SO_FAR = %v", bestDate)
 
 	for !end {
 		jsonString, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 
 		for _, version := range versions.Versions {
-			log.Printf("VERSION RELEASE: %v (%v)", version.Released, strings.Count(version.Released, "-"))
 
 			if strings.Count(version.Released, "-") == 2 {
 				//Check that the date is legit
 				if strings.Split(version.Released, "-")[1] == "00" {
 					dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
 					date := dateV.Unix()
-					log.Printf("HERE_SPEC = %v", date)
 					if bestDate < 0 || date < bestDate {
 						bestDate = date
 					}
 				}
 				dateV, _ := time.Parse("2006-02-01", version.Released)
 				date := dateV.Unix()
-				log.Printf("HERE = %v", date)
 				if bestDate < 0 || date < bestDate {
 					bestDate = date
 				}
 			} else if strings.Count(version.Released, "-") == 0 {
 				dateV, _ := time.Parse("2006", version.Released)
 				date := dateV.Unix()
-				log.Printf("HERE = %v", date)
 				if bestDate < 0 || date < bestDate {
 					bestDate = date
 				}
@@ -148,8 +133,6 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 		}
 		end = versions.Pagination.Pages == versions.Pagination.Page
 	}
-
-	log.Printf("BEST = %v -> %v", bestDate, time.Unix(bestDate, 0))
 
 	if bestDate > 0 {
 		release.EarliestReleaseDate = bestDate
@@ -296,13 +279,9 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 func (r *DiscogsRetriever) post(path string, data string) {
 	urlv := "https://api.discogs.com/" + path
 
-	log.Printf("POST = %v", urlv)
-
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
-	log.Printf("DIFF = %v", diff)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		log.Printf("Sleeping for %v from %v, %v", time.Duration(r.getSleep)*time.Millisecond-diff, diff, time.Duration(r.getSleep)*time.Millisecond)
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
