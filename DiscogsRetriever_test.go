@@ -28,6 +28,11 @@ func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, 
 	return response, nil
 }
 
+func (httpGetter testFileGetter) Delete(url string, data string) (*http.Response, error) {
+	response := &http.Response{}
+	return response, nil
+}
+
 func TestGetWantlist(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	wantlist, err := retr.GetWantlist()
@@ -117,6 +122,16 @@ func TestMoveToUncateogrized(t *testing.T) {
 	retr.MoveToFolder(10, 10, 10, 10)
 }
 
+func TestAddToWantlist(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.AddToWantlist(100)
+}
+
+func TestRemoveFromWantlist(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.RemoveFromWantlist(100)
+}
+
 func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
 	retr := NewTestDiscogsRetriever()
@@ -139,6 +154,10 @@ func (httpGetter testFailGetter) Get(url string) (*http.Response, error) {
 }
 
 func (httpGetter testFailGetter) Post(url string, data string) (*http.Response, error) {
+	return nil, errors.New("Built To Fail")
+}
+
+func (httpGetter testFailGetter) Delete(url string, data string) (*http.Response, error) {
 	return nil, errors.New("Built To Fail")
 }
 
