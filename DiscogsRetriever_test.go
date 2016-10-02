@@ -28,6 +28,11 @@ func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, 
 	return response, nil
 }
 
+func (httpGetter testFileGetter) Put(url string, data string) (*http.Response, error) {
+	response := &http.Response{}
+	return response, nil
+}
+
 func (httpGetter testFileGetter) Delete(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	return response, nil
@@ -154,6 +159,10 @@ func (httpGetter testFailGetter) Get(url string) (*http.Response, error) {
 }
 
 func (httpGetter testFailGetter) Post(url string, data string) (*http.Response, error) {
+	return nil, errors.New("Built To Fail")
+}
+
+func (httpGetter testFailGetter) Put(url string, data string) (*http.Response, error) {
 	return nil, errors.New("Built To Fail")
 }
 
