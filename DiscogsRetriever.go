@@ -29,6 +29,7 @@ func GetHTTPGetCount() int {
 type httpGetter interface {
 	Get(url string) (*http.Response, error)
 	Post(url string, data string) (*http.Response, error)
+	Put(url string, data string) (*http.Response, error)
 	Delete(url string, data string) (*http.Response, error)
 }
 type prodHTTPGetter struct{}
@@ -41,6 +42,12 @@ func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
 func (httpGetter prodHTTPGetter) Post(url string, data string) (*http.Response, error) {
 	httpCount++
 	return http.Post(url, "application/json", bytes.NewBuffer([]byte(data)))
+}
+
+func (httpGetter prodHTTPGetter) Put(url string, data string) (*http.Response, error) {
+	httpCount++
+	req, _ := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(data)))
+	return http.DefaultClient.Do(req)
 }
 
 func (httpGetter prodHTTPGetter) Delete(url string, data string) (*http.Response, error) {
@@ -230,7 +237,7 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 
 // AddToWantlist adds a record to the wantlist
 func (r *DiscogsRetriever) AddToWantlist(releaseID int) {
-	r.post("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+	r.put("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 }
 
 // RemoveFromWantlist adds a record to the wantlist
@@ -317,4 +324,17 @@ func (r *DiscogsRetriever) delete(path string, data string) {
 
 	lastTimeRetrieved = time.Now()
 	r.getter.Delete(urlv, data)
+}
+
+func (r *DiscogsRetriever) put(path string, data string) {
+	urlv := "https://api.discogs.com/" + path
+
+	//Sleep here
+	diff := time.Now().Sub(lastTimeRetrieved)
+	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
+	}
+
+	lastTimeRetrieved = time.Now()
+	r.getter.Put(urlv, data)
 }
