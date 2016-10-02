@@ -29,6 +29,7 @@ func GetHTTPGetCount() int {
 type httpGetter interface {
 	Get(url string) (*http.Response, error)
 	Post(url string, data string) (*http.Response, error)
+	Delete(url string, data string) (*http.Response, error)
 }
 type prodHTTPGetter struct{}
 
@@ -40,6 +41,12 @@ func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
 func (httpGetter prodHTTPGetter) Post(url string, data string) (*http.Response, error) {
 	httpCount++
 	return http.Post(url, "application/json", bytes.NewBuffer([]byte(data)))
+}
+
+func (httpGetter prodHTTPGetter) Delete(url string, data string) (*http.Response, error) {
+	httpCount++
+	req, _ := http.NewRequest("DELETE", url, bytes.NewBuffer([]byte(data)))
+	return http.DefaultClient.Do(req)
 }
 
 // DiscogsRetriever Main retriever type
@@ -221,6 +228,16 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 	return releases
 }
 
+// AddToWantlist adds a record to the wantlist
+func (r *DiscogsRetriever) AddToWantlist(releaseID int) {
+	r.post("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+}
+
+// RemoveFromWantlist adds a record to the wantlist
+func (r *DiscogsRetriever) RemoveFromWantlist(releaseID int) {
+	r.delete("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+}
+
 // AddToFolder adds the release to the given folder
 func (r *DiscogsRetriever) AddToFolder(folderID int, releaseID int) {
 	r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
@@ -287,4 +304,17 @@ func (r *DiscogsRetriever) post(path string, data string) {
 
 	lastTimeRetrieved = time.Now()
 	r.getter.Post(urlv, data)
+}
+
+func (r *DiscogsRetriever) delete(path string, data string) {
+	urlv := "https://api.discogs.com/" + path
+
+	//Sleep here
+	diff := time.Now().Sub(lastTimeRetrieved)
+	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
+	}
+
+	lastTimeRetrieved = time.Now()
+	r.getter.Delete(urlv, data)
 }
