@@ -1,6 +1,7 @@
 package godiscogs
 
 import (
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,11 +14,15 @@ func split(str string) []string {
 
 // GetReleaseArtist Gets a string of the release artist of this record
 func GetReleaseArtist(rel Release) string {
-	artistString := rel.Artists[0].Name
-	for _, artist := range rel.Artists[1:] {
-		artistString += " & " + artist.Name
+	log.Printf("HERE = %v", rel)
+	if len(rel.Artists) > 0 {
+		artistString := rel.Artists[0].Name
+		for _, artist := range rel.Artists[1:] {
+			artistString += " & " + artist.Name
+		}
+		return artistString
 	}
-	return artistString
+	return "Unknown"
 }
 
 // ByLabelCat is a sorting function that sorts by label name, then catalogue number
