@@ -93,6 +93,10 @@ func TestGetRelease(t *testing.T) {
 	if !strings.Contains(release.Images[0].Uri, "https") {
 		t.Errorf("Image has not been retrieved: %v", release)
 	}
+
+	if len(release.Formats) != 1 {
+		t.Errorf("Formats has been pulled wrong: %v", release.Formats)
+	}
 }
 
 func TestGetEarliestReleaseDate(t *testing.T) {

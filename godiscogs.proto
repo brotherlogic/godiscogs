@@ -34,6 +34,17 @@ message Image {
         string type = 2;
 }
 
+message Format {
+  // The descriptions of the Format
+  repeated string descriptions = 1;
+
+  // The name of the Format
+  string name = 2;
+
+  // The number of the format
+  string qty = 3;
+}
+
 message Release {
 	// The id number of the release
 	int32 id = 1;
@@ -70,4 +81,7 @@ message Release {
 
   // The release date of this release
   string released = 12;
+
+  // The formats of the release
+  repeated Format formats = 13;
 }
