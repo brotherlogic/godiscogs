@@ -126,7 +126,22 @@ func TestSortingOrderConsistency(t *testing.T) {
 			}
 		}
 	}
+}
 
+func TestSortingConsistencyWithMultipleLabels(t *testing.T) {
+	r1 := Release{Labels: []*Label{&Label{Name: "REally Though", Catno: "IM 12"}, &Label{Name: "Actually First", Catno: "DDD"}}}
+	r2 := Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "IM 1"}, &Label{Name: "Behind", Catno: "BBB"}}}
+
+	sValue := sortByLabelCat(r1, r2)
+	log.Printf("HERE = %v", sValue)
+	if sValue >= 0 {
+		t.Errorf("Sorting is off with mulitple labels")
+	}
+	sValueR := sortByLabelCat(r2, r1)
+	log.Printf("HERE = %v", sValueR)
+	if sValueR <= 0 {
+		t.Errorf("Reverse sorting is off with multiple labels")
+	}
 }
 
 func TestSortingByLabelCat(t *testing.T) {
