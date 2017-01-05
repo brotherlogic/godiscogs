@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -302,6 +303,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 
 func (r *DiscogsRetriever) post(path string, data string) {
 	urlv := "https://api.discogs.com/" + path
+	log.Printf("Posting %v to %v", data, urlv)
 
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
