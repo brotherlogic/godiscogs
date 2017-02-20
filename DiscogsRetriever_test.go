@@ -201,7 +201,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 2371 {
+	if len(collection) != 2797 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
@@ -266,6 +266,22 @@ func TestPostTiming(t *testing.T) {
 
 	if diff > 700 || diff < 500 {
 		t.Errorf("Timing on posts is quite wrong: %v", diff)
+	}
+}
+
+func TestBoxSet(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, _ := retr.GetRelease(2370027)
+	if !release.Boxset {
+		t.Errorf("Boxset has not been marked as such: %v", release)
+	}
+}
+
+func TestGatefold(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, _ := retr.GetRelease(9082405)
+	if !release.Gatefold {
+		t.Errorf("Gatefold has not been marked as such: %v", release)
 	}
 }
 
