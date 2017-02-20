@@ -43,6 +43,9 @@ message Format {
 
   // The number of the format
   string qty = 3;
+
+  // Text associated with the Format
+  string text = 4;
 }
 
 message Release {
@@ -84,4 +87,10 @@ message Release {
 
   // The formats of the release
   repeated Format formats = 13;
+
+  // Is this a gatefold?
+  bool gatefold = 14;
+
+  // Is this a boxset
+  bool boxset = 15;
 }

@@ -152,6 +152,16 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	if bestDate > 0 {
 		release.EarliestReleaseDate = bestDate
 	}
+
+	//Set boolean fields
+	for _, format := range release.GetFormats() {
+		if format.Text == "Gatefold" {
+			release.Gatefold = true
+		} else if format.Text == "Boxset" || format.Name == "Box Set" {
+			release.Boxset = true
+		}
+	}
+
 	return release, nil
 }
 
