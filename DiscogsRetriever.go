@@ -82,6 +82,10 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 		return release, err
 	}
 
+	if release.Id == 0 {
+		log.Printf("Error here: %v from %v", jsonString, release)
+	}
+
 	var versions VersionsResponse
 	if release.MasterId != 0 {
 		// Now get the earliest release date
