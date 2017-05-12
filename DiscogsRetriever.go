@@ -83,7 +83,7 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	}
 
 	if release.Id == 0 {
-		log.Printf("Error here: %v from %v", jsonString, release)
+		log.Printf("Error here: %v from %v", string(jsonString), release)
 	}
 
 	var versions VersionsResponse
