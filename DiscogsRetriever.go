@@ -69,7 +69,7 @@ type DiscogsRetriever struct {
 
 // NewDiscogsRetriever Build a production retriever
 func NewDiscogsRetriever(token string) *DiscogsRetriever {
-	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 1000, lastRetrieveTime: time.Now().Unix()}
+	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 1500, lastRetrieveTime: time.Now().Unix()}
 }
 
 // GetRelease returns a release from the discogs system
