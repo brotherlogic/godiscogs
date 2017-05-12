@@ -99,6 +99,14 @@ func TestGetRelease(t *testing.T) {
 	}
 }
 
+func TestGetReleaseNoData(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, _ := retr.GetRelease(2425133)
+	if release.Title != "Love, Love, Love, Love, Love" {
+		t.Errorf("Wrong title: %v", release)
+	}
+}
+
 func TestGetEarliestReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	release, _ := retr.GetRelease(668315)
@@ -201,7 +209,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 2797 {
+	if len(collection) != 2907 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
@@ -210,6 +218,10 @@ func TestGetCollection(t *testing.T) {
 		if record.Id == 679324 {
 			found = true
 			foundRecord = record
+		}
+
+		if record.Id == 0 {
+			t.Errorf("Bad record found!: %v", record)
 		}
 	}
 
