@@ -74,7 +74,7 @@ func NewDiscogsRetriever(token string) *DiscogsRetriever {
 
 // GetRelease returns a release from the discogs system
 func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
-	jsonString, _ := r.retrieve("/releases/" + strconv.Itoa(id) + "?token=" + r.userToken)
+	jsonString, _, _ := r.retrieve("/releases/" + strconv.Itoa(id) + "?token=" + r.userToken)
 	var release Release
 	err := r.unmarshaller.Unmarshal(jsonString, &release)
 
@@ -89,7 +89,7 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	var versions VersionsResponse
 	if release.MasterId != 0 {
 		// Now get the earliest release date
-		jsonString, _ = r.retrieve("/masters/" + strconv.Itoa(int(release.MasterId)) + "/versions?per_page=500&token=" + r.userToken)
+		jsonString, _, _ = r.retrieve("/masters/" + strconv.Itoa(int(release.MasterId)) + "/versions?per_page=500&token=" + r.userToken)
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 	} else {
 		tmpVersion := Version{Released: release.Released}
@@ -123,7 +123,7 @@ func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
 	end := versions.Pagination.Pages == versions.Pagination.Page
 
 	for !end {
-		jsonString, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
+		jsonString, _, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 
 		for _, version := range versions.Versions {
@@ -206,9 +206,18 @@ type VersionsResponse struct {
 	Versions   []Version
 }
 
+// GetRateLimit returns the rate limit
+func (r *DiscogsRetriever) GetRateLimit() int {
+	log.Printf("Running Retrieve")
+	_, headers, _ := r.retrieve("/releases/249504?token=" + r.userToken)
+	val, err := strconv.Atoi(headers.Get("X-Discogs-Ratelimit"))
+	log.Printf("CONV %v,%v", val, err)
+	return val
+}
+
 // GetWantlist returns the wantlist for the given user
 func (r *DiscogsRetriever) GetWantlist() ([]Release, error) {
-	jsonString, _ := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
+	jsonString, _, _ := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
 
 	var releases []Release
 	var response WantlistResponse
@@ -218,7 +227,7 @@ func (r *DiscogsRetriever) GetWantlist() ([]Release, error) {
 	end := response.Pagination.Pages == response.Pagination.Page
 
 	for !end {
-		jsonString, _ = r.retrieve(response.Pagination.Urls.Next[23:])
+		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
 		r.unmarshaller.Unmarshal(jsonString, &response)
 
 		releases = append(releases, response.Wants...)
@@ -230,7 +239,7 @@ func (r *DiscogsRetriever) GetWantlist() ([]Release, error) {
 
 // GetCollection gets all the releases in the users collection
 func (r *DiscogsRetriever) GetCollection() []Release {
-	jsonString, _ := r.retrieve("/users/brotherlogic/collection/folders/0/releases?per_page=100&token=" + r.userToken)
+	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/folders/0/releases?per_page=100&token=" + r.userToken)
 
 	var releases []Release
 	var response CollectionResponse
@@ -240,7 +249,7 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 	end := response.Pagination.Pages == response.Pagination.Page
 
 	for !end {
-		jsonString, _ = r.retrieve(response.Pagination.Urls.Next[23:])
+		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
 		r.unmarshaller.Unmarshal(jsonString, &response)
 
 		releases = append(releases, response.Releases...)
@@ -283,7 +292,7 @@ type FoldersResponse struct {
 
 // GetFolders gets all the folders for a given user
 func (r *DiscogsRetriever) GetFolders() []Folder {
-	jsonString, _ := r.retrieve("/users/brotherlogic/collection/folders?token=" + r.userToken)
+	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/folders?token=" + r.userToken)
 
 	var folders []Folder
 	var response FoldersResponse
@@ -294,7 +303,7 @@ func (r *DiscogsRetriever) GetFolders() []Folder {
 	return folders
 }
 
-func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
+func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -306,13 +315,13 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, error) {
 	response, err := r.getter.Get(urlv)
 
 	if err != nil {
-		return make([]byte, 0), err
+		return make([]byte, 0), make(http.Header), err
 	}
 
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 	lastTimeRetrieved = time.Now()
-	return body, nil
+	return body, response.Header, nil
 }
 
 func (r *DiscogsRetriever) post(path string, data string) {

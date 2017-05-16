@@ -1,0 +1,19 @@
+HTTP/1.1 200 OK
+Server: nginx
+Date: Fri, 12 May 2017 23:16:56 GMT
+Content-Type: application/json
+Content-Length: 10613
+Vary: Accept-Encoding
+Access-Control-Allow-Headers: Content-Type, authorization
+Access-Control-Allow-Methods: GET,PUT,POST,DELETE,PATCH
+X-Discogs-Media-Type: discogs.v2.1.0
+Access-Control-Allow-Origin: *
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Cache-Control: public, must-revalidate
+Strict-Transport-Security: max-age=16000000
+X-Discogs-Ratelimit: 60
+X-Discogs-Ratelimit-Used: 2
+X-Discogs-Ratelimit-Remaining: 58
+

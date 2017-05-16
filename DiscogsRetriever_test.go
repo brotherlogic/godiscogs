@@ -1,6 +1,7 @@
 package godiscogs
 
 import (
+	"bufio"
 	"errors"
 	"log"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 type testFileGetter struct{}
 
 func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
+	log.Printf("RUNNING GET: %v", url)
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, err := os.Open("testdata" + strippedURL)
@@ -20,6 +22,26 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 		log.Printf("Error opening test file %v", err)
 	}
 	response.Body = blah
+
+	// Add the header if it exists
+	headers, err := os.Open("testdata" + strippedURL + ".headers")
+	if err == nil {
+		var t http.Header
+		t = make(http.Header)
+		response.Header = t
+
+		defer headers.Close()
+		scanner := bufio.NewScanner(headers)
+		for scanner.Scan() {
+			line := scanner.Text()
+			if strings.Contains(line, ":") {
+				elems := strings.Split(line, ":")
+				log.Printf("HEADER: '%v', '%v'", strings.TrimSpace(elems[0]), strings.TrimSpace(elems[1]))
+				response.Header.Add(strings.TrimSpace(elems[0]), strings.TrimSpace(elems[1]))
+			}
+		}
+	}
+
 	return response, nil
 }
 
@@ -56,6 +78,16 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 	retr.getter = testFileGetter{}
 	retr.getSleep = 0.0
 	return retr
+}
+
+func TestGetRateLimit(t *testing.T) {
+	retr := NewDiscogsRetriever("token")
+	retr.getter = testFileGetter{}
+
+	rateLimit := retr.GetRateLimit()
+	if rateLimit != 60 {
+		t.Errorf("Rate limit has come back wrong: %v", rateLimit)
+	}
 }
 
 func TestPost(t *testing.T) {
@@ -153,7 +185,7 @@ func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
 	retr := NewTestDiscogsRetriever()
 	retr.getter = prodHTTPGetter{}
-	body, _ := retr.retrieve("/releases/249504")
+	body, _, _ := retr.retrieve("/releases/249504")
 	if !strings.Contains(string(body), "Astley") {
 		t.Errorf("Error in retrieving data")
 	}
@@ -185,7 +217,7 @@ func (httpGetter testFailGetter) Delete(url string, data string) (*http.Response
 func TestFailGet(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.getter = testFailGetter{}
-	_, err := retr.retrieve("/releases/249504")
+	_, err, _ := retr.retrieve("/releases/249504")
 	if err == nil {
 		t.Errorf("Get did not throw an error")
 	}
@@ -209,7 +241,7 @@ func TestFailMarshal(t *testing.T) {
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 2907 {
+	if len(collection) != 2911 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false

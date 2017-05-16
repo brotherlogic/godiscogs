@@ -5,6 +5,8 @@ mkdir -p testdata/masters/38998
 mkdir -p testdata/masters/5251
 curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504
 sleep 1
+curl --user-agent "GoDiscogsTestData" -I "https://api.discogs.com/releases/249504?token=$1" > testdata/releases/249504_token=token.headers
+sleep 1
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token
 sleep 1
 curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/0/releases?per_page=100&token=$1&page=2" |  sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/0/releases_per_page=100_token=token_page=2
