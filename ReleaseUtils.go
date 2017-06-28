@@ -1,6 +1,7 @@
 package godiscogs
 
 import (
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -34,6 +35,7 @@ func sortByLabelCat(rel1 Release, rel2 Release) int {
 	label1 := GetMainLabel(rel1.Labels)
 	label2 := GetMainLabel(rel2.Labels)
 
+	log.Printf("Comparing %v to %v", rel1, rel2)
 	labelSort := strings.Compare(label1.Name, label2.Name)
 	if labelSort != 0 {
 		return labelSort
