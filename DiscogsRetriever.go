@@ -206,6 +206,12 @@ type VersionsResponse struct {
 	Versions   []Version
 }
 
+// Pricing the single price
+type Pricing struct {
+	Currency string
+	Value    float32
+}
+
 // GetRateLimit returns the rate limit
 func (r *DiscogsRetriever) GetRateLimit() int {
 	log.Printf("Running Retrieve")
@@ -257,6 +263,21 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 	}
 
 	return releases
+}
+
+// GetSalePrice gets the sale price for a release
+func (r *DiscogsRetriever) GetSalePrice(releaseID int) float32 {
+	jsonString, _, _ := r.retrieve("/marketplace/price_suggestions/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
+	var resp map[string]Pricing
+	r.unmarshaller.Unmarshal(jsonString, &resp)
+	return resp["Very Good Plus (VG+)"].Value
+}
+
+// SellRecord sells a given release
+func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string) {
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"sleeve_condition\":\"Very Good Plus (VG+)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"auto\"}"
+	res := r.post("/marketplace/listings?token="+r.userToken, data)
+	log.Printf("RESPONSE = %v", res)
 }
 
 // AddToWantlist adds a record to the wantlist
@@ -324,7 +345,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	return body, response.Header, nil
 }
 
-func (r *DiscogsRetriever) post(path string, data string) {
+func (r *DiscogsRetriever) post(path string, data string) string {
 	urlv := "https://api.discogs.com/" + path
 	log.Printf("Posting %v to %v", data, urlv)
 
@@ -335,7 +356,10 @@ func (r *DiscogsRetriever) post(path string, data string) {
 	}
 
 	lastTimeRetrieved = time.Now()
-	r.getter.Post(urlv, data)
+	response, _ := r.getter.Post(urlv, data)
+	defer response.Body.Close()
+	body, _ := ioutil.ReadAll(response.Body)
+	return string(body)
 }
 
 func (r *DiscogsRetriever) delete(path string, data string) {
