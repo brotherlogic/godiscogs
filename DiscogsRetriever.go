@@ -275,7 +275,7 @@ func (r *DiscogsRetriever) GetSalePrice(releaseID int) float32 {
 
 // SellRecord sells a given release
 func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string) {
-	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"sleeve_condition\":\"Very Good Plus (VG+)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"auto\"}"
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"sleeve_condition\":\"Very Good Plus (VG+)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"auto\", \"allow_offers\":\"true\"}"
 	res := r.post("/marketplace/listings?token="+r.userToken, data)
 	log.Printf("RESPONSE = %v", res)
 }
