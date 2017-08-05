@@ -47,6 +47,12 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 
 func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
+	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	blah, err := os.Open("testdata" + strippedURL)
+	if err != nil {
+		log.Printf("Error opening test file %v", err)
+	}
+	response.Body = blah
 	return response, nil
 }
 
@@ -78,6 +84,24 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 	retr.getter = testFileGetter{}
 	retr.getSleep = 0.0
 	return retr
+}
+
+func TestSellRecord(t *testing.T) {
+	retr := NewDiscogsRetriever("token")
+	retr.getter = testFileGetter{}
+
+	retr.SellRecord(2576104, 12.345, "Draft")
+}
+
+func TestGetSuggestedPrice(t *testing.T) {
+	retr := NewDiscogsRetriever("token")
+	retr.getter = testFileGetter{}
+
+	salePrice := retr.GetSalePrice(2576104)
+
+	if salePrice != 24.592861 {
+		t.Errorf("Failure to get sale price: %v", salePrice)
+	}
 }
 
 func TestGetRateLimit(t *testing.T) {
