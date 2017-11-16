@@ -265,6 +265,18 @@ func (r *DiscogsRetriever) GetCollection() []Release {
 	return releases
 }
 
+// GetInstanceID Gets the instance ID for this release
+func (r *DiscogsRetriever) GetInstanceID(releaseID int) int32 {
+	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/releases/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
+	var response CollectionResponse
+	r.unmarshaller.Unmarshal(jsonString, &response)
+	if len(response.Releases) > 0 {
+		return response.Releases[0].InstanceId
+	}
+
+	return -1
+}
+
 // GetSalePrice gets the sale price for a release
 func (r *DiscogsRetriever) GetSalePrice(releaseID int) float32 {
 	jsonString, _, _ := r.retrieve("/marketplace/price_suggestions/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)

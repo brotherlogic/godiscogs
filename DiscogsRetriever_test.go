@@ -99,7 +99,7 @@ func TestGetSuggestedPrice(t *testing.T) {
 
 	salePrice := retr.GetSalePrice(2576104)
 
-	if salePrice != 24.592861 {
+	if salePrice != 4.9002776 {
 		t.Errorf("Failure to get sale price: %v", salePrice)
 	}
 }
@@ -262,10 +262,18 @@ func TestFailMarshal(t *testing.T) {
 	}
 }
 
+func TestGetInstanceID(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	val := retr.GetInstanceID(11146958)
+	if val != 261212718 {
+		t.Errorf("Error in getting instance ID: %v", val)
+	}
+}
+
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	collection := retr.GetCollection()
-	if len(collection) != 2911 {
+	if len(collection) != 3104 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
