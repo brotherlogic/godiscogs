@@ -249,13 +249,13 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 
 	var releases []*Release
 	response := &CollectionResponse{}
-	blah := r.unmarshaller.Unmarshal(jsonString, response)
-	log.Printf("BLAH  = %v given %v", response, blah)
+	r.unmarshaller.Unmarshal(jsonString, response)
 
 	releases = append(releases, response.Releases...)
 	end := response.Pagination.Pages == response.Pagination.Page
 
 	for !end {
+		log.Printf("Retrieve: %v", response.Pagination.Urls.Next[23:])
 		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
 		newResponse := &CollectionResponse{}
 		r.unmarshaller.Unmarshal(jsonString, &newResponse)
