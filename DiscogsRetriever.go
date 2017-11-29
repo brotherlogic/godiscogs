@@ -186,13 +186,13 @@ type Pagination struct {
 // CollectionResponse returned from discogs
 type CollectionResponse struct {
 	Pagination Pagination
-	Releases   []Release
+	Releases   []*Release
 }
 
 // WantlistResponse returned from discogs
 type WantlistResponse struct {
 	Pagination Pagination
-	Wants      []Release
+	Wants      []*Release
 }
 
 // Version a version of a master release
@@ -222,10 +222,10 @@ func (r *DiscogsRetriever) GetRateLimit() int {
 }
 
 // GetWantlist returns the wantlist for the given user
-func (r *DiscogsRetriever) GetWantlist() ([]Release, error) {
+func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
 	jsonString, _, _ := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
 
-	var releases []Release
+	var releases []*Release
 	var response WantlistResponse
 	r.unmarshaller.Unmarshal(jsonString, &response)
 
@@ -244,22 +244,25 @@ func (r *DiscogsRetriever) GetWantlist() ([]Release, error) {
 }
 
 // GetCollection gets all the releases in the users collection
-func (r *DiscogsRetriever) GetCollection() []Release {
+func (r *DiscogsRetriever) GetCollection() []*Release {
 	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/folders/0/releases?per_page=100&token=" + r.userToken)
 
-	var releases []Release
-	var response CollectionResponse
-	r.unmarshaller.Unmarshal(jsonString, &response)
+	var releases []*Release
+	response := &CollectionResponse{}
+	blah := r.unmarshaller.Unmarshal(jsonString, response)
+	log.Printf("BLAH  = %v given %v", response, blah)
 
 	releases = append(releases, response.Releases...)
 	end := response.Pagination.Pages == response.Pagination.Page
 
 	for !end {
 		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
-		r.unmarshaller.Unmarshal(jsonString, &response)
+		newResponse := &CollectionResponse{}
+		r.unmarshaller.Unmarshal(jsonString, &newResponse)
 
-		releases = append(releases, response.Releases...)
-		end = response.Pagination.Pages == response.Pagination.Page
+		releases = append(releases, newResponse.Releases...)
+		end = newResponse.Pagination.Pages == newResponse.Pagination.Page
+		response = newResponse
 	}
 
 	return releases

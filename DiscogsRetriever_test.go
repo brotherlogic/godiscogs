@@ -277,8 +277,13 @@ func TestGetCollection(t *testing.T) {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
-	var foundRecord Release
+	var foundRecord *Release
+	log.Printf("Collection size: %v", len(collection))
+	count := 0
 	for _, record := range collection {
+		if record.Id == 2180118 {
+			count++
+		}
 		if record.Id == 679324 {
 			found = true
 			foundRecord = record
@@ -290,7 +295,7 @@ func TestGetCollection(t *testing.T) {
 	}
 
 	if !found {
-		t.Errorf("Collection does not contain Earth Rot")
+		t.Fatalf("Collection does not contain Earth Rot : %v", count)
 	}
 
 	if foundRecord.FolderId != 242017 {
