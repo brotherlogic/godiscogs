@@ -73,9 +73,9 @@ func NewDiscogsRetriever(token string) *DiscogsRetriever {
 }
 
 // GetRelease returns a release from the discogs system
-func (r *DiscogsRetriever) GetRelease(id int) (Release, error) {
-	jsonString, _, _ := r.retrieve("/releases/" + strconv.Itoa(id) + "?token=" + r.userToken)
-	var release Release
+func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
+	jsonString, _, _ := r.retrieve("/releases/" + strconv.Itoa(int(id)) + "?token=" + r.userToken)
+	var release *Release
 	err := r.unmarshaller.Unmarshal(jsonString, &release)
 
 	if err != nil {
