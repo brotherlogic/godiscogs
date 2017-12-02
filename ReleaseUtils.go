@@ -13,7 +13,7 @@ func split(str string) []string {
 }
 
 // GetReleaseArtist Gets a string of the release artist of this record
-func GetReleaseArtist(rel Release) string {
+func GetReleaseArtist(rel *Release) string {
 	if len(rel.Artists) > 0 {
 		artistString := rel.Artists[0].Name
 		for _, artist := range rel.Artists[1:] {
