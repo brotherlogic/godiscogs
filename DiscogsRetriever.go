@@ -306,8 +306,9 @@ func (r *DiscogsRetriever) RemoveFromWantlist(releaseID int) {
 }
 
 // AddToFolder adds the release to the given folder
-func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) {
+func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) error {
 	r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(int(folderID))+"/releases/"+strconv.Itoa(int(releaseID))+"?token="+r.userToken, "")
+	return nil
 }
 
 // MoveToFolder Moves the given release to the new folder
