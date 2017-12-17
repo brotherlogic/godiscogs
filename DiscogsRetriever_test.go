@@ -86,6 +86,31 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 	return retr
 }
 
+func TestGetImage(t *testing.T) {
+	retr := NewDiscogsRetriever("token")
+	retr.getter = testFileGetter{}
+
+	r, err := retr.GetRelease(4707982)
+
+	if err != nil {
+		t.Fatalf("Error getting release: %v", err)
+	}
+
+	found := false
+	for _, i := range r.GetImages() {
+		if i.Type == "primary" {
+			if i.Uri == "" {
+				t.Errorf("Unable to pick out image uri: %v", r)
+			}
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("No primary image: %v", r)
+	}
+}
+
 func TestSellRecord(t *testing.T) {
 	retr := NewDiscogsRetriever("token")
 	retr.getter = testFileGetter{}
