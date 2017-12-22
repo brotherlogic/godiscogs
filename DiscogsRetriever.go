@@ -17,7 +17,10 @@ type jsonUnmarshaller interface {
 type prodUnmarshaller struct{}
 
 func (jsonUnmarshaller prodUnmarshaller) Unmarshal(inp []byte, v interface{}) error {
-	return json.Unmarshal(inp, v)
+	log.Printf("UNMARSHAL: %v", string(inp))
+	err := json.Unmarshal(inp, v)
+	log.Printf("%v and %v", err, v)
+	return err
 }
 
 var httpCount int
@@ -305,10 +308,23 @@ func (r *DiscogsRetriever) RemoveFromWantlist(releaseID int) {
 	r.delete("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 }
 
+//AddToFolderResponse the response back from an add request
+type AddToFolderResponse struct {
+	InstanceID  int `json:"instance_id"`
+	ResourceURL string
+	Simple      int
+}
+
 // AddToFolder adds the release to the given folder
-func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) error {
-	r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(int(folderID))+"/releases/"+strconv.Itoa(int(releaseID))+"?token="+r.userToken, "")
-	return nil
+func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) (int, error) {
+	jsonString := r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(int(folderID))+"/releases/"+strconv.Itoa(int(releaseID))+"?token="+r.userToken, "")
+	var response AddToFolderResponse
+	err := r.unmarshaller.Unmarshal([]byte(jsonString), &response)
+	if err != nil {
+		return -1, err
+	}
+	log.Printf("GOT: %v -> %v (%v) but overall %v", jsonString, response.Simple, err, response)
+	return response.InstanceID, nil
 }
 
 // MoveToFolder Moves the given release to the new folder
