@@ -212,7 +212,15 @@ func TestGetEarliestReleaseDateOrdering(t *testing.T) {
 
 func TestAddToFolder(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	retr.AddToFolder(10, 10)
+	v, err := retr.AddToFolder(812802, 10)
+
+	if err != nil {
+		t.Fatalf("Error running add: %v", err)
+	}
+
+	if v != 267910454 {
+		t.Errorf("Error in returned instance ID: %v", v)
+	}
 }
 
 func TestMoveToUncateogrized(t *testing.T) {
