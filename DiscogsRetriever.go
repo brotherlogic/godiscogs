@@ -332,11 +332,6 @@ func (r *DiscogsRetriever) MoveToFolder(folderID int, releaseID int, instanceID 
 	r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
 }
 
-// SetRating sets the rating on the specified releases
-func (r *DiscogsRetriever) SetRating(folderID int, releaseID int, instanceID int, rating int) {
-	r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"rating\": "+strconv.Itoa(rating)+"}")
-}
-
 // FoldersResponse returned from discogs
 type FoldersResponse struct {
 	Pagination Pagination
@@ -407,7 +402,7 @@ func (r *DiscogsRetriever) delete(path string, data string) {
 	r.getter.Delete(urlv, data)
 }
 
-func (r *DiscogsRetriever) put(path string, data string) {
+func (r *DiscogsRetriever) put(path string, data string) []byte {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -417,5 +412,8 @@ func (r *DiscogsRetriever) put(path string, data string) {
 	}
 
 	lastTimeRetrieved = time.Now()
-	r.getter.Put(urlv, data)
+	response, _ := r.getter.Put(urlv, data)
+	defer response.Body.Close()
+	body, _ := ioutil.ReadAll(response.Body)
+	return body
 }
