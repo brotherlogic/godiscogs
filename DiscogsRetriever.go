@@ -51,6 +51,7 @@ func (httpGetter prodHTTPGetter) Post(url string, data string) (*http.Response, 
 func (httpGetter prodHTTPGetter) Put(url string, data string) (*http.Response, error) {
 	httpCount++
 	req, _ := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(data)))
+	req.Header.Set("Content-Type", "application/json")
 	return http.DefaultClient.Do(req)
 }
 
