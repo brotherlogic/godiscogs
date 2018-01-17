@@ -86,14 +86,14 @@ func TestGetWantlist(t *testing.T) {
 }
 
 func NewTestDiscogsRetriever() *DiscogsRetriever {
-	retr := NewDiscogsRetriever("token")
+	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 	retr.getSleep = 0.0
 	return retr
 }
 
 func TestGetImage(t *testing.T) {
-	retr := NewDiscogsRetriever("token")
+	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 
 	r, err := retr.GetRelease(4707982)
@@ -118,14 +118,14 @@ func TestGetImage(t *testing.T) {
 }
 
 func TestSellRecord(t *testing.T) {
-	retr := NewDiscogsRetriever("token")
+	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 
 	retr.SellRecord(2576104, 12.345, "Draft")
 }
 
 func TestGetSuggestedPrice(t *testing.T) {
-	retr := NewDiscogsRetriever("token")
+	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 
 	salePrice := retr.GetSalePrice(2576104)
@@ -136,7 +136,7 @@ func TestGetSuggestedPrice(t *testing.T) {
 }
 
 func TestGetRateLimit(t *testing.T) {
-	retr := NewDiscogsRetriever("token")
+	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 
 	rateLimit := retr.GetRateLimit()
@@ -146,14 +146,14 @@ func TestGetRateLimit(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
-	retr := NewDiscogsRetriever("token")
+	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = prodHTTPGetter{}
 	retr.post("blah", "madeup")
 }
 
 func TestRetrieveLimiting(t *testing.T) {
 	//Ignore the get Sleep override
-	retr := NewDiscogsRetriever("token")
+	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 	start := time.Now()
 

@@ -81,8 +81,8 @@ func (r *DiscogsRetriever) Log(text string) {
 }
 
 // NewDiscogsRetriever Build a production retriever
-func NewDiscogsRetriever(token string) *DiscogsRetriever {
-	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 1500, lastRetrieveTime: time.Now().Unix()}
+func NewDiscogsRetriever(token string, logger func(string)) *DiscogsRetriever {
+	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 1500, lastRetrieveTime: time.Now().Unix(), logger: logger}
 }
 
 // GetRelease returns a release from the discogs system
