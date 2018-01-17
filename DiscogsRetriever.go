@@ -3,6 +3,7 @@ package godiscogs
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -69,6 +70,14 @@ type DiscogsRetriever struct {
 	unmarshaller     jsonUnmarshaller
 	getter           httpGetter
 	getSleep         int
+	logger           func(string)
+}
+
+//Log out a value to the log function
+func (r *DiscogsRetriever) Log(text string) {
+	if r.logger != nil {
+		r.logger(text)
+	}
 }
 
 // NewDiscogsRetriever Build a production retriever
@@ -375,7 +384,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 
 func (r *DiscogsRetriever) post(path string, data string) string {
 	urlv := "https://api.discogs.com/" + path
-	log.Printf("Posting %v to %v", data, urlv)
+	r.Log(fmt.Sprintf("Posting %v to %v", data, urlv))
 
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
