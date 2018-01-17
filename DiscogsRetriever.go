@@ -18,9 +18,7 @@ type jsonUnmarshaller interface {
 type prodUnmarshaller struct{}
 
 func (jsonUnmarshaller prodUnmarshaller) Unmarshal(inp []byte, v interface{}) error {
-	log.Printf("UNMARSHAL: %v", string(inp))
 	err := json.Unmarshal(inp, v)
-	log.Printf("%v and %v", err, v)
 	return err
 }
 
