@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,9 +17,7 @@ type jsonUnmarshaller interface {
 type prodUnmarshaller struct{}
 
 func (jsonUnmarshaller prodUnmarshaller) Unmarshal(inp []byte, v interface{}) error {
-	log.Printf("UNMARSHAL: %v", string(inp))
 	err := json.Unmarshal(inp, v)
-	log.Printf("%v and %v", err, v)
 	return err
 }
 
@@ -93,10 +90,6 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 
 	if err != nil {
 		return release, err
-	}
-
-	if release.Id == 0 {
-		log.Printf("Error here: %v from %v", string(jsonString), release)
 	}
 
 	var versions VersionsResponse
@@ -227,10 +220,8 @@ type Pricing struct {
 
 // GetRateLimit returns the rate limit
 func (r *DiscogsRetriever) GetRateLimit() int {
-	log.Printf("Running Retrieve")
 	_, headers, _ := r.retrieve("/releases/249504?token=" + r.userToken)
-	val, err := strconv.Atoi(headers.Get("X-Discogs-Ratelimit"))
-	log.Printf("CONV %v,%v", val, err)
+	val, _ := strconv.Atoi(headers.Get("X-Discogs-Ratelimit"))
 	return val
 }
 
@@ -268,7 +259,6 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 	end := response.Pagination.Pages == response.Pagination.Page
 
 	for !end {
-		log.Printf("Retrieve: %v", response.Pagination.Urls.Next[23:])
 		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
 		newResponse := &CollectionResponse{}
 		r.unmarshaller.Unmarshal(jsonString, &newResponse)
@@ -304,8 +294,7 @@ func (r *DiscogsRetriever) GetSalePrice(releaseID int) float32 {
 // SellRecord sells a given release
 func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string) {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"sleeve_condition\":\"Very Good Plus (VG+)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"auto\", \"allow_offers\":\"true\"}"
-	res := r.post("/marketplace/listings?token="+r.userToken, data)
-	log.Printf("RESPONSE = %v", res)
+	r.post("/marketplace/listings?token="+r.userToken, data)
 }
 
 // AddToWantlist adds a record to the wantlist
@@ -333,7 +322,6 @@ func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) (int, er
 	if err != nil {
 		return -1, err
 	}
-	log.Printf("GOT: %v -> %v (%v) but overall %v", jsonString, response.Simple, err, response)
 	return response.InstanceID, nil
 }
 
@@ -367,6 +355,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		r.Log(fmt.Sprintf("GET Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
@@ -389,6 +378,7 @@ func (r *DiscogsRetriever) post(path string, data string) string {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		r.Log(fmt.Sprintf("Post Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
@@ -405,6 +395,7 @@ func (r *DiscogsRetriever) delete(path string, data string) {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		r.Log(fmt.Sprintf("Delete Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
@@ -418,6 +409,7 @@ func (r *DiscogsRetriever) put(path string, data string) []byte {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		r.Log(fmt.Sprintf("Put Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 

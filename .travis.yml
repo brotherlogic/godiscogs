@@ -8,6 +8,8 @@ branches:
     - master
 
 before_install:
+- find testdata
+- ./look_for_logs.sh
 - go get github.com/axw/gocov/gocov
 - go get github.com/mattn/goveralls
 - go get github.com/golang/lint/golint
@@ -16,6 +18,6 @@ before_install:
   fi
   
 script:
+- find testdata
 - fgt golint $(find ./ | grep .go$ | grep -v discogs.pb.go)
-- go test ./...
 - $HOME/gopath/bin/goveralls -service=travis-ci -ignore ReleaseUtils.go,DiscogsRetriever.go,godiscogs.pb.go -package github.com/brotherlogic/godiscogs
