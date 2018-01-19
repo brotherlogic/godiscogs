@@ -403,7 +403,7 @@ func (r *DiscogsRetriever) delete(path string, data string) {
 	r.getter.Delete(urlv, data)
 }
 
-func (r *DiscogsRetriever) put(path string, data string) []byte {
+func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -414,8 +414,15 @@ func (r *DiscogsRetriever) put(path string, data string) []byte {
 	}
 
 	lastTimeRetrieved = time.Now()
-	response, _ := r.getter.Put(urlv, data)
+	response, err := r.getter.Put(urlv, data)
+	if err != nil {
+		return make([]byte, 0), err
+	}
+
 	defer response.Body.Close()
-	body, _ := ioutil.ReadAll(response.Body)
-	return body
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return make([]byte, 0), err
+	}
+	return body, nil
 }
