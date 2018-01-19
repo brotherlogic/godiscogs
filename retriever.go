@@ -13,7 +13,12 @@ type setRatingResponse struct {
 
 // SetRating sets the rating on the specified releases
 func (r *DiscogsRetriever) SetRating(releaseID int, rating int) error {
-	data := r.put("/releases/"+strconv.Itoa(releaseID)+"/rating/BrotherLogic?token="+r.userToken, "{\"rating\": "+strconv.Itoa(rating)+"}")
+	data, err := r.put("/releases/"+strconv.Itoa(releaseID)+"/rating/BrotherLogic?token="+r.userToken, "{\"rating\": "+strconv.Itoa(rating)+"}")
+
+	if err != nil {
+		return err
+	}
+
 	var response setRatingResponse
 	r.unmarshaller.Unmarshal(data, &response)
 

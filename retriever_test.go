@@ -12,6 +12,15 @@ func TestSetRating(t *testing.T) {
 
 func TestSetRatingFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
+	err := retr.SetRating(10567528, 5)
+	if err == nil {
+		t.Errorf("Fail set rating has not failed")
+	}
+}
+
+func TestSetRatingPutFail(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getter = testFailGetter{}
 	err := retr.SetRating(2000000000, 5)
 	if err == nil {
 		t.Errorf("Fail set rating has not failed")
