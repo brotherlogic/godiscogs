@@ -355,7 +355,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		r.Log(fmt.Sprintf("GET Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
+		r.Log(fmt.Sprintf("GET (%v) Sleeping for %v", urlv, time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
