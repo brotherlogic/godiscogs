@@ -383,7 +383,10 @@ func (r *DiscogsRetriever) post(path string, data string) string {
 	}
 
 	lastTimeRetrieved = time.Now()
-	response, _ := r.getter.Post(urlv, data)
+	response, err := r.getter.Post(urlv, data)
+	if err != nil {
+		return fmt.Sprintf("POST ERROR: %v", err)
+	}
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 	return string(body)
