@@ -2,14 +2,17 @@ mkdir -p testdata/releases/10567529/rating
 mkdir -p testdata/releases/2000000000/rating
 mkdir -p testdata/users/brotherlogic/collection/folders/0/
 mkdir -p testdata/users/brotherlogic/collection/folders/812802/releases
+mkdir -p testdata/users/brotherlogic/collection/folders/673768/releases/10866041/instances
 mkdir -p testdata/users/brotherlogic/collection/releases
 mkdir -p testdata/masters/67464
 mkdir -p testdata/masters/38998
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
-curl -X PUT -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/2000000000/rating/BrotherLogic?token=$1" -d '{"rating": 5}'| sed "s/$1/token/g" > testdata/releases/2000000000/rating/brotherlogic_token=token
+curl -X DELETE -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/673768/releases/10866041/instances/280210978?token=$1" | sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/673768/releases/10866041/instances/280210978_token=token
 sleep 1
 exit
+curl -X PUT -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/2000000000/rating/BrotherLogic?token=$1" -d '{"rating": 5}'| sed "s/$1/token/g" > testdata/releases/2000000000/rating/brotherlogic_token=token
+sleep 1
 curl -X PUT -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/10567529/rating/BrotherLogic?token=$1" -d '{"rating": 5}'| sed "s/$1/token/g" > testdata/releases/10567529/rating/brotherlogic_token=token
 sleep 1
 curl -X POST -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/812802/releases/10?token=$1" -d '' > testdata/users/brotherlogic/collection/folders/812802/releases/10_token=token

@@ -330,6 +330,11 @@ func (r *DiscogsRetriever) MoveToFolder(folderID int, releaseID int, instanceID 
 	return r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
 }
 
+// DeleteInstance removes a record from the collection
+func (r *DiscogsRetriever) DeleteInstance(folderID int, releaseID int, instanceID int) string {
+	return r.delete("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
+}
+
 // FoldersResponse returned from discogs
 type FoldersResponse struct {
 	Pagination Pagination
@@ -392,7 +397,7 @@ func (r *DiscogsRetriever) post(path string, data string) string {
 	return string(body)
 }
 
-func (r *DiscogsRetriever) delete(path string, data string) {
+func (r *DiscogsRetriever) delete(path string, data string) string {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -403,7 +408,13 @@ func (r *DiscogsRetriever) delete(path string, data string) {
 	}
 
 	lastTimeRetrieved = time.Now()
-	r.getter.Delete(urlv, data)
+	response, err := r.getter.Delete(urlv, data)
+	if err != nil {
+		return fmt.Sprintf("POST ERROR: %v", err)
+	}
+	defer response.Body.Close()
+	body, _ := ioutil.ReadAll(response.Body)
+	return string(body)
 }
 
 func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
