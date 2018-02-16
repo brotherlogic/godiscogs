@@ -69,6 +69,12 @@ func (httpGetter testFileGetter) Put(url string, data string) (*http.Response, e
 
 func (httpGetter testFileGetter) Delete(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
+	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	blah, err := os.Open("testdata" + strippedURL)
+	if err != nil {
+		log.Printf("Error opening test file %v", err)
+	}
+	response.Body = blah
 	return response, nil
 }
 
@@ -232,6 +238,11 @@ func TestAddToFolder(t *testing.T) {
 func TestMoveToUncateogrized(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.MoveToFolder(10, 10, 10, 10)
+}
+
+func TestDelete(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.DeleteInstance(673768, 10866041, 280210978)
 }
 
 func TestAddToWantlist(t *testing.T) {
