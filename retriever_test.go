@@ -10,6 +10,14 @@ func TestSetRating(t *testing.T) {
 	}
 }
 
+func TestNullRating(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	err := retr.SetRating(10567529, 0)
+	if err != nil {
+		t.Errorf("Rating has not been set")
+	}
+}
+
 func TestSetRatingFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	err := retr.SetRating(10567528, 5)
