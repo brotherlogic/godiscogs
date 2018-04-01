@@ -8,6 +8,9 @@ message Label {
 
         // The catalogue number
         string catno = 2;
+
+  // The id of the label
+  int32 id = 3;
 }
 
 message Folder {
@@ -70,8 +73,8 @@ message Release {
   // The labels connected to this release
   repeated Label labels = 7;
 
-	// The number of discs in the release
-	int32 format_quantity = 8;
+  // The number of discs in the release
+  int32 format_quantity = 8;
 
   // The rating given to this release
   int32 rating = 9;
