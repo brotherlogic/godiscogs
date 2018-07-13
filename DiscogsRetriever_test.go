@@ -190,6 +190,14 @@ func TestGetRelease(t *testing.T) {
 	if len(release.Formats) != 1 {
 		t.Errorf("Formats has been pulled wrong: %v", release.Formats)
 	}
+
+	if len(release.Labels) != 1 {
+		t.Errorf("Labels has been pulled wrong: %b", release.Labels)
+	}
+
+	if release.Labels[0].Id != 895 {
+		t.Errorf("Label ID has not been pulled correctly: %v", release.Labels[0])
+	}
 }
 
 func TestGetReleaseNoData(t *testing.T) {

@@ -360,7 +360,6 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		r.Log(fmt.Sprintf("GET (%v) Sleeping for %v", urlv, time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
@@ -383,7 +382,6 @@ func (r *DiscogsRetriever) post(path string, data string) string {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		r.Log(fmt.Sprintf("Post Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
@@ -403,7 +401,6 @@ func (r *DiscogsRetriever) delete(path string, data string) string {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		r.Log(fmt.Sprintf("Delete Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
@@ -423,7 +420,6 @@ func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		r.Log(fmt.Sprintf("Put Sleeping for %v", time.Duration(r.getSleep)*time.Millisecond-diff))
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 
