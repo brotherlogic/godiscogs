@@ -373,7 +373,9 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	body, _ := ioutil.ReadAll(response.Body)
 	lastTimeRetrieved = time.Now()
 
-	r.Log(fmt.Sprintf("HEADER: %v", response.Header))
+	if response.StatusCode != 200 {
+		r.Log(fmt.Sprintf("%v -> %v", response.StatusCode, string(body)))
+	}
 
 	return body, response.Header, nil
 }
