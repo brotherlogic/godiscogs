@@ -397,6 +397,11 @@ func (r *DiscogsRetriever) post(path string, data string) string {
 	}
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != 200 {
+		r.Log(fmt.Sprintf("%v -> %v", response.StatusCode, string(body)))
+	}
+
 	return string(body)
 }
 
@@ -415,6 +420,7 @@ func (r *DiscogsRetriever) delete(path string, data string) string {
 		return fmt.Sprintf("POST ERROR: %v", err)
 	}
 	defer response.Body.Close()
+
 	body, _ := ioutil.ReadAll(response.Body)
 	return string(body)
 }
