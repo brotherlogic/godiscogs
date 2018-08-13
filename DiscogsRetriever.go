@@ -371,7 +371,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
-	if response.StatusCode != 200 {
+	if response.StatusCode != 200 && response.StatusCode != 201 {
 		r.Log(fmt.Sprintf("RETR %v -> %v", response.StatusCode, string(body)))
 	}
 
@@ -398,7 +398,7 @@ func (r *DiscogsRetriever) post(path string, data string) string {
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != 200 && response.StatusCode != 201 {
 		r.Log(fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path))
 	}
 
@@ -443,7 +443,7 @@ func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
-	if response.StatusCode != 200 {
+	if response.StatusCode != 200 && response.StatusCode != 201 {
 		r.Log(fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path))
 	}
 	if err != nil {
