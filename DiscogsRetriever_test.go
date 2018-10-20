@@ -53,6 +53,7 @@ func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, 
 		log.Printf("Error opening test file %v", err)
 	}
 	response.Body = blah
+	response.StatusCode = 204
 	return response, nil
 }
 
@@ -421,6 +422,22 @@ func TestGatefold(t *testing.T) {
 	release, _ := retr.GetRelease(9082405)
 	if !release.Gatefold {
 		t.Errorf("Gatefold has not been marked as such: %v", release)
+	}
+}
+
+func TestGetSalePrice(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	price := retr.GetCurrentSalePrice(805377159)
+	if price != 9.75 {
+		t.Errorf("Price is incorrect: %v", price)
+	}
+}
+
+func TestUpdateSalePrice(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	err := retr.UpdateSalePrice(805377159, 11403112, "Very Good Plus (VG+)", 9.50)
+	if err != nil {
+		t.Errorf("Update price failed!: %v", err)
 	}
 }
 

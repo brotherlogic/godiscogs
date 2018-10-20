@@ -1,18 +1,17 @@
 language: go
 
 go:
-  - 1.7
+  - 1.9
   
 branches:
   only:
     - master
 
 before_install:
-- find testdata
 - ./look_for_logs.sh
 - go get github.com/axw/gocov/gocov
 - go get github.com/mattn/goveralls
-- go get github.com/golang/lint/golint
+- go get golang.org/x/lint/golint
 - go get github.com/GeertJohan/fgt
 - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover;
   fi
@@ -20,4 +19,4 @@ before_install:
 script:
 - find testdata
 - fgt golint $(find ./ | grep .go$ | grep -v discogs.pb.go)
-- $HOME/gopath/bin/goveralls -service=travis-ci -ignore ReleaseUtils.go,DiscogsRetriever.go,godiscogs.pb.go -package github.com/brotherlogic/godiscogs
+- $HOME/gopath/bin/goveralls -service=travis-ci -ignore stillToGo.go,ReleaseUtils.go,godiscogs.pb.go -package github.com/brotherlogic/godiscogs

@@ -8,9 +8,14 @@ mkdir -p testdata/masters/67464
 mkdir -p testdata/masters/38998
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
-curl -X DELETE -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/673768/releases/10866041/instances/280210978?token=$1" | sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/673768/releases/10866041/instances/280210978_token=token
+mkdir -p testdata/marketplace/listings
+curl -i -X POST -H "Content-Type:applicaion/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/marketplace/listings/805377159?token=$1&curr_abr=USD" -d '{"listing_id": 805377159, "release_id":11403112, "condition": "Very Good Plus (VG+)", "price": 9.50, "status":"For Sale"}' | sed "s/$1/token/g" >  testdata/marketplace/listings/805377159_curr_abr=USD_token=token
 sleep 1
 exit
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/marketplace/listings/805377159?curr_abbr=USD&token=$1" | sed "s/$1/token/g" > testdata/marketplace/listings/805377159_curr_abbr=USD_token=token
+sleep 1
+curl -X DELETE -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/collection/folders/673768/releases/10866041/instances/280210978?token=$1" | sed "s/$1/token/g" > testdata/users/brotherlogic/collection/folders/673768/releases/10866041/instances/280210978_token=token
+sleep 1
 curl -X PUT -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/2000000000/rating/BrotherLogic?token=$1" -d '{"rating": 5}'| sed "s/$1/token/g" > testdata/releases/2000000000/rating/brotherlogic_token=token
 sleep 1
 curl -X PUT -H "Content-Type:application/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/10567529/rating/BrotherLogic?token=$1" -d '{"rating": 5}'| sed "s/$1/token/g" > testdata/releases/10567529/rating/brotherlogic_token=token
