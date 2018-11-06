@@ -144,7 +144,7 @@ func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string
 
 // GetCurrentSalePrice gets the current sale price
 func (r *DiscogsRetriever) GetCurrentSalePrice(saleID int) float32 {
-	jsonString, _, _ := r.retrieve("/marketplace/listings/" + strconv.Itoa(saleID) + "?curr_abbr=USD?token=" + r.userToken)
+	jsonString, _, _ := r.retrieve("/marketplace/listings/" + strconv.Itoa(saleID) + "?curr_abbr=USD&token=" + r.userToken)
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 	return resp.Price.Value
