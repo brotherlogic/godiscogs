@@ -152,7 +152,7 @@ func (r *DiscogsRetriever) GetCurrentSalePrice(saleID int) float32 {
 
 // UpdateSalePrice updates the sale price
 func (r *DiscogsRetriever) UpdateSalePrice(saleID int, releaseID int, condition string, price float32) error {
-	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + condition + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + "\"status\":\"For Sale\"}"
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + condition + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"For Sale\"}"
 	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
 	return err
 }
