@@ -193,7 +193,7 @@ func TestGetRelease(t *testing.T) {
 	}
 
 	if len(release.Labels) != 1 {
-		t.Errorf("Labels has been pulled wrong: %b", release.Labels)
+		t.Errorf("Labels has been pulled wrong: %v", release.Labels)
 	}
 
 	if release.Labels[0].Id != 895 {

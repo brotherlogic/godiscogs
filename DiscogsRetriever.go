@@ -115,6 +115,8 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 	releases = append(releases, response.Releases...)
 	end := response.Pagination.Pages == response.Pagination.Page
 
+	r.Log(fmt.Sprintf("FOUND %v PAGES", response.Pagination.Pages))
+
 	for !end {
 		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
 		newResponse := &CollectionResponse{}
