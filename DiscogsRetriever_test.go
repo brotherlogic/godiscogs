@@ -128,7 +128,11 @@ func TestSellRecord(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 
-	retr.SellRecord(2576104, 12.345, "Draft")
+	id := retr.SellRecord(2576104, 12.345, "Draft")
+
+	if id != 567306424 {
+		t.Errorf("Sale has failed: %v", id)
+	}
 }
 
 func TestGetSuggestedPrice(t *testing.T) {
