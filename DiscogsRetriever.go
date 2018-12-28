@@ -97,6 +97,11 @@ type PriceResponse struct {
 	Price Pricing
 }
 
+// SellResponse response from selling a record
+type SellResponse struct {
+	ListingID int `json:"listing_id"`
+}
+
 // GetRateLimit returns the rate limit
 func (r *DiscogsRetriever) GetRateLimit() int {
 	_, headers, _ := r.retrieve("/releases/249504?token=" + r.userToken)
@@ -139,9 +144,12 @@ func (r *DiscogsRetriever) GetSalePrice(releaseID int) float32 {
 }
 
 // SellRecord sells a given release
-func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string) {
+func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string) int {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"sleeve_condition\":\"Very Good Plus (VG+)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"auto\"}"
-	r.post("/marketplace/listings?token="+r.userToken, data)
+	databack, _ := r.post("/marketplace/listings?token="+r.userToken, data)
+	var resp SellResponse
+	r.unmarshaller.Unmarshal([]byte(databack), &resp)
+	return resp.ListingID
 }
 
 // GetCurrentSalePrice gets the current sale price
