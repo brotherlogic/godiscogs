@@ -135,6 +135,17 @@ func TestSellRecord(t *testing.T) {
 	}
 }
 
+func TestRemoveSale(t *testing.T) {
+	retr := NewDiscogsRetriever("token", nil)
+	retr.getter = testFileGetter{}
+
+	err := retr.RemoveFromSale(805055435, 1145342)
+
+	if err != nil {
+		t.Errorf("Sale has failed: %v", err)
+	}
+}
+
 func TestGetSuggestedPrice(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
@@ -449,6 +460,14 @@ func TestGetSaleStateOnFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	state := retr.GetCurrentSaleState(805377158)
 	if state != SaleState_NOT_FOR_SALE {
+		t.Errorf("State is incorrect: %v", state)
+	}
+}
+
+func TestGetSaleStateOnSold(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	state := retr.GetCurrentSaleState(805377157)
+	if state != SaleState_SOLD {
 		t.Errorf("State is incorrect: %v", state)
 	}
 }

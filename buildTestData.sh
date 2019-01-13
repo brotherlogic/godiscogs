@@ -9,6 +9,9 @@ mkdir -p testdata/masters/38998
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
 mkdir -p testdata/marketplace/listings
+curl -i -X POST -H "Content-Type:applicaion/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/marketplace/listings/805055435?token=$1&curr_abr=USD" -d '{"listing_id": 805055435, "release_id":1145342, "condition": "Very Good Plus (VG+)", "price": 5.00, "status":"Draft"}' | sed "s/$1/token/g" >  testdata/marketplace/listings/805055435_curr_abr=USD_token=token
+sleep 1
+exit
 curl -i -X POST -H "Content-Type:applicaion/json" --user-agent "GoDiscogsTestData" "https://api.discogs.com/marketplace/listings/805377159?token=$1&curr_abr=USD" -d '{"listing_id": 805377159, "release_id":11403112, "condition": "Very Good Plus (VG+)", "price": 9.50, "status":"For Sale"}' | sed "s/$1/token/g" >  testdata/marketplace/listings/805377159_curr_abr=USD_token=token
 sleep 1
 exit
