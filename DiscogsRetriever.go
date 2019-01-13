@@ -166,6 +166,7 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 	jsonString, _, _ := r.retrieve("/marketplace/listings/" + strconv.Itoa(saleID) + "?curr_abbr=USD&token=" + r.userToken)
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
+
 	if resp.Status == "For Sale" {
 		return SaleState_FOR_SALE
 	} else if resp.Status == "Sold" {
@@ -179,6 +180,13 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 // UpdateSalePrice updates the sale price
 func (r *DiscogsRetriever) UpdateSalePrice(saleID int, releaseID int, condition string, price float32) error {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + condition + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"For Sale\"}"
+	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
+	return err
+}
+
+// RemoveFromSale removes the listing from sale
+func (r *DiscogsRetriever) RemoveFromSale(saleID int, releaseID int) error {
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"price\":5.00, \"status\":\"Draft\"}"
 	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
 	return err
 }
