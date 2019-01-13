@@ -168,6 +168,8 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 	if resp.Status == "For Sale" {
 		return SaleState_FOR_SALE
+	} else if resp.Status == "Sold" {
+		return SaleState_SOLD
 	}
 
 	r.Log(fmt.Sprintf("Unknown sale status: %v", resp.Status))
