@@ -437,6 +437,22 @@ func TestGetSalePrice(t *testing.T) {
 	}
 }
 
+func TestGetSaleState(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	state := retr.GetCurrentSaleState(805377159)
+	if state != SaleState_FOR_SALE {
+		t.Errorf("State is incorrect: %v", state)
+	}
+}
+
+func TestGetSaleStateOnFail(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	state := retr.GetCurrentSaleState(805377158)
+	if state != SaleState_NOT_FOR_SALE {
+		t.Errorf("State is incorrect: %v", state)
+	}
+}
+
 func TestUpdateSalePrice(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	err := retr.UpdateSalePrice(805377159, 11403112, "Very Good Plus (VG+)", 9.50)
