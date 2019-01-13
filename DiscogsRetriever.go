@@ -94,7 +94,8 @@ type Pricing struct {
 
 // PriceResponse response from get sale details
 type PriceResponse struct {
-	Price Pricing
+	Price  Pricing
+	Status string
 }
 
 // SellResponse response from selling a record
@@ -158,6 +159,19 @@ func (r *DiscogsRetriever) GetCurrentSalePrice(saleID int) float32 {
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 	return resp.Price.Value
+}
+
+// GetCurrentSaleState gets the current sale state
+func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
+	jsonString, _, _ := r.retrieve("/marketplace/listings/" + strconv.Itoa(saleID) + "?curr_abbr=USD&token=" + r.userToken)
+	var resp PriceResponse
+	r.unmarshaller.Unmarshal(jsonString, &resp)
+	if resp.Status == "For Sale" {
+		return SaleState_FOR_SALE
+	}
+
+	r.Log(fmt.Sprintf("Unknown sale status: %v", resp.Status))
+	return SaleState_NOT_FOR_SALE
 }
 
 // UpdateSalePrice updates the sale price

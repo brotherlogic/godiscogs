@@ -97,3 +97,9 @@ message Release {
   // Is this a boxset
   bool boxset = 15;
 }
+
+enum SaleState {
+  NOT_FOR_SALE = 0;
+  FOR_SALE = 1;
+  SOLD = 2;
+}
