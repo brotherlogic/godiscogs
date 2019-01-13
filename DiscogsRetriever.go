@@ -169,7 +169,7 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 
 	if resp.Status == "For Sale" {
 		return SaleState_FOR_SALE
-	} else if resp.Status == "Sold" {
+	} else if resp.Status == "Sold" || resp.Status == "Draft" {
 		return SaleState_SOLD
 	}
 
