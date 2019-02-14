@@ -152,7 +152,7 @@ func TestGetSuggestedPrice(t *testing.T) {
 
 	salePrice := retr.GetSalePrice(2576104)
 
-	if salePrice != 4.9002776 {
+	if salePrice != 7.1619444 {
 		t.Errorf("Failure to get sale price: %v", salePrice)
 	}
 }
