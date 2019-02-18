@@ -111,6 +111,8 @@ message Track {
     TRACK = 1;
   }
   TrackType track_type = 4;
+  
+  repeated Track sub_tracks = 5;
 }
 
 enum SaleState {

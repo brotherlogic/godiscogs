@@ -42,6 +42,15 @@ func (r *DiscogsRetriever) Log(text string) {
 	}
 }
 
+func (r *DiscogsRetriever) setTrack(t *Track) {
+	switch t.Type_ {
+	case "track":
+		t.TrackType = Track_TRACK
+	default:
+		r.Log(fmt.Sprintf("Unknown type: %v", t.Type_))
+	}
+}
+
 // GetRelease returns a release from the discogs system
 func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 	jsonString, _, _ := r.retrieve("/releases/" + strconv.Itoa(int(id)) + "?token=" + r.userToken)
@@ -54,11 +63,9 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 
 	// Work the tracks
 	for _, t := range release.GetTracklist() {
-		switch t.Type_ {
-		case "track":
-			t.TrackType = Track_TRACK
-		default:
-			r.Log(fmt.Sprintf("Unknown type: %v", t.Type_))
+		r.setTrack(t)
+		for _, st := range t.SubTracks {
+			r.setTrack(st)
 		}
 	}
 
