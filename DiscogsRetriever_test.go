@@ -128,13 +128,13 @@ func TestGetTracks(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 
-	r, err := retr.GetRelease(4707982)
+	r, err := retr.GetRelease(1161277)
 
 	if err != nil {
 		t.Fatalf("Error getting release: %v", err)
 	}
 
-	if len(r.GetTracklist()) != 41 {
+	if len(r.GetTracklist()) != 5 {
 		t.Errorf("Wrong number of tracks retrieved: %v", len(r.GetTracklist()))
 	}
 
@@ -145,9 +145,19 @@ func TestGetTracks(t *testing.T) {
 		} else {
 			log.Printf("%v", t.TrackType)
 		}
+
+		log.Printf("HERE %v", len(t.SubTracks))
+		for _, st := range t.SubTracks {
+			if st.TrackType == Track_TRACK {
+				count++
+			} else {
+				log.Printf("%v", st.TrackType)
+			}
+
+		}
 	}
 
-	if count != 38 {
+	if count != 14 {
 		t.Errorf("Bad track count: %v", count)
 	}
 }
