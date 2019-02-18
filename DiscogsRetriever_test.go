@@ -14,10 +14,10 @@ import (
 type testFileGetter struct{}
 
 func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
-	log.Printf("RUNNING GET: %v", url)
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, err := os.Open("testdata" + strippedURL)
+	log.Printf("OPEN %v", "testdata"+strippedURL)
 	if err != nil {
 		log.Printf("Error opening test file %v", err)
 	}
@@ -121,6 +121,34 @@ func TestGetImage(t *testing.T) {
 
 	if !found {
 		t.Errorf("No primary image: %v", r)
+	}
+}
+
+func TestGetTracks(t *testing.T) {
+	retr := NewDiscogsRetriever("token", nil)
+	retr.getter = testFileGetter{}
+
+	r, err := retr.GetRelease(4707982)
+
+	if err != nil {
+		t.Fatalf("Error getting release: %v", err)
+	}
+
+	if len(r.GetTracklist()) != 41 {
+		t.Errorf("Wrong number of tracks retrieved: %v", len(r.GetTracklist()))
+	}
+
+	count := 0
+	for _, t := range r.GetTracklist() {
+		if t.TrackType == Track_TRACK {
+			count++
+		} else {
+			log.Printf("%v", t.TrackType)
+		}
+	}
+
+	if count != 38 {
+		t.Errorf("Bad track count: %v", count)
 	}
 }
 

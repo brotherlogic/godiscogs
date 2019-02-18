@@ -52,6 +52,16 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 		return release, err
 	}
 
+	// Work the tracks
+	for _, t := range release.GetTracklist() {
+		switch t.Type_ {
+		case "track":
+			t.TrackType = Track_TRACK
+		default:
+			r.Log(fmt.Sprintf("Unknown type: %v", t.Type_))
+		}
+	}
+
 	var versions VersionsResponse
 	if release.MasterId != 0 {
 		// Now get the earliest release date

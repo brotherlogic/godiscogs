@@ -96,6 +96,21 @@ message Release {
 
   // Is this a boxset
   bool boxset = 15;
+
+  // The tracks for this release
+  repeated Track tracklist = 16;
+}
+
+message Track {
+  string position = 1;
+  string title = 2;
+  string type_ = 3;
+
+  enum TrackType {
+    UNKNOWN = 0;
+    TRACK = 1;
+  }
+  TrackType track_type = 4;
 }
 
 enum SaleState {
