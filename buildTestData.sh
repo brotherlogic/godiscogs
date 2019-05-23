@@ -9,6 +9,12 @@ mkdir -p testdata/masters/38998
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
 mkdir -p testdata/marketplace/listings
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/565473?token=$1" | sed "s/$1/token/g" > testdata/releases/565473_token=token
+sleep 1
+exit
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/1018055?token=$1" | sed "s/$1/token/g" > testdata/releases/1018055_token=token
+sleep 1
+exit
 curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/1161277?token=$1" > testdata/releases/1161277_token=token
 exit
 sleep 1
