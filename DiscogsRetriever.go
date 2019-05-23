@@ -146,7 +146,7 @@ func (r *DiscogsRetriever) GetSalePrice(releaseID int) float32 {
 
 // SellRecord sells a given release
 func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string) int {
-	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"sleeve_condition\":\"Very Good Plus (VG+)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"auto\"}"
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"sleeve_condition\":\"Near Mint (NM or M-)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"auto\"}"
 	databack, _ := r.post("/marketplace/listings?token="+r.userToken, data)
 	var resp SellResponse
 	r.unmarshaller.Unmarshal([]byte(databack), &resp)
@@ -186,7 +186,7 @@ func (r *DiscogsRetriever) UpdateSalePrice(saleID int, releaseID int, condition 
 
 // RemoveFromSale removes the listing from sale
 func (r *DiscogsRetriever) RemoveFromSale(saleID int, releaseID int) error {
-	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Very Good Plus (VG+)\", \"price\":5.00, \"status\":\"Draft\"}"
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":5.00, \"status\":\"Draft\"}"
 	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
 	return err
 }

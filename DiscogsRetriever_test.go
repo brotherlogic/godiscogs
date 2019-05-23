@@ -3,12 +3,15 @@ package godiscogs
 import (
 	"bufio"
 	"errors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	proto "github.com/golang/protobuf/proto"
 )
 
 type testFileGetter struct{}
@@ -226,6 +229,17 @@ func TestRetrieveLimiting(t *testing.T) {
 	if end.Sub(start) < time.Second {
 		t.Errorf("Danger of being throttled by discogs API; 6 requests took %v ms", end.Sub(start).Seconds())
 	}
+}
+
+func TestBuildRelease(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, _ := retr.GetRelease(1018055)
+	data, _ := proto.Marshal(release)
+	ioutil.WriteFile("1018055.file", data, 0644)
+	release, _ = retr.GetRelease(565473)
+	data, _ = proto.Marshal(release)
+	ioutil.WriteFile("565473.file", data, 0644)
+
 }
 
 func TestGetRelease(t *testing.T) {
