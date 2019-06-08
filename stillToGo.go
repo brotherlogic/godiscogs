@@ -46,6 +46,8 @@ func (r *DiscogsRetriever) setTrack(t *Track) {
 	switch t.Type_ {
 	case "track":
 		t.TrackType = Track_TRACK
+	case "heading":
+		t.TrackType = Track_HEADING
 	default:
 		r.Log(fmt.Sprintf("Unknown type: %v", t.Type_))
 	}
