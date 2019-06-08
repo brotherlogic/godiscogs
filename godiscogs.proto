@@ -109,6 +109,7 @@ message Track {
   enum TrackType {
     UNKNOWN = 0;
     TRACK = 1;
+    HEADING = 2;
   }
   TrackType track_type = 4;
   
