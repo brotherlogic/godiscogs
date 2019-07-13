@@ -191,7 +191,7 @@ func TestGetSuggestedPrice(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
 
-	salePrice := retr.GetSalePrice(2576104)
+	salePrice, _ := retr.GetSalePrice(2576104)
 
 	if salePrice != 7.1619444 {
 		t.Errorf("Failure to get sale price: %v", salePrice)
