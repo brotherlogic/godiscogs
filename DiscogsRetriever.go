@@ -137,11 +137,11 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 }
 
 // GetSalePrice gets the sale price for a release
-func (r *DiscogsRetriever) GetSalePrice(releaseID int) float32 {
-	jsonString, _, _ := r.retrieve("/marketplace/price_suggestions/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
+func (r *DiscogsRetriever) GetSalePrice(releaseID int) (float32, error) {
+	jsonString, _, err := r.retrieve("/marketplace/price_suggestions/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
 	var resp map[string]Pricing
 	r.unmarshaller.Unmarshal(jsonString, &resp)
-	return resp["Mint (M)"].Value
+	return resp["Mint (M)"].Value, err
 }
 
 // SellRecord sells a given release
