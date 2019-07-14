@@ -141,8 +141,12 @@ func (r *DiscogsRetriever) GetSalePrice(releaseID int) (float32, error) {
 	jsonString, _, err := r.retrieve("/marketplace/price_suggestions/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
 	var resp map[string]Pricing
 	r.unmarshaller.Unmarshal(jsonString, &resp)
-	r.Log(fmt.Sprintf("GSP RETR %v -> %v", string(jsonString), resp))
-	return resp["Mint (M)"].Value, err
+	value := resp["Mint (M)"].Value
+
+	if value == 0 && err == nil {
+		return float32(100), err
+	}
+	return value, err
 }
 
 // SellRecord sells a given release
