@@ -140,8 +140,8 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 func (r *DiscogsRetriever) GetSalePrice(releaseID int) (float32, error) {
 	jsonString, _, err := r.retrieve("/marketplace/price_suggestions/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
 	var resp map[string]Pricing
-	r.Log(fmt.Sprintf("GSP RETR %v", jsonString))
 	r.unmarshaller.Unmarshal(jsonString, &resp)
+	r.Log(fmt.Sprintf("GSP RETR %v -> %v", string(jsonString), resp))
 	return resp["Mint (M)"].Value, err
 }
 
