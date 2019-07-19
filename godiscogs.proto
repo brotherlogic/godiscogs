@@ -99,6 +99,15 @@ message Release {
 
   // The tracks for this release
   repeated Track tracklist = 16;
+
+  repeated Note instance_notes = 19;
+  string record_condition = 17;
+  string sleeve_condition = 18;
+}
+
+message Note {
+  int32 field_id = 1;
+  string value = 2;
 }
 
 message Track {

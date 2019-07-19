@@ -198,6 +198,17 @@ func TestGetSuggestedPrice(t *testing.T) {
 	}
 }
 
+func TestGetSuggestedPriceWithEmpty(t *testing.T) {
+	retr := NewDiscogsRetriever("token", nil)
+	retr.getter = testFileGetter{}
+
+	salePrice, _ := retr.GetSalePrice(2576105)
+
+	if salePrice != 100 {
+		t.Errorf("Failure to get sale price: %v", salePrice)
+	}
+}
+
 func TestGetRateLimit(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
@@ -404,6 +415,7 @@ func TestGetCollection(t *testing.T) {
 	}
 	found := false
 	var foundRecord *Release
+	var bothHandsFree *Release
 	log.Printf("Collection size: %v", len(collection))
 	count := 0
 	for _, record := range collection {
@@ -413,6 +425,10 @@ func TestGetCollection(t *testing.T) {
 		if record.Id == 679324 {
 			found = true
 			foundRecord = record
+		}
+
+		if record.Id == 2901518 {
+			bothHandsFree = record
 		}
 
 		if record.Id == 0 {
@@ -435,6 +451,16 @@ func TestGetCollection(t *testing.T) {
 	if foundRecord.Rating != 5 {
 		t.Errorf("Rating is not right: %v", foundRecord)
 	}
+
+	if bothHandsFree == nil {
+		t.Fatalf("Both Hands Free not found")
+	}
+
+	if bothHandsFree.SleeveCondition != "Very Good Plus (VG+)" ||
+		bothHandsFree.RecordCondition != "Near Mint (NM or M-)" {
+		t.Errorf("Poor condition retrieve: %v", bothHandsFree)
+	}
+
 }
 
 func TestGetFolders(t *testing.T) {

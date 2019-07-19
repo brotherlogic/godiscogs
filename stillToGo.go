@@ -182,7 +182,7 @@ func (r *DiscogsRetriever) GetInstanceID(releaseID int) int32 {
 	var response CollectionResponse
 	r.unmarshaller.Unmarshal(jsonString, &response)
 	if len(response.Releases) > 0 {
-		return response.Releases[0].InstanceId
+		return int32(response.Releases[0].InstanceID)
 	}
 
 	return -1

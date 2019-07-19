@@ -66,7 +66,16 @@ type Pagination struct {
 // CollectionResponse returned from discogs
 type CollectionResponse struct {
 	Pagination Pagination
-	Releases   []*Release
+	Releases   []*CollectionRelease
+}
+
+// CollectionRelease returned from collection pull
+type CollectionRelease struct {
+	ID         int `json:"id"`
+	FolderID   int `json:"folder_id"`
+	InstanceID int `json:"instance_id"`
+	Rating     int `json:"rating"`
+	Notes      []*Note
 }
 
 // WantlistResponse returned from discogs
@@ -110,11 +119,33 @@ func (r *DiscogsRetriever) GetRateLimit() int {
 	return val
 }
 
+func (r *DiscogsRetriever) processCollectionRelease(re *CollectionRelease) *Release {
+	release := &Release{}
+	for _, note := range re.Notes {
+		// Media condition
+		if note.FieldId == 1 {
+			release.RecordCondition = note.Value
+		}
+
+		// Sleeve condition
+		if note.FieldId == 2 {
+			release.SleeveCondition = note.Value
+		}
+	}
+
+	release.Id = int32(re.ID)
+	release.InstanceId = int32(re.InstanceID)
+	release.FolderId = int32(re.FolderID)
+	release.Rating = int32(re.Rating)
+
+	return release
+}
+
 // GetCollection gets all the releases in the users collection
 func (r *DiscogsRetriever) GetCollection() []*Release {
 	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/folders/0/releases?per_page=100&token=" + r.userToken)
 
-	var releases []*Release
+	var releases []*CollectionRelease
 	response := &CollectionResponse{}
 	r.unmarshaller.Unmarshal(jsonString, response)
 
@@ -133,7 +164,12 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 		response = newResponse
 	}
 
-	return releases
+	procReleases := []*Release{}
+	for _, re := range releases {
+		procReleases = append(procReleases, r.processCollectionRelease(re))
+	}
+
+	return procReleases
 }
 
 // GetSalePrice gets the sale price for a release
