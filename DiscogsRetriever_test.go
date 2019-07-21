@@ -552,7 +552,7 @@ func TestGetSaleStateOnSold(t *testing.T) {
 
 func TestUpdateSalePrice(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	err := retr.UpdateSalePrice(805377159, 11403112, "Very Good Plus (VG+)", 9.50)
+	err := retr.UpdateSalePrice(805377159, 11403112, "Very Good Plus (VG+)", "Very Good Plus (VG+)", 9.50)
 	if err != nil {
 		t.Errorf("Update price failed!: %v", err)
 	}
