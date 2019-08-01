@@ -8,6 +8,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type prodHTTPGetter struct{}
@@ -219,6 +222,11 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 
 	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 {
 		return fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path), fmt.Errorf("POST ERROR (STATUS CODE): %v, %v", response.StatusCode, string(body))
+	}
+
+	// Return Unavailable on a 502
+	if response.StatusCode == 502 {
+		return "", status.Error(codes.Unavailable, fmt.Sprintf("%v", string(body)))
 	}
 
 	return string(body), nil
