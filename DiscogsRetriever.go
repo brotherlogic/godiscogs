@@ -210,7 +210,7 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 
 	if resp.Status == "For Sale" {
 		return SaleState_FOR_SALE
-	} else if resp.Status == "Sold" || resp.Status == "Draft" {
+	} else if resp.Status == "Sold" || resp.Status == "Draft" || resp.Status == "Deleted" {
 		return SaleState_SOLD
 	}
 
@@ -279,17 +279,20 @@ func (r *DiscogsRetriever) GetFolders() []Folder {
 	return folders
 }
 
-func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
-	urlv := "https://api.discogs.com/" + path
-
+func (r *DiscogsRetriever) throttle() {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
+	lastTimeRetrieved = time.Now()
+}
 
+func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
+	urlv := "https://api.discogs.com/" + path
+
+	r.throttle()
 	response, err := r.getter.Get(urlv)
-
 	if err != nil {
 		return make([]byte, 0), make(http.Header), err
 	}

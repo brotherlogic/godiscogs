@@ -207,12 +207,7 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	r.Log(fmt.Sprintf("Posting %v to %v", data, urlv))
 
 	//Sleep here
-	diff := time.Now().Sub(lastTimeRetrieved)
-	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
-	}
-
-	lastTimeRetrieved = time.Now()
+	r.throttle()
 	response, err := r.getter.Post(urlv, data)
 	if err != nil {
 		return fmt.Sprintf("POST ERROR ON RUN: %v", err), err
@@ -236,12 +231,7 @@ func (r *DiscogsRetriever) delete(path string, data string) string {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
-	diff := time.Now().Sub(lastTimeRetrieved)
-	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
-	}
-
-	lastTimeRetrieved = time.Now()
+	r.throttle()
 	response, err := r.getter.Delete(urlv, data)
 	if err != nil {
 		return fmt.Sprintf("POST ERROR: %v", err)
@@ -256,12 +246,8 @@ func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
-	diff := time.Now().Sub(lastTimeRetrieved)
-	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
-	}
+	r.throttle()
 
-	lastTimeRetrieved = time.Now()
 	response, err := r.getter.Put(urlv, data)
 	if err != nil {
 		return make([]byte, 0), err
