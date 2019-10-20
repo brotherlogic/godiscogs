@@ -106,6 +106,14 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 			if bestDate < 0 || date < bestDate {
 				bestDate = date
 			}
+		} else {
+			dateV, err := time.Parse("01 Feb 2006", version.Released)
+			if err == nil {
+				date := dateV.Unix()
+				if bestDate < 0 || date < bestDate {
+					bestDate = date
+				}
+			}
 		}
 	}
 	end := versions.Pagination.Pages == versions.Pagination.Page
@@ -135,6 +143,14 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 				date := dateV.Unix()
 				if bestDate < 0 || date < bestDate {
 					bestDate = date
+				}
+			} else {
+				dateV, err := time.Parse("01 Feb 2006", version.Released)
+				if err == nil {
+					date := dateV.Unix()
+					if bestDate < 0 || date < bestDate {
+						bestDate = date
+					}
 				}
 			}
 		}
