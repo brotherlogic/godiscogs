@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -20,10 +19,6 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, err := os.Open("testdata" + strippedURL)
-	log.Printf("OPEN %v", "testdata"+strippedURL)
-	if err != nil {
-		log.Printf("Error opening test file %v", err)
-	}
 	response.Body = blah
 
 	// Add the header if it exists
@@ -39,7 +34,6 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 			line := scanner.Text()
 			if strings.Contains(line, ":") {
 				elems := strings.Split(line, ":")
-				log.Printf("HEADER: '%v', '%v'", strings.TrimSpace(elems[0]), strings.TrimSpace(elems[1]))
 				response.Header.Add(strings.TrimSpace(elems[0]), strings.TrimSpace(elems[1]))
 			}
 		}
@@ -51,10 +45,7 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
-	blah, err := os.Open("testdata" + strippedURL)
-	if err != nil {
-		log.Printf("Error opening test file %v", err)
-	}
+	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	response.StatusCode = 204
 	return response, nil
@@ -63,10 +54,7 @@ func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, 
 func (httpGetter testFileGetter) Put(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
-	blah, err := os.Open("testdata" + strippedURL)
-	if err != nil {
-		log.Printf("Error opening test file %v", err)
-	}
+	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	return response, nil
 }
@@ -74,10 +62,7 @@ func (httpGetter testFileGetter) Put(url string, data string) (*http.Response, e
 func (httpGetter testFileGetter) Delete(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
-	blah, err := os.Open("testdata" + strippedURL)
-	if err != nil {
-		log.Printf("Error opening test file %v", err)
-	}
+	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	return response, nil
 }
@@ -127,6 +112,18 @@ func TestGetImage(t *testing.T) {
 	}
 }
 
+func TestGetReleaseDate(t *testing.T) {
+	retr := NewDiscogsRetriever("token", nil)
+	retr.getter = testFileGetter{}
+
+	_, err := retr.GetRelease(2535152)
+
+	if err != nil {
+		t.Fatalf("Error getting release: %v", err)
+	}
+
+}
+
 func TestGetTracks(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
 	retr.getter = testFileGetter{}
@@ -145,16 +142,11 @@ func TestGetTracks(t *testing.T) {
 	for _, t := range r.GetTracklist() {
 		if t.TrackType == Track_TRACK {
 			count++
-		} else {
-			log.Printf("%v", t.TrackType)
 		}
 
-		log.Printf("HERE %v", len(t.SubTracks))
 		for _, st := range t.SubTracks {
 			if st.TrackType == Track_TRACK {
 				count++
-			} else {
-				log.Printf("%v", st.TrackType)
 			}
 
 		}
@@ -291,10 +283,10 @@ func TestGetEarliestReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	release, _ := retr.GetRelease(668315)
 	if release.Title != "Totale's Turns (It's Now Or Never)" {
-		t.Errorf("Wrong title: %v", release)
+		t.Errorf("Wrong title: %v", release.Title)
 	}
 	if time.Unix(release.EarliestReleaseDate, 0).In(time.UTC).Year() != 1980 {
-		t.Errorf("Release has wrong date: (%v->%v) %v", release.EarliestReleaseDate, time.Unix(release.EarliestReleaseDate, 0).Year(), release)
+		t.Errorf("Release has wrong date: (%v->%v) %v", release.EarliestReleaseDate, time.Unix(release.EarliestReleaseDate, 0).Year(), time.Unix(release.EarliestReleaseDate, 0))
 	}
 }
 
@@ -302,10 +294,10 @@ func TestGetEarliestReleaseDateOrdering(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	release, _ := retr.GetRelease(603365)
 	if release.Title != "Live At The Witch Trials" {
-		t.Errorf("Wrong title: %v", release)
+		t.Errorf("Wrong title: %v", release.Title)
 	}
 	if time.Unix(release.EarliestReleaseDate, 0).In(time.UTC).Year() != 1979 {
-		t.Errorf("Release has wrong date: (%v->%v) %v", release.EarliestReleaseDate, time.Unix(release.EarliestReleaseDate, 0).Year(), release)
+		t.Errorf("Release has wrong date: (%v->%v) %v", release.EarliestReleaseDate, time.Unix(release.EarliestReleaseDate, 0).Year(), release.Title)
 	}
 }
 
@@ -416,7 +408,6 @@ func TestGetCollection(t *testing.T) {
 	found := false
 	var foundRecord *Release
 	var bothHandsFree *Release
-	log.Printf("Collection size: %v", len(collection))
 	count := 0
 	for _, record := range collection {
 		if record.Id == 2180118 {
@@ -561,7 +552,6 @@ func TestUpdateSalePrice(t *testing.T) {
 func TestMain(m *testing.M) {
 	val := m.Run()
 	if GetHTTPGetCount() > 2 {
-		log.Printf("Too many http get calls: %v", GetHTTPGetCount())
 		val = 2
 	}
 	os.Exit(val)
