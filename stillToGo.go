@@ -83,65 +83,30 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 		tmpVersion := Version{Released: release.Released}
 		versions.Versions = append(versions.Versions, tmpVersion)
 	}
-	bestDate := int64(-1)
+	bestDate := int64(0)
 	for _, version := range versions.Versions {
-		if strings.Count(version.Released, "-") == 2 {
-			//Check that the date is legit
-			if strings.Split(version.Released, "-")[1] == "00" {
-				dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
-				date := dateV.Unix()
-				if bestDate < 0 || date < bestDate {
-					bestDate = date
-				}
-			} else {
-				dateV, _ := time.Parse("2006-01-02", version.Released)
-				date := dateV.Unix()
-				if bestDate < 0 || date < bestDate {
-					bestDate = date
-				}
-			}
-		} else if strings.Count(version.Released, "-") == 0 && len(version.Released) > 0 {
-			dateV, _ := time.Parse("2006", version.Released)
-			date := dateV.Unix()
-			if bestDate < 0 || date < bestDate {
-				bestDate = date
-			}
-		} else {
-			dateV, err := time.Parse("01 Feb 2006", version.Released)
-			if err == nil {
-				date := dateV.Unix()
-				if bestDate < 0 || date < bestDate {
-					bestDate = date
-				}
-			}
-		}
-	}
-	end := versions.Pagination.Pages == versions.Pagination.Page
-
-	for !end {
-		jsonString, _, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
-		r.unmarshaller.Unmarshal(jsonString, &versions)
-
-		for _, version := range versions.Versions {
-
+		if version.Released != "0" {
 			if strings.Count(version.Released, "-") == 2 {
 				//Check that the date is legit
 				if strings.Split(version.Released, "-")[1] == "00" {
 					dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
 					date := dateV.Unix()
-					if bestDate < 0 || date < bestDate {
+					if bestDate == 0 || date < bestDate {
 						bestDate = date
 					}
+				} else {
+					dateV, err := time.Parse("2006-01-02", version.Released)
+					if err == nil {
+						date := dateV.Unix()
+						if bestDate == 0 || date < bestDate {
+							bestDate = date
+						}
+					}
 				}
-				dateV, _ := time.Parse("2006-02-01", version.Released)
-				date := dateV.Unix()
-				if bestDate < 0 || date < bestDate {
-					bestDate = date
-				}
-			} else if strings.Count(version.Released, "-") == 0 {
+			} else if strings.Count(version.Released, "-") == 0 && len(version.Released) > 0 {
 				dateV, _ := time.Parse("2006", version.Released)
 				date := dateV.Unix()
-				if bestDate < 0 || date < bestDate {
+				if bestDate == 0 || date < bestDate {
 					bestDate = date
 				}
 			} else {
@@ -154,10 +119,51 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 				}
 			}
 		}
+	}
+	end := versions.Pagination.Pages == versions.Pagination.Page
+
+	for !end {
+		jsonString, _, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
+		r.unmarshaller.Unmarshal(jsonString, &versions)
+
+		for _, version := range versions.Versions {
+			if version.Released != "0" {
+				if strings.Count(version.Released, "-") == 2 {
+					//Check that the date is legit
+					if strings.Split(version.Released, "-")[1] == "00" {
+						dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
+						date := dateV.Unix()
+						if bestDate < 0 || date < bestDate {
+							bestDate = date
+						}
+					}
+					dateV, _ := time.Parse("2006-02-01", version.Released)
+					date := dateV.Unix()
+					if bestDate == 0 || date < bestDate {
+						bestDate = date
+					}
+				} else if strings.Count(version.Released, "-") == 0 {
+					dateV, _ := time.Parse("2006", version.Released)
+					date := dateV.Unix()
+					if bestDate == 0 || date < bestDate {
+						bestDate = date
+					}
+				} else {
+					dateV, err := time.Parse("01 Feb 2006", version.Released)
+					if err == nil {
+						date := dateV.Unix()
+						if bestDate == 0 || date < bestDate {
+							bestDate = date
+						}
+					}
+				}
+			}
+
+		}
 		end = versions.Pagination.Pages == versions.Pagination.Page
 	}
 
-	if bestDate > 0 {
+	if bestDate != 0 {
 		release.EarliestReleaseDate = bestDate
 	}
 

@@ -2,7 +2,6 @@ package godiscogs
 
 import (
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"sort"
 	"testing"
@@ -83,11 +82,9 @@ func TestFullSortWithAmbigousLabels(t *testing.T) {
 }
 
 func TestSortingOrderConsistency(t *testing.T) {
-	data1, err := ioutil.ReadFile("testdata/sort_test/1/3139381.release")
+	data1, _ := ioutil.ReadFile("testdata/sort_test/1/3139381.release")
 	data2, _ := ioutil.ReadFile("testdata/sort_test/1/1531104.release")
 	data3, _ := ioutil.ReadFile("testdata/sort_test/1/6512427.release")
-
-	log.Printf("ERR %v", err)
 
 	release1 := &Release{}
 	release2 := &Release{}
@@ -95,8 +92,6 @@ func TestSortingOrderConsistency(t *testing.T) {
 	proto.Unmarshal(data1, release1)
 	proto.Unmarshal(data2, release2)
 	proto.Unmarshal(data3, release3)
-
-	log.Printf("WAH %v, %v", release1, data1)
 
 	var cReleases []*Release
 	cReleases = append(cReleases, release1)
@@ -133,12 +128,10 @@ func TestSortingConsistencyWithMultipleLabels(t *testing.T) {
 	r2 := Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "IM 1"}, &Label{Name: "Behind", Catno: "BBB"}}}
 
 	sValue := sortByLabelCat(r1, r2)
-	log.Printf("HERE = %v", sValue)
 	if sValue >= 0 {
 		t.Errorf("Sorting is off with mulitple labels")
 	}
 	sValueR := sortByLabelCat(r2, r1)
-	log.Printf("HERE = %v", sValueR)
 	if sValueR <= 0 {
 		t.Errorf("Reverse sorting is off with multiple labels")
 	}
