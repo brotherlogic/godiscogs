@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -170,6 +171,59 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 	}
 
 	return procReleases
+}
+
+// InventoryResponse returned from discogs
+type InventoryResponse struct {
+	Pagination Pagination
+	Listings   []*InventoryEntry
+}
+
+// BasicRelease is the release returned from the inventory pull
+type BasicRelease struct {
+	ID int
+}
+
+// InventoryEntry returned from invetory pull
+type InventoryEntry struct {
+	Price   Pricing
+	ID      int `json:"id"`
+	Release BasicRelease
+}
+
+// GetInventory gets all the releases that are for sale
+func (r *DiscogsRetriever) GetInventory() ([]*ForSale, error) {
+	jsonString, _, err := r.retrieve("/users/brotherlogic/inventory?status=For%20Sale&per_page=100&token=" + r.userToken)
+	if err != nil {
+		return []*ForSale{}, err
+	}
+
+	var items []*InventoryEntry
+	response := &InventoryResponse{}
+	r.unmarshaller.Unmarshal(jsonString, response)
+
+	items = append(items, response.Listings...)
+	end := response.Pagination.Pages == response.Pagination.Page
+
+	for !end {
+		jsonString, _, err = r.retrieve(response.Pagination.Urls.Next[23:])
+		if err != nil {
+			return []*ForSale{}, err
+		}
+		newResponse := &InventoryResponse{}
+		r.unmarshaller.Unmarshal(jsonString, &newResponse)
+
+		items = append(items, newResponse.Listings...)
+		end = newResponse.Pagination.Pages == newResponse.Pagination.Page
+		response = newResponse
+	}
+
+	sales := []*ForSale{}
+	for _, re := range items {
+		sales = append(sales, &ForSale{Id: int32(re.Release.ID), SaleId: int32(re.ID), SalePrice: int32(math.Round(float64(re.Price.Value * 100)))})
+	}
+
+	return sales, nil
 }
 
 // GetSalePrice gets the sale price for a release
