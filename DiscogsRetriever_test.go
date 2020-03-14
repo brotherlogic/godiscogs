@@ -3,6 +3,7 @@ package godiscogs
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -13,12 +14,22 @@ import (
 	proto "github.com/golang/protobuf/proto"
 )
 
-type testFileGetter struct{}
+type testFileGetter struct {
+	count int
+}
 
-func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
+func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
+	if httpGetter.count == 0 {
+		return nil, fmt.Errorf("Built to fail")
+	}
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, err := os.Open("testdata" + strippedURL)
+
+	if err != nil {
+		return nil, err
+	}
+
 	response.Body = blah
 
 	// Add the header if it exists
@@ -39,10 +50,11 @@ func (httpGetter testFileGetter) Get(url string) (*http.Response, error) {
 		}
 	}
 
+	httpGetter.count--
 	return response, nil
 }
 
-func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, error) {
+func (httpGetter *testFileGetter) Post(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, _ := os.Open("testdata" + strippedURL)
@@ -51,7 +63,7 @@ func (httpGetter testFileGetter) Post(url string, data string) (*http.Response, 
 	return response, nil
 }
 
-func (httpGetter testFileGetter) Put(url string, data string) (*http.Response, error) {
+func (httpGetter *testFileGetter) Put(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, _ := os.Open("testdata" + strippedURL)
@@ -59,7 +71,7 @@ func (httpGetter testFileGetter) Put(url string, data string) (*http.Response, e
 	return response, nil
 }
 
-func (httpGetter testFileGetter) Delete(url string, data string) (*http.Response, error) {
+func (httpGetter *testFileGetter) Delete(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, _ := os.Open("testdata" + strippedURL)
@@ -82,14 +94,14 @@ func TestGetWantlist(t *testing.T) {
 
 func NewTestDiscogsRetriever() *DiscogsRetriever {
 	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr.getter = &testFileGetter{count: -1}
+
 	retr.getSleep = 0.0
 	return retr
 }
 
 func TestGetImage(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr := NewTestDiscogsRetriever()
 
 	r, err := retr.GetRelease(4707982)
 
@@ -113,8 +125,7 @@ func TestGetImage(t *testing.T) {
 }
 
 func TestGetReleaseDate(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr := NewTestDiscogsRetriever()
 
 	_, err := retr.GetRelease(2535152)
 
@@ -125,8 +136,7 @@ func TestGetReleaseDate(t *testing.T) {
 }
 
 func TestGetTracks(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr := NewTestDiscogsRetriever()
 
 	r, err := retr.GetRelease(1161277)
 
@@ -158,8 +168,7 @@ func TestGetTracks(t *testing.T) {
 }
 
 func TestSellRecord(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr := NewTestDiscogsRetriever()
 
 	id := retr.SellRecord(2576104, 12.345, "Draft", "blah", "blah")
 
@@ -169,8 +178,7 @@ func TestSellRecord(t *testing.T) {
 }
 
 func TestRemoveSale(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr := NewTestDiscogsRetriever()
 
 	err := retr.RemoveFromSale(805055435, 1145342)
 
@@ -180,10 +188,12 @@ func TestRemoveSale(t *testing.T) {
 }
 
 func TestGetSuggestedPrice(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr := NewTestDiscogsRetriever()
 
-	salePrice, _ := retr.GetSalePrice(2576104)
+	salePrice, err := retr.GetSalePrice(2576104)
+	if err != nil {
+		t.Fatalf("Error in retrieve: %v", err)
+	}
 
 	if salePrice != 7.1619444 {
 		t.Errorf("Failure to get sale price: %v", salePrice)
@@ -191,19 +201,17 @@ func TestGetSuggestedPrice(t *testing.T) {
 }
 
 func TestGetSuggestedPriceWithEmpty(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+	retr := NewTestDiscogsRetriever()
 
-	salePrice, _ := retr.GetSalePrice(2576105)
+	salePrice, err := retr.GetSalePrice(2576105)
 
-	if salePrice != 100 {
-		t.Errorf("Failure to get sale price: %v", salePrice)
+	if err != nil || salePrice != 100 {
+		t.Errorf("Failure to get sale price: %v -> %v", salePrice, err)
 	}
 }
 
 func TestGetRateLimit(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
 
 	rateLimit := retr.GetRateLimit()
 	if rateLimit != 60 {
@@ -212,15 +220,14 @@ func TestGetRateLimit(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = prodHTTPGetter{}
+	retr := NewTestDiscogsRetriever()
 	retr.post("blah", "madeup")
 }
 
 func TestRetrieveLimiting(t *testing.T) {
 	//Ignore the get Sleep override
 	retr := NewDiscogsRetriever("token", nil)
-	retr.getter = testFileGetter{}
+
 	start := time.Now()
 
 	for i := 0; i < 3; i++ {
@@ -338,9 +345,9 @@ func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
 	retr := NewTestDiscogsRetriever()
 	retr.getter = prodHTTPGetter{}
-	body, _, _ := retr.retrieve("/releases/249504")
+	body, _, err := retr.retrieve("/releases/249504")
 	if !strings.Contains(string(body), "Astley") {
-		t.Errorf("Error in retrieving data")
+		t.Errorf("Error in retrieving data: %v, %v", err, string(body))
 	}
 
 	endCount := GetHTTPGetCount()
@@ -396,6 +403,35 @@ func TestGetInstanceID(t *testing.T) {
 	val := retr.GetInstanceID(11146958)
 	if val != 261212718 {
 		t.Errorf("Error in getting instance ID: %v", val)
+	}
+}
+
+func TestGetInventory(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	inventory, err := retr.GetInventory()
+	if err != nil {
+		t.Fatalf("Bad pull: %v", err)
+	}
+	if len(inventory) != 322 {
+		t.Errorf("Inventory pull is short: %v", len(inventory))
+	}
+}
+
+func TestGetInventoryInitialFail(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getter = &testFileGetter{count: 0}
+	_, err := retr.GetInventory()
+	if err == nil {
+		t.Fatalf("Did not fail")
+	}
+}
+
+func TestGetInventorySecondFail(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getter = &testFileGetter{count: 1}
+	_, err := retr.GetInventory()
+	if err == nil {
+		t.Fatalf("Did not fail")
 	}
 }
 
@@ -551,7 +587,7 @@ func TestUpdateSalePrice(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	val := m.Run()
-	if GetHTTPGetCount() > 2 {
+	if GetHTTPGetCount() > 5 {
 		val = 2
 	}
 	os.Exit(val)

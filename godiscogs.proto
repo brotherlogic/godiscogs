@@ -2,6 +2,17 @@ syntax = "proto3";
 
 package godiscogs;
 
+message ForSale {
+  // The id of the record
+  int32 id = 1;
+
+  // The id of the sale
+  int32 sale_id = 2;
+
+  // The current price
+  int32 sale_price = 3;
+}
+
 message Label {
         // The name of the label
         string name = 1;

@@ -10,6 +10,24 @@ mkdir -p testdata/masters/38677
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
 mkdir -p testdata/marketplace/listings
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/inventory?status=For+Sale&per_page=100&token=$1&page=4" | sed "s/$1/token/g" > testdata/users/brotherlogic/inventory_status=For+Sale_per_page=100_token=token_page=4
+sleep 1
+exit
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/inventory?status=For+Sale&per_page=100&token=$1&page=3" | sed "s/$1/token/g" > testdata/users/brotherlogic/inventory_status=For+Sale_per_page=100_token=token_page=3
+sleep 1
+exit
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/inventory?status=For+Sale&per_page=100&token=$1&page=2" | sed "s/$1/token/g" > testdata/users/brotherlogic/inventory_status=For+Sale_per_page=100_token=token_page=2
+sleep 1
+exit
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/inventory?status=For%20Sale&per_page=100&token=$1" | sed "s/$1/token/g" > testdata/users/brotherlogic/inventory_status=For%20Sale_per_page=100_token=token
+sleep 1
+exit
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/marketplace/listings/885335204?curr_abbr=USD&token=$1" | sed "s/$1/token/g" > testdata/marketplace/listings/885335204_curr_abbr=USD_token=token
+sleep 1
+exit
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/marketplace/price_suggestions/1215019?token=$1" |  sed "s/$1/token/g" > testdata/marketplace/price_suggestions/1215019_token=token
+sleep 1
+exit
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/masters/38677/versions?per_page=100&token=$1&page=2" | sed "s/$1/token/g" > testdata/masters/38677/versions_per_page=100_token=token_page=2
 sleep 1
 exit
