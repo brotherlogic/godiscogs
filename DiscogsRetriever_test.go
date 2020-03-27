@@ -180,6 +180,16 @@ func TestSellRecord(t *testing.T) {
 func TestRemoveSale(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
+	err := retr.ExpireSale(1079257117, 1473369, float32(4.99))
+
+	if err != nil {
+		t.Errorf("Sale has failed: %v", err)
+	}
+}
+
+func TestExpireSale(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+
 	err := retr.RemoveFromSale(805055435, 1145342)
 
 	if err != nil {
