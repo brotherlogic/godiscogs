@@ -264,6 +264,8 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 
 	if resp.Status == "For Sale" {
 		return SaleState_FOR_SALE
+	} else if resp.Status == "Expired" {
+		return SaleState_EXPIRED
 	} else if resp.Status == "Sold" || resp.Status == "Draft" || resp.Status == "Deleted" {
 		return SaleState_SOLD
 	}
@@ -282,6 +284,13 @@ func (r *DiscogsRetriever) UpdateSalePrice(saleID int, releaseID int, condition,
 // RemoveFromSale removes the listing from sale
 func (r *DiscogsRetriever) RemoveFromSale(saleID int, releaseID int) error {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":5.00, \"status\":\"Draft\"}"
+	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
+	return err
+}
+
+// ExpireSale removes the listing from sale
+func (r *DiscogsRetriever) ExpireSale(saleID int, releaseID int, price float32) error {
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"Expired\"}"
 	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
 	return err
 }
