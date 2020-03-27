@@ -264,6 +264,8 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 
 	if resp.Status == "For Sale" {
 		return SaleState_FOR_SALE
+	} else if resp.Status == "Expired" {
+		return SaleState_EXPIRED
 	} else if resp.Status == "Sold" || resp.Status == "Draft" || resp.Status == "Deleted" {
 		return SaleState_SOLD
 	}
