@@ -286,6 +286,13 @@ func (r *DiscogsRetriever) RemoveFromSale(saleID int, releaseID int) error {
 	return err
 }
 
+// RemoveFromSale removes the listing from sale
+func (r *DiscogsRetriever) ExpireSale(saleID int, releaseID int, price float32) error {
+	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"Expired\"}"
+	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
+	return err
+}
+
 // AddToWantlist adds a record to the wantlist
 func (r *DiscogsRetriever) AddToWantlist(releaseID int) {
 	r.put("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
