@@ -227,7 +227,6 @@ func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) (int, er
 func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	urlv := "https://api.discogs.com/" + path
 	r.Log(fmt.Sprintf("Posting %v to %v", data, urlv))
-	time.Sleep(time.Second * 2)
 
 	//Sleep here
 	r.throttle()

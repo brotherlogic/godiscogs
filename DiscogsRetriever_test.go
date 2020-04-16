@@ -518,27 +518,6 @@ func TestGetFolders(t *testing.T) {
 	}
 }
 
-func TestPostTiming(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	retr.getSleep = 200
-
-	start := time.Now()
-	for i := 0; i < 3; i++ {
-		//Insert 200 ms of sleep here
-		if i == 2 {
-			time.Sleep(time.Millisecond * 200)
-		}
-
-		retr.post("madeup", "")
-	}
-	end := time.Now()
-	diff := end.Sub(start) / time.Millisecond
-
-	if diff > 700 || diff < 500 {
-		t.Errorf("Timing on posts is quite wrong: %v", diff)
-	}
-}
-
 func TestBoxSet(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	release, _ := retr.GetRelease(2370027)
@@ -583,6 +562,14 @@ func TestGetSaleStateOnSold(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	state := retr.GetCurrentSaleState(805377157)
 	if state != SaleState_SOLD {
+		t.Errorf("State is incorrect: %v", state)
+	}
+}
+
+func TestGetSaleStateExpired(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	state := retr.GetCurrentSaleState(805377156)
+	if state != SaleState_EXPIRED {
 		t.Errorf("State is incorrect: %v", state)
 	}
 }
