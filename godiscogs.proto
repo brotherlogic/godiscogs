@@ -139,7 +139,8 @@ message Track {
 }
 
 enum SaleState {
-  NOT_FOR_SALE = 0;
+  UNKNOWN = 0;
+  NOT_FOR_SALE = 4;
   FOR_SALE = 1;
   SOLD = 2;
   EXPIRED = 3;
