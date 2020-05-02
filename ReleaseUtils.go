@@ -79,6 +79,13 @@ func GetMainLabel(labels []*Label) *Label {
 		labelCat := labels[0].Catno
 		labelIndex := 0
 
+		// Favour Mondiophone
+		for _, label := range labels {
+			if label.GetName() == "Mondiophone" {
+				return label
+			}
+		}
+
 		for i, label := range labels[1:] {
 			if strings.Compare(labelName, label.Name) > 0 || (strings.Compare(labelName, label.Name) == 0 && strings.Compare(labelCat, label.Catno) > 0) {
 				labelName = label.Name
