@@ -7,7 +7,19 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+var (
+	// DiscogsRequests request out to discogs
+	DiscogsRequests = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "godiscogs_requests",
+		Help: "The number of server requests",
+	}, []string{"method", "path1"})
 )
 
 type jsonUnmarshaller interface {
@@ -354,6 +366,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	urlv := "https://api.discogs.com/" + path
 
 	r.throttle()
+	DiscogsRequests.With(prometheus.Labels{"method": "GET", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Get(urlv)
 	if err != nil {
 		return make([]byte, 0), make(http.Header), err
