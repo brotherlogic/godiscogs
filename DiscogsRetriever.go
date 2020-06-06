@@ -334,6 +334,40 @@ func (r *DiscogsRetriever) DeleteInstance(folderID int, releaseID int, instanceI
 	return r.delete("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
 }
 
+//ReleaseBack what we get for a single release
+type ReleaseBack struct {
+	DateAdded  string `json:"date_added"`
+	InstanceID int32  `json:"instance_id"`
+}
+
+//ReleaseResponse what we get back from release
+type ReleaseResponse struct {
+	Pagination Pagination
+	Releases   []ReleaseBack
+}
+
+//GetInstanceInfo gets the info for an instance
+func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]int64, error) {
+	jsonString, _, err := r.retrieve(fmt.Sprintf("/users/brotherlogic/collection/releases/%v?token=%v", rid, r.userToken))
+	mapper := make(map[int32]int64)
+	if err != nil {
+		return mapper, err
+	}
+
+	var response ReleaseResponse
+	r.unmarshaller.Unmarshal(jsonString, &response)
+
+	for _, entry := range response.Releases {
+		//2015-11-30T10:54:13-08:00
+		p, err := time.Parse("2006-01-02T15:04:05-07:00", entry.DateAdded)
+		if err != nil {
+			return mapper, err
+		}
+		mapper[entry.InstanceID] = p.Unix()
+	}
+	return mapper, nil
+}
+
 // FoldersResponse returned from discogs
 type FoldersResponse struct {
 	Pagination Pagination
