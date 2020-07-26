@@ -500,6 +500,34 @@ func TestGetCollection(t *testing.T) {
 
 }
 
+func TestGetInstanceInfo(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	info, err := retr.GetInstanceInfo(323005)
+	if err != nil {
+		t.Fatalf("Unable to pull iid: %v", err)
+	}
+
+	if info[19867048] != 1351323375 {
+		t.Errorf("Bad date: %v", info)
+	}
+}
+
+func TestGetInstanceInfoFailRet(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	_, err := retr.GetInstanceInfo(12)
+	if err == nil {
+		t.Fatalf("Bad pull did not fail: %v", err)
+	}
+}
+
+func TestGetInstanceInfoFailParse(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	_, err := retr.GetInstanceInfo(323006)
+	if err == nil {
+		t.Fatalf("Bad pull did not fail: %v", err)
+	}
+}
+
 func TestGetFolders(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	folders := retr.GetFolders()
