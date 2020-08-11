@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -367,7 +366,6 @@ func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]*InstanceInfo, 
 	r.unmarshaller.Unmarshal(jsonString, &response)
 
 	for _, entry := range response.Releases {
-		log.Printf("HERE %+v", entry)
 		//2015-11-30T10:54:13-08:00
 		p, err := time.Parse("2006-01-02T15:04:05-07:00", entry.DateAdded)
 		if err != nil {
