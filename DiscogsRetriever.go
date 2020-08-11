@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -336,8 +337,9 @@ func (r *DiscogsRetriever) DeleteInstance(folderID int, releaseID int, instanceI
 
 //ReleaseBack what we get for a single release
 type ReleaseBack struct {
-	DateAdded  string `json:"date_added"`
-	InstanceID int32  `json:"instance_id"`
+	DateAdded  string  `json:"date_added"`
+	InstanceID int32   `json:"instance_id"`
+	Notes      []*Note `json:"notes"`
 }
 
 //ReleaseResponse what we get back from release
@@ -346,10 +348,17 @@ type ReleaseResponse struct {
 	Releases   []ReleaseBack
 }
 
+//InstanceInfo some basic details about the instance
+type InstanceInfo struct {
+	DateAdded       int64
+	RecordCondition string
+	SleeveCondition string
+}
+
 //GetInstanceInfo gets the info for an instance
-func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]int64, error) {
+func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]*InstanceInfo, error) {
 	jsonString, _, err := r.retrieve(fmt.Sprintf("/users/brotherlogic/collection/releases/%v?token=%v", rid, r.userToken))
-	mapper := make(map[int32]int64)
+	mapper := make(map[int32]*InstanceInfo)
 	if err != nil {
 		return mapper, err
 	}
@@ -358,12 +367,26 @@ func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]int64, error) {
 	r.unmarshaller.Unmarshal(jsonString, &response)
 
 	for _, entry := range response.Releases {
+		log.Printf("HERE %+v", entry)
 		//2015-11-30T10:54:13-08:00
 		p, err := time.Parse("2006-01-02T15:04:05-07:00", entry.DateAdded)
 		if err != nil {
 			return mapper, err
 		}
-		mapper[entry.InstanceID] = p.Unix()
+		mapper[entry.InstanceID] = &InstanceInfo{DateAdded: p.Unix()}
+
+		for _, note := range entry.Notes {
+			// Media condition
+			if note.FieldId == 1 {
+				mapper[entry.InstanceID].RecordCondition = note.Value
+			}
+
+			// Sleeve condition
+			if note.FieldId == 2 {
+				mapper[entry.InstanceID].SleeveCondition = note.Value
+			}
+		}
+
 	}
 	return mapper, nil
 }

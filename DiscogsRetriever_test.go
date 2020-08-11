@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -26,6 +27,7 @@ func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	blah, err := os.Open("testdata" + strippedURL)
 
+	log.Printf("Opened %v", "testdata"+strippedURL)
 	if err != nil {
 		return nil, err
 	}
@@ -507,9 +509,14 @@ func TestGetInstanceInfo(t *testing.T) {
 		t.Fatalf("Unable to pull iid: %v", err)
 	}
 
-	if info[19867048] != 1351323375 {
+	if info[19867048].DateAdded != 1351323375 {
 		t.Errorf("Bad date: %v", info)
 	}
+
+	if info[19867048].RecordCondition != "Very Good Plus (VG+)" {
+		t.Errorf("Bad condition: %+v", info[19867048])
+	}
+
 }
 
 func TestGetInstanceInfoFailRet(t *testing.T) {
