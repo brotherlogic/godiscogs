@@ -336,8 +336,9 @@ func (r *DiscogsRetriever) DeleteInstance(folderID int, releaseID int, instanceI
 
 //ReleaseBack what we get for a single release
 type ReleaseBack struct {
-	DateAdded  string `json:"date_added"`
-	InstanceID int32  `json:"instance_id"`
+	DateAdded  string  `json:"date_added"`
+	InstanceID int32   `json:"instance_id"`
+	Notes      []*Note `json:"notes"`
 }
 
 //ReleaseResponse what we get back from release
@@ -346,10 +347,17 @@ type ReleaseResponse struct {
 	Releases   []ReleaseBack
 }
 
+//InstanceInfo some basic details about the instance
+type InstanceInfo struct {
+	DateAdded       int64
+	RecordCondition string
+	SleeveCondition string
+}
+
 //GetInstanceInfo gets the info for an instance
-func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]int64, error) {
+func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]*InstanceInfo, error) {
 	jsonString, _, err := r.retrieve(fmt.Sprintf("/users/brotherlogic/collection/releases/%v?token=%v", rid, r.userToken))
-	mapper := make(map[int32]int64)
+	mapper := make(map[int32]*InstanceInfo)
 	if err != nil {
 		return mapper, err
 	}
@@ -363,7 +371,20 @@ func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]int64, error) {
 		if err != nil {
 			return mapper, err
 		}
-		mapper[entry.InstanceID] = p.Unix()
+		mapper[entry.InstanceID] = &InstanceInfo{DateAdded: p.Unix()}
+
+		for _, note := range entry.Notes {
+			// Media condition
+			if note.FieldId == 1 {
+				mapper[entry.InstanceID].RecordCondition = note.Value
+			}
+
+			// Sleeve condition
+			if note.FieldId == 2 {
+				mapper[entry.InstanceID].SleeveCondition = note.Value
+			}
+		}
+
 	}
 	return mapper, nil
 }
