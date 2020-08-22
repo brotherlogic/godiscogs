@@ -100,6 +100,8 @@ type WantlistResponse struct {
 // Version a version of a master release
 type Version struct {
 	Released string
+	Format   string
+	ID       int32
 }
 
 // VersionsResponse returned from discogs

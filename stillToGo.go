@@ -81,11 +81,15 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 		jsonString, _, _ = r.retrieve("/masters/" + strconv.Itoa(int(release.MasterId)) + "/versions?per_page=500&token=" + r.userToken)
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 	} else {
-		tmpVersion := Version{Released: release.Released}
+		tmpVersion := Version{Released: release.Released, Format: ""}
 		versions.Versions = append(versions.Versions, tmpVersion)
 	}
 	bestDate := int64(0)
+	release.DigitalVersions = []int32{}
 	for _, version := range versions.Versions {
+		if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
+			release.DigitalVersions = append(release.DigitalVersions, version.ID)
+		}
 		if version.Released != "0" {
 			if strings.Count(version.Released, "-") == 2 {
 				//Check that the date is legit
