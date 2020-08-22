@@ -309,6 +309,17 @@ func TestGetEarliestReleaseDate(t *testing.T) {
 	}
 }
 
+func TestGetOtherVersions(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, _ := retr.GetRelease(668315)
+	if release.Title != "Totale's Turns (It's Now Or Never)" {
+		t.Errorf("Wrong title: %v", release.Title)
+	}
+	if len(release.DigitalVersions) != 4 {
+		t.Errorf("Wrong digital versions: %v", release.DigitalVersions)
+	}
+}
+
 func TestGetEarliestReleaseDateOrdering(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	release, _ := retr.GetRelease(603365)

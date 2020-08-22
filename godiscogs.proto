@@ -116,6 +116,8 @@ message Release {
   repeated Note instance_notes = 19;
   string record_condition = 17;
   string sleeve_condition = 18;
+
+  repeated int32 digital_versions = 20;
 }
 
 message Note {
