@@ -101,7 +101,7 @@ type WantlistResponse struct {
 type Version struct {
 	Released string
 	Format   string
-	Id       int32
+	ID       int32
 }
 
 // VersionsResponse returned from discogs

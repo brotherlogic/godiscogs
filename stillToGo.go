@@ -88,7 +88,7 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 	release.DigitalVersions = []int32{}
 	for _, version := range versions.Versions {
 		if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
-			release.DigitalVersions = append(release.DigitalVersions, version.Id)
+			release.DigitalVersions = append(release.DigitalVersions, version.ID)
 		}
 		if version.Released != "0" {
 			if strings.Count(version.Released, "-") == 2 {
