@@ -315,7 +315,21 @@ func TestGetOtherVersions(t *testing.T) {
 	if release.Title != "Totale's Turns (It's Now Or Never)" {
 		t.Errorf("Wrong title: %v", release.Title)
 	}
-	if len(release.DigitalVersions) != 4 {
+	if len(release.DigitalVersions) != 5 {
+		t.Errorf("Wrong digital versions: %v", release.DigitalVersions)
+	}
+}
+
+func TestGetOtherVersionsHuh(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, err := retr.GetRelease(372019)
+	if err != nil {
+		t.Fatalf("Unable to read version: %v", err)
+	}
+	if release.Title != "Totale's Turns (It's Now Or Never)" {
+		t.Errorf("Wrong title: %v", release.Title)
+	}
+	if len(release.DigitalVersions) != 5 {
 		t.Errorf("Wrong digital versions: %v", release.DigitalVersions)
 	}
 }
