@@ -90,6 +90,13 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 		r.Log(fmt.Sprintf("Building Versions (%v): %+v", len(versions.Versions), version))
 		if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
 			release.DigitalVersions = append(release.DigitalVersions, version.ID)
+		} else {
+			for _, format := range version.MajorFormats {
+				if strings.Contains(format, "CD") || strings.Contains(format, "File") {
+					release.DigitalVersions = append(release.DigitalVersions, version.ID)
+					break
+				}
+			}
 		}
 		if version.Released != "0" {
 			if strings.Count(version.Released, "-") == 2 {
@@ -133,6 +140,10 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 
 		for _, version := range versions.Versions {
+			if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
+				release.DigitalVersions = append(release.DigitalVersions, version.ID)
+			}
+
 			if version.Released != "0" {
 				if strings.Count(version.Released, "-") == 2 {
 					//Check that the date is legit
