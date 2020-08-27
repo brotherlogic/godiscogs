@@ -311,8 +311,9 @@ func (r *DiscogsRetriever) ExpireSale(saleID int, releaseID int, price float32) 
 }
 
 // AddToWantlist adds a record to the wantlist
-func (r *DiscogsRetriever) AddToWantlist(releaseID int) {
-	r.put("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+func (r *DiscogsRetriever) AddToWantlist(releaseID int) error {
+	_, err := r.put("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+	return err
 }
 
 // RemoveFromWantlist adds a record to the wantlist
