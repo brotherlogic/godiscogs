@@ -201,7 +201,7 @@ func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
 	jsonString, _, _ := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
 
 	var releases []*Release
-	var response WantlistResponse
+	response := &WantlistResponse{}
 	r.unmarshaller.Unmarshal(jsonString, &response)
 
 	releases = append(releases, response.Wants...)
@@ -209,10 +209,15 @@ func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
 
 	for !end {
 		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
-		r.unmarshaller.Unmarshal(jsonString, &response)
+		newResponse := &WantlistResponse{}
+		err := r.unmarshaller.Unmarshal(jsonString, &newResponse)
+		if err != nil {
+			return nil, err
+		}
 
-		releases = append(releases, response.Wants...)
-		end = response.Pagination.Pages == response.Pagination.Page
+		releases = append(releases, newResponse.Wants...)
+		end = newResponse.Pagination.Pages == newResponse.Pagination.Page
+		response = newResponse
 	}
 
 	return releases, nil

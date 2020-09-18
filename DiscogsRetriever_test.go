@@ -92,6 +92,7 @@ func TestGetWantlist(t *testing.T) {
 	if len(wantlist) == 0 {
 		t.Errorf("Wantlist has come back empty")
 	}
+
 }
 
 func NewTestDiscogsRetriever() *DiscogsRetriever {
