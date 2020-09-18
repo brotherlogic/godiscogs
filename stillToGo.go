@@ -209,7 +209,10 @@ func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
 
 	for !end {
 		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
-		r.unmarshaller.Unmarshal(jsonString, &response)
+		err := r.unmarshaller.Unmarshal(jsonString, &response)
+		if err != nil {
+			return nil, err
+		}
 
 		releases = append(releases, response.Wants...)
 		end = response.Pagination.Pages == response.Pagination.Page
