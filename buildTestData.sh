@@ -10,6 +10,13 @@ mkdir -p testdata/masters/38677
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
 mkdir -p testdata/marketplace/listings
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/wants?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/wants_per_page=100_token=token
+sleep 1
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/wants?per_page=100&token=$1&page=2" |  sed "s/$1/token/g" > testdata/users/brotherlogic/wants_per_page=100_token=token_page=2
+sleep 1
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/wants?per_page=100&token=$1&page=3" |  sed "s/$1/token/g" > testdata/users/brotherlogic/wants_per_page=100_token=token_page=3
+sleep 1
+exit
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/masters/5251/versions?per_page=500&token=$1" > testdata/masters/5251/versions_per_page=500_token=token
 sleep 1
 exit
