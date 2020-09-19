@@ -435,6 +435,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	body, _ := ioutil.ReadAll(response.Body)
 	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 {
 		r.Log(fmt.Sprintf("RETR (%v) %v -> %v", path, response.StatusCode, string(body)))
+		return body, response.Header, fmt.Errorf("Bad Read: %v", string(body))
 	}
 
 	lastTimeRetrieved = time.Now()
