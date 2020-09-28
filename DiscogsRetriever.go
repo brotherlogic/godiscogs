@@ -59,7 +59,7 @@ type DiscogsRetriever struct {
 
 // NewDiscogsRetriever Build a production retriever
 func NewDiscogsRetriever(token string, logger func(string)) *DiscogsRetriever {
-	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 4000, lastRetrieveTime: time.Now().Unix(), logger: logger}
+	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 6000, lastRetrieveTime: time.Now().Unix(), logger: logger}
 }
 
 var lastTimeRetrieved time.Time
