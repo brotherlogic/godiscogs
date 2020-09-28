@@ -198,7 +198,11 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 
 // GetWantlist returns the wantlist for the given user
 func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
-	jsonString, _, _ := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
+	jsonString, _, err := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
+
+	if err != nil {
+		return nil, err
+	}
 
 	var releases []*Release
 	response := &WantlistResponse{}
