@@ -255,7 +255,7 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	r.Log(fmt.Sprintf("Posting %v to %v", data, urlv))
 
 	//Sleep here
-	r.throttle()
+	tv := r.throttle()
 	DiscogsRequests.With(prometheus.Labels{"method": "POST", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Post(urlv, data)
 	if err != nil {
@@ -270,7 +270,7 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	}
 
 	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 {
-		return fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path), fmt.Errorf("POST ERROR (STATUS CODE): %v, %v (%v, %v) ", response.StatusCode, string(body), response.Header.Get("X-Discogs-Ratelimit"), response.Header.Get("X-Discogs-Ratelimit-Used"))
+		return fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path), fmt.Errorf("POST ERROR (STATUS CODE): %v, %v (%v, %v) throttled %v", response.StatusCode, string(body), response.Header.Get("X-Discogs-Ratelimit"), response.Header.Get("X-Discogs-Ratelimit-Used"), tv)
 	}
 
 	// Return Unavailable on a 502

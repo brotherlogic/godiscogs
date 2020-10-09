@@ -412,13 +412,16 @@ func (r *DiscogsRetriever) GetFolders() []Folder {
 	return folders
 }
 
-func (r *DiscogsRetriever) throttle() {
+func (r *DiscogsRetriever) throttle() time.Duration {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
+	val := time.Second * 0
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
+		val = time.Duration(r.getSleep)*time.Millisecond - diff
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
 	}
 	lastTimeRetrieved = time.Now()
+	return val
 }
 
 func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
