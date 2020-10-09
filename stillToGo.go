@@ -270,7 +270,7 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	}
 
 	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 {
-		return fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path), fmt.Errorf("POST ERROR (STATUS CODE): %v, %v", response.StatusCode, string(body))
+		return fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path), fmt.Errorf("POST ERROR (STATUS CODE): %v, %v (%v, %v) ", response.StatusCode, string(body), response.Header.Get("X-Discogs-Ratelimit"), response.Header.Get("X-Discogs-Ratelimit-Used"))
 	}
 
 	// Return Unavailable on a 502
