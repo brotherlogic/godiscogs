@@ -415,7 +415,7 @@ func (r *DiscogsRetriever) GetFolders() []Folder {
 func (r *DiscogsRetriever) throttle() time.Duration {
 	//Sleep here
 	diff := time.Now().Sub(lastTimeRetrieved)
-	val := time.Second * 0
+	val := diff
 	if diff < time.Duration(r.getSleep)*time.Millisecond {
 		val = time.Duration(r.getSleep)*time.Millisecond - diff
 		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
