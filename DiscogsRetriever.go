@@ -424,6 +424,32 @@ func (r *DiscogsRetriever) throttle() time.Duration {
 	return val
 }
 
+var (
+	// DiscogsRequests request out to discogs
+	rateLimit = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "godiscogs_rate_limit",
+		Help: "The number of server requests",
+	}, []string{"method"})
+	rateLimitUsed = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "godiscogs_rate_limit_used",
+		Help: "The number of server requests",
+	}, []string{"method"})
+)
+
+func (r *DiscogsRetriever) updateRateLimit(resp *http.Response, method string) {
+	limit, err := strconv.Atoi(resp.Header.Get("X-Discogs-Ratelimit"))
+	if err != nil {
+		r.Log(fmt.Sprintf("Unable to parse rate limit: %v", err))
+	}
+	rateLimit.With(prometheus.Labels{"method": method}).Set(float64(limit))
+
+	used, err := strconv.Atoi(resp.Header.Get("X-Discogs-Ratelimit-Used"))
+	if err != nil {
+		r.Log(fmt.Sprintf("Unable to parse rate limit used: %v", err))
+	}
+	rateLimitUsed.With(prometheus.Labels{"method": method}).Set(float64(used))
+}
+
 func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	urlv := "https://api.discogs.com/" + path
 
@@ -433,6 +459,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	if err != nil {
 		return make([]byte, 0), make(http.Header), err
 	}
+	r.updateRateLimit(response, "GET")
 
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
