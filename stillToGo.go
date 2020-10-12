@@ -261,6 +261,7 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	if err != nil {
 		return fmt.Sprintf("POST ERROR ON RUN: %v", err), err
 	}
+	r.updateRateLimit(response, "POST")
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 
@@ -291,6 +292,7 @@ func (r *DiscogsRetriever) delete(path string, data string) string {
 	if err != nil {
 		return fmt.Sprintf("POST ERROR: %v", err)
 	}
+	r.updateRateLimit(response, "DELETE")
 	defer response.Body.Close()
 
 	body, _ := ioutil.ReadAll(response.Body)
@@ -308,6 +310,7 @@ func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
 	if err != nil {
 		return make([]byte, 0), err
 	}
+	r.updateRateLimit(response, "PUT")
 
 	defer response.Body.Close()
 
