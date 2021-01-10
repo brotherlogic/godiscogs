@@ -118,6 +118,7 @@ message Release {
   string sleeve_condition = 18;
 
   repeated int32 digital_versions = 20;
+  repeated int32 other_versions = 21;
 }
 
 message Note {
