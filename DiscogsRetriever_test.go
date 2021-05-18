@@ -170,6 +170,18 @@ func TestGetTracks(t *testing.T) {
 	}
 }
 
+func TestGetStats(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	stats, err := retr.GetStats(18121840)
+	if err != nil {
+		t.Fatalf("Bad retr: %v", err)
+	}
+
+	if stats.NumHave != 7 {
+		t.Errorf("Bad stats: %+v", stats)
+	}
+}
+
 func TestSellRecord(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 

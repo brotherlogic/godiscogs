@@ -12,6 +12,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -128,6 +130,45 @@ type SellResponse struct {
 	ListingID int `json:"listing_id"`
 }
 
+type OrderResponse struct {
+	Status  string
+	Created string
+	Items   []Item
+}
+
+type Item struct {
+	ID    int32
+	Price Pricing
+}
+
+// GetCurrentSalePrice gets the current sale price
+func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, error) {
+	rMap := make(map[int32]int32)
+	tRet := time.Now()
+
+	jsonString, _, err := r.retrieve("/marketplace/orders/" + order + "?token=" + r.userToken)
+	if err != nil {
+		return rMap, tRet, err
+	}
+	var resp OrderResponse
+	r.unmarshaller.Unmarshal(jsonString, &resp)
+
+	if resp.Status != "Sold" {
+		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order of type %v", resp.Status)
+	}
+
+	tRet, err = time.Parse("2006-01-02T15:04:05-07:00", resp.Created)
+	if err != nil {
+		return rMap, tRet, status.Errorf(codes.Internal, "Cannot parse time (%v): %v", resp.Created, err)
+	}
+
+	for _, item := range resp.Items {
+		rMap[item.ID] = int32(item.Price.Value)
+	}
+
+	return rMap, tRet, nil
+}
+
 // GetRateLimit returns the rate limit
 func (r *DiscogsRetriever) GetRateLimit() int {
 	_, headers, _ := r.retrieve("/releases/249504?token=" + r.userToken)
@@ -155,6 +196,11 @@ func (r *DiscogsRetriever) processCollectionRelease(re *CollectionRelease) *Rele
 	release.Rating = int32(re.Rating)
 
 	return release
+}
+
+func (r *DiscogsRetriever) SetNotes(iid, fid, id int32, value string) error {
+	//_, err := r.post(fmt.Sprintf("/users/brotherlogic/collection/folders/%v/releases/%v/instances/%v/fields/3?value=%v&token=", fid, id, iid, value, r.userToken), "")
+	return fmt.Errorf("Not finished yet")
 }
 
 // GetCollection gets all the releases in the users collection
@@ -349,6 +395,23 @@ type ReleaseBack struct {
 type ReleaseResponse struct {
 	Pagination Pagination
 	Releases   []ReleaseBack
+}
+
+type Stats struct {
+	NumHave int32 `json:"num_have"`
+	NumWant int32 `json:"num_want"`
+}
+
+func (r *DiscogsRetriever) GetStats(rid int32) (*Stats, error) {
+	jsonString, _, err := r.retrieve(fmt.Sprintf("/releases/%v/stats?token=%v", rid, r.userToken))
+	if err != nil {
+		return nil, err
+	}
+
+	var stats *Stats
+	r.unmarshaller.Unmarshal(jsonString, stats)
+
+	return stats, nil
 }
 
 //InstanceInfo some basic details about the instance

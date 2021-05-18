@@ -1,3 +1,4 @@
+mkdir -p testdata/releases/18121840
 mkdir -p testdata/releases/10567529/rating
 mkdir -p testdata/releases/2000000000/rating
 mkdir -p testdata/users/brotherlogic/collection/folders/0/
@@ -10,6 +11,12 @@ mkdir -p testdata/masters/38677
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
 mkdir -p testdata/marketplace/listings
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/18121840/stats?token=$1" |  sed "s/$1/token/g" > testdata/releases/18121840/stats_token=token
+sleep 1
+exit
+curl --user-agent "GoDiscogsTestData" -X POST -H "Content-Type: application/json" "https://api.discogs.com/users/brotherlogic/collection/folders/242017/releases/2600379/instances/477051727/fields/3?token=$1&value=blah" > testdata/fields
+sleep 1
+exit
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/wants?per_page=100&token=$1" |  sed "s/$1/token/g" > testdata/users/brotherlogic/wants_per_page=100_token=token
 sleep 1
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/users/brotherlogic/wants?per_page=100&token=$1&page=2" |  sed "s/$1/token/g" > testdata/users/brotherlogic/wants_per_page=100_token=token_page=2
