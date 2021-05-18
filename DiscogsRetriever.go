@@ -154,7 +154,7 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 
 	if resp.Status != "Shipped" {
-		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order of type %v", resp.Status)
+		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order of status %v", resp.Status)
 	}
 
 	tRet, err = time.Parse("2006-01-02T15:04:05-07:00", resp.Created)
