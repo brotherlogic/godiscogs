@@ -153,7 +153,7 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 	var resp OrderResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 
-	if resp.Status != "Sold" {
+	if resp.Status != "Shipped" {
 		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order of type %v", resp.Status)
 	}
 
