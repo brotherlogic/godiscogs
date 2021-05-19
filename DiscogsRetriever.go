@@ -164,7 +164,7 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 			return rMap, tRet, nil
 		}
 
-		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order of status %v", resp.Status)
+		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order with status %v", resp.Status)
 	}
 
 	for _, item := range resp.Items {
