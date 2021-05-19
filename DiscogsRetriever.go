@@ -164,6 +164,11 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 			return rMap, tRet, nil
 		}
 
+		// Ignore new orders that are over a year old
+		if resp.Status == "New Order" && time.Now().Sub(tRet) > time.Hour*24*365 {
+			return rMap, tRet, nil
+		}
+
 		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order with status %v", resp.Status)
 	}
 
