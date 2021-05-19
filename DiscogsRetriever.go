@@ -165,7 +165,7 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 		}
 
 		// Ignore new orders that are over a year old
-		if resp.Status == "New Order" && time.Now().Sub(tRet) > time.Hour*24*365 {
+		if (resp.Status == "New Order" || resp.Status == "Payment Received") && time.Now().Sub(tRet) > time.Hour*24*365 {
 			return rMap, tRet, nil
 		}
 
