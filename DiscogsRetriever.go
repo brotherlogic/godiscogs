@@ -131,9 +131,10 @@ type SellResponse struct {
 }
 
 type OrderResponse struct {
-	Status  string
-	Created string
-	Items   []Item
+	Status   string
+	Created  string
+	Items    []Item
+	Archived bool
 }
 
 type Item struct {
@@ -164,12 +165,12 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 			return rMap, tRet, nil
 		}
 
-		// Ignore orders over two years old
-		if time.Now().Sub(tRet) > time.Hour*24*365*2 {
+		// Ignore orders over two years old and have been archived
+		if time.Now().Sub(tRet) > time.Hour*24*365*2 && resp.Archived {
 			return rMap, tRet, nil
 		}
 
-		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order with status %v (made on date %v)", resp.Status, tRet)
+		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order with status %v (made on date %v -> %v)", resp.Status, tRet, resp.Archived)
 	}
 
 	for _, item := range resp.Items {
