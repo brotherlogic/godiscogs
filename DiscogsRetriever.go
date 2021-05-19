@@ -153,13 +153,18 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 	var resp OrderResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 
-	if resp.Status != "Shipped" {
-		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order of status %v", resp.Status)
-	}
-
 	tRet, err = time.Parse("2006-01-02T15:04:05-07:00", resp.Created)
 	if err != nil {
 		return rMap, tRet, status.Errorf(codes.Internal, "Cannot parse time (%v): %v", resp.Created, err)
+	}
+
+	if resp.Status != "Shipped" {
+		// If the order was cancelled, return an empty response
+		if strings.HasPrefix(resp.Status, "Cancelled") {
+			return rMap, tRet, nil
+		}
+
+		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order of status %v", resp.Status)
 	}
 
 	for _, item := range resp.Items {
