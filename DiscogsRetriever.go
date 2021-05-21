@@ -174,7 +174,7 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 	}
 
 	for _, item := range resp.Items {
-		rMap[item.ID] = int32(item.Price.Value)
+		rMap[item.ID] = int32(item.Price.Value * 100)
 	}
 
 	return rMap, tRet, nil
