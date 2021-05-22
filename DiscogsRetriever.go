@@ -166,7 +166,7 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 		}
 
 		// Ignore orders over two years old and have been archived
-		if time.Now().Sub(tRet) > time.Hour*24*365*2 && resp.Archived {
+		if time.Now().Sub(tRet) > time.Hour*24*90 && resp.Archived {
 			return rMap, tRet, nil
 		}
 
