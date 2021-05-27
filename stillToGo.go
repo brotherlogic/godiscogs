@@ -52,6 +52,8 @@ func (r *DiscogsRetriever) setTrack(t *Track) {
 		t.TrackType = Track_TRACK
 	case "heading":
 		t.TrackType = Track_HEADING
+	case "index":
+		// Pass
 	default:
 		r.Log(fmt.Sprintf("Unknown type: %v", t.Type_))
 	}
@@ -89,7 +91,6 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 	release.OtherVersions = []int32{}
 	for _, version := range versions.Versions {
 		release.OtherVersions = append(release.OtherVersions, version.ID)
-		r.Log(fmt.Sprintf("Building Versions (%v): %+v", len(versions.Versions), version))
 		if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
 			release.DigitalVersions = append(release.DigitalVersions, version.ID)
 		} else {
