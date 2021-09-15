@@ -285,7 +285,7 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	return string(body), nil
 }
 
-func (r *DiscogsRetriever) delete(path string, data string) string {
+func (r *DiscogsRetriever) delete(path string, data string) error {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -293,13 +293,16 @@ func (r *DiscogsRetriever) delete(path string, data string) string {
 	DiscogsRequests.With(prometheus.Labels{"method": "DELETE", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Delete(urlv, data)
 	if err != nil {
-		return fmt.Sprintf("POST ERROR: %v", err)
+		return fmt.Errorf("POST ERROR: %v", err)
 	}
 	r.updateRateLimit(response, "DELETE")
 	defer response.Body.Close()
 
 	body, _ := ioutil.ReadAll(response.Body)
-	return string(body)
+	if response.StatusCode != 204 {
+		return fmt.Errorf("Error on delete: %v", string(body))
+	}
+	return nil
 }
 
 func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {

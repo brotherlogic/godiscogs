@@ -374,8 +374,9 @@ func (r *DiscogsRetriever) AddToWantlist(releaseID int) error {
 }
 
 // RemoveFromWantlist adds a record to the wantlist
-func (r *DiscogsRetriever) RemoveFromWantlist(releaseID int) {
-	r.delete("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+func (r *DiscogsRetriever) RemoveFromWantlist(releaseID int) error {
+	err := r.delete("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+	return err
 }
 
 //AddToFolderResponse the response back from an add request
@@ -391,7 +392,7 @@ func (r *DiscogsRetriever) MoveToFolder(folderID int, releaseID int, instanceID 
 }
 
 // DeleteInstance removes a record from the collection
-func (r *DiscogsRetriever) DeleteInstance(folderID int, releaseID int, instanceID int) string {
+func (r *DiscogsRetriever) DeleteInstance(folderID int, releaseID int, instanceID int) error {
 	return r.delete("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
 }
 
