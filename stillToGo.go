@@ -300,6 +300,9 @@ func (r *DiscogsRetriever) delete(path string, data string) error {
 
 	body, _ := ioutil.ReadAll(response.Body)
 	if response.StatusCode != 204 {
+		if response.StatusCode == 404 {
+			return status.Errorf(codes.NotFound, "error on delete ( => %v): %v", response.StatusCode, string(body))
+		}
 		return fmt.Errorf("error on delete ( => %v): %v", response.StatusCode, string(body))
 	}
 	return nil
