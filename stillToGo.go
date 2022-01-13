@@ -90,47 +90,49 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 	release.DigitalVersions = []int32{}
 	release.OtherVersions = []int32{}
 	for _, version := range versions.Versions {
-		release.OtherVersions = append(release.OtherVersions, version.ID)
-		if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
-			release.DigitalVersions = append(release.DigitalVersions, version.ID)
-		} else {
-			for _, format := range version.MajorFormats {
-				if strings.Contains(format, "CD") || strings.Contains(format, "File") {
-					release.DigitalVersions = append(release.DigitalVersions, version.ID)
-					break
+		if version.ID > 0 {
+			release.OtherVersions = append(release.OtherVersions, version.ID)
+			if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
+				release.DigitalVersions = append(release.DigitalVersions, version.ID)
+			} else {
+				for _, format := range version.MajorFormats {
+					if strings.Contains(format, "CD") || strings.Contains(format, "File") {
+						release.DigitalVersions = append(release.DigitalVersions, version.ID)
+						break
+					}
 				}
 			}
-		}
-		if version.Released != "0" {
-			if strings.Count(version.Released, "-") == 2 {
-				//Check that the date is legit
-				if strings.Split(version.Released, "-")[1] == "00" {
-					dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
+			if version.Released != "0" {
+				if strings.Count(version.Released, "-") == 2 {
+					//Check that the date is legit
+					if strings.Split(version.Released, "-")[1] == "00" {
+						dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
+						date := dateV.Unix()
+						if bestDate == 0 || date < bestDate {
+							bestDate = date
+						}
+					} else {
+						dateV, err := time.Parse("2006-01-02", version.Released)
+						if err == nil {
+							date := dateV.Unix()
+							if bestDate == 0 || date < bestDate {
+								bestDate = date
+							}
+						}
+					}
+				} else if strings.Count(version.Released, "-") == 0 && len(version.Released) > 0 {
+					dateV, _ := time.Parse("2006", version.Released)
 					date := dateV.Unix()
 					if bestDate == 0 || date < bestDate {
 						bestDate = date
 					}
 				} else {
-					dateV, err := time.Parse("2006-01-02", version.Released)
+					dateV, err := time.Parse("01 Feb 2006", version.Released)
 					if err == nil {
 						date := dateV.Unix()
-						if bestDate == 0 || date < bestDate {
+						if bestDate < 0 || date < bestDate {
 							bestDate = date
 						}
-					}
-				}
-			} else if strings.Count(version.Released, "-") == 0 && len(version.Released) > 0 {
-				dateV, _ := time.Parse("2006", version.Released)
-				date := dateV.Unix()
-				if bestDate == 0 || date < bestDate {
-					bestDate = date
-				}
-			} else {
-				dateV, err := time.Parse("01 Feb 2006", version.Released)
-				if err == nil {
-					date := dateV.Unix()
-					if bestDate < 0 || date < bestDate {
-						bestDate = date
 					}
 				}
 			}
