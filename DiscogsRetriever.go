@@ -528,9 +528,12 @@ func (r *DiscogsRetriever) updateRateLimit(resp *http.Response, method string) {
 func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	urlv := "https://api.discogs.com/" + path
 
+	t1 := time.Now()
 	r.throttle()
+	t2 := time.Now()
 	DiscogsRequests.With(prometheus.Labels{"method": "GET", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Get(urlv)
+	r.Log(fmt.Sprintf("%v in %v with %v", urlv, time.Since(t2), t2.Sub(t1)))
 	if err != nil {
 		return make([]byte, 0), make(http.Header), err
 	}
