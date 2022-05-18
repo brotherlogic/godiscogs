@@ -22,6 +22,13 @@ var (
 		Name: "godiscogs_requests",
 		Help: "The number of server requests",
 	}, []string{"method", "path1"})
+
+	// DiscogsRequests request out to discogs
+	RequestLatency = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "godiscogs_request_latency",
+		Help:    "The number of server requests",
+		Buckets: []float64{5, 10, 25, 50, 100, 250, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 1024000},
+	}, []string{"method", "path1"})
 )
 
 type jsonUnmarshaller interface {
@@ -531,8 +538,11 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	t1 := time.Now()
 	r.throttle()
 	t2 := time.Now()
+	t := time.Now()
 	DiscogsRequests.With(prometheus.Labels{"method": "GET", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Get(urlv)
+	RequestLatency.With(prometheus.Labels{"method": "GET", "path1": strings.Split(path, "/")[0]}).Observe(float64(time.Now().Sub(t).Milliseconds()))
+
 	r.Log(fmt.Sprintf("%v in %v with %v", urlv, time.Since(t2), t2.Sub(t1)))
 	if err != nil {
 		return make([]byte, 0), make(http.Header), err

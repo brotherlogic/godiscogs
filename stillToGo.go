@@ -261,8 +261,10 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 
 	//Sleep here
 	tv := r.throttle()
+	t := time.Now()
 	DiscogsRequests.With(prometheus.Labels{"method": "POST", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Post(urlv, data)
+	RequestLatency.With(prometheus.Labels{"method": "POST", "path1": strings.Split(path, "/")[0]}).Observe(float64(time.Now().Sub(t).Milliseconds()))
 	if err != nil {
 		return fmt.Sprintf("POST ERROR ON RUN: %v", err), err
 	}
@@ -292,8 +294,11 @@ func (r *DiscogsRetriever) delete(path string, data string) error {
 
 	//Sleep here
 	r.throttle()
+	t := time.Now()
 	DiscogsRequests.With(prometheus.Labels{"method": "DELETE", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Delete(urlv, data)
+	RequestLatency.With(prometheus.Labels{"method": "DELETE", "path1": strings.Split(path, "/")[0]}).Observe(float64(time.Now().Sub(t).Milliseconds()))
+
 	if err != nil {
 		return fmt.Errorf("POST ERROR: %v", err)
 	}
@@ -316,8 +321,11 @@ func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
 	//Sleep here
 	r.throttle()
 
+	t := time.Now()
 	DiscogsRequests.With(prometheus.Labels{"method": "PUT", "path1": strings.Split(path, "/")[0]}).Inc()
 	response, err := r.getter.Put(urlv, data)
+	RequestLatency.With(prometheus.Labels{"method": "PUT", "path1": strings.Split(path, "/")[0]}).Observe(float64(time.Now().Sub(t).Milliseconds()))
+
 	if err != nil {
 		return make([]byte, 0), err
 	}
