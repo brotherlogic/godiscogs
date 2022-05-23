@@ -272,6 +272,8 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 
+	r.Log(fmt.Sprintf("POST: %v", response.StatusCode))
+
 	// This means we're trying to modify something we shouldn't
 	if response.StatusCode == 422 {
 		return "", status.Error(codes.FailedPrecondition, fmt.Sprintf("POST ERROR (STATUS CODE): %v, %v", response.StatusCode, string(body)))
