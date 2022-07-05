@@ -81,7 +81,7 @@ func GetMainLabel(labels []*Label) *Label {
 
 		// Favour Mondiophone and Timing
 		for _, label := range labels {
-			if label.GetName() == "Mondiophone" || label.GetName() == "Timing" {
+			if label.GetName() == "Mondiophone" || label.GetName() == "Timing" || label.GetName() == "Roundtable" {
 				return label
 			}
 		}
