@@ -172,6 +172,10 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 			return rMap, tRet, nil
 		}
 
+		if strings.HasPrefix(resp.Status, "Payment Received") {
+			return rMap, tRet, status.Errorf(codes.FailedPrecondition, "This order needs to be processed fully")
+		}
+
 		// Ignore orders over two years old and have been archived
 		if time.Now().Sub(tRet) > time.Hour*24*90 && resp.Archived {
 			return rMap, tRet, nil
