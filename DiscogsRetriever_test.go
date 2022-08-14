@@ -185,7 +185,7 @@ func TestGetStats(t *testing.T) {
 func TestSellRecord(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	id := retr.SellRecord(2576104, 12.345, "Draft", "blah", "blah")
+	id := retr.SellRecord(2576104, 12.345, "Draft", "blah", "blah", 12)
 
 	if id != 567306424 {
 		t.Errorf("Sale has failed: %v", id)
@@ -464,6 +464,17 @@ func TestGetInventory(t *testing.T) {
 	}
 	if len(inventory) != 322 {
 		t.Errorf("Inventory pull is short: %v", len(inventory))
+	}
+
+	for _, entry := range inventory {
+		if entry.Id == 551582 {
+			if entry.SalePrice != 1035 {
+				t.Errorf("Bad sale price: %v", entry)
+			}
+			if entry.DatePosted <= 0 {
+				t.Errorf("Bad Date: %v", entry)
+			}
+		}
 	}
 }
 

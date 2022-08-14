@@ -13,6 +13,8 @@ message ForSale {
 
   // The current price
   int32 sale_price = 3;
+
+  int64 date_posted = 4;
 }
 
 message Label {
@@ -140,6 +142,7 @@ message Track {
   
   repeated Track sub_tracks = 5;
 }
+
 
 enum SaleState {
   NOT_FOR_SALE = 0;

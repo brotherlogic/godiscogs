@@ -272,6 +272,7 @@ type InventoryEntry struct {
 	Price   Pricing
 	ID      int `json:"id"`
 	Release BasicRelease
+	Posted  string `json:"posted"`
 }
 
 // GetInventory gets all the releases that are for sale
@@ -280,6 +281,7 @@ func (r *DiscogsRetriever) GetInventory() ([]*ForSale, error) {
 	if err != nil {
 		return []*ForSale{}, err
 	}
+	//log.Printf("JSON %v", string(jsonString))
 
 	var items []*InventoryEntry
 	response := &InventoryResponse{}
@@ -303,7 +305,16 @@ func (r *DiscogsRetriever) GetInventory() ([]*ForSale, error) {
 
 	sales := []*ForSale{}
 	for _, re := range items {
-		sales = append(sales, &ForSale{Id: int32(re.Release.ID), SaleId: int32(re.ID), SalePrice: int32(math.Round(float64(re.Price.Value * 100)))})
+		p, err := time.Parse("2006-01-02T15:04:05-07:00", re.Posted)
+		if err != nil {
+			return nil, err
+		}
+		sales = append(sales,
+			&ForSale{
+				Id:         int32(re.Release.ID),
+				SaleId:     int32(re.ID),
+				DatePosted: int64(p.Unix()),
+				SalePrice:  int32(math.Round(float64(re.Price.Value * 100)))})
 	}
 
 	return sales, nil
@@ -555,7 +566,7 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
-	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 {
+	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 && response.StatusCode != 0 {
 		r.Log(fmt.Sprintf("RETR (%v) %v -> %v", path, response.StatusCode, string(body)))
 		if response.StatusCode == 404 {
 			return body, response.Header, status.Errorf(codes.NotFound, "Bad Read: (%v) %v", response.StatusCode, string(body))
