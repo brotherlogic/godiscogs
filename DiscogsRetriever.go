@@ -1,6 +1,7 @@
 package godiscogs
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -63,11 +64,11 @@ type DiscogsRetriever struct {
 	unmarshaller     jsonUnmarshaller
 	getter           httpGetter
 	getSleep         int
-	logger           func(string)
+	logger           func(context.Context, string)
 }
 
 // NewDiscogsRetriever Build a production retriever
-func NewDiscogsRetriever(token string, logger func(string)) *DiscogsRetriever {
+func NewDiscogsRetriever(token string, logger func(context.Context, string)) *DiscogsRetriever {
 	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 500, lastRetrieveTime: time.Now().Unix(), logger: logger}
 }
 
@@ -150,11 +151,11 @@ type Item struct {
 }
 
 // GetCurrentSalePrice gets the current sale price
-func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, error) {
+func (r *DiscogsRetriever) GetOrder(ctx context.Context, order string) (map[int32]int32, time.Time, error) {
 	rMap := make(map[int32]int32)
 	tRet := time.Now()
 
-	jsonString, _, err := r.retrieve("/marketplace/orders/" + order + "?token=" + r.userToken)
+	jsonString, _, err := r.retrieve(ctx, "/marketplace/orders/"+order+"?token="+r.userToken)
 	if err != nil {
 		return rMap, tRet, err
 	}
@@ -192,8 +193,8 @@ func (r *DiscogsRetriever) GetOrder(order string) (map[int32]int32, time.Time, e
 }
 
 // GetRateLimit returns the rate limit
-func (r *DiscogsRetriever) GetRateLimit() int {
-	_, headers, _ := r.retrieve("/releases/249504?token=" + r.userToken)
+func (r *DiscogsRetriever) GetRateLimit(ctx context.Context) int {
+	_, headers, _ := r.retrieve(ctx, "/releases/249504?token="+r.userToken)
 	val, _ := strconv.Atoi(headers.Get("X-Discogs-Ratelimit"))
 	return val
 }
@@ -226,8 +227,8 @@ func (r *DiscogsRetriever) SetNotes(iid, fid, id int32, value string) error {
 }
 
 // GetCollection gets all the releases in the users collection
-func (r *DiscogsRetriever) GetCollection() []*Release {
-	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/folders/0/releases?per_page=100&token=" + r.userToken)
+func (r *DiscogsRetriever) GetCollection(ctx context.Context) []*Release {
+	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/folders/0/releases?per_page=100&token="+r.userToken)
 
 	var releases []*CollectionRelease
 	response := &CollectionResponse{}
@@ -236,10 +237,10 @@ func (r *DiscogsRetriever) GetCollection() []*Release {
 	releases = append(releases, response.Releases...)
 	end := response.Pagination.Pages == response.Pagination.Page
 
-	r.Log(fmt.Sprintf("FOUND %v PAGES", response.Pagination.Pages))
+	r.Log(ctx, fmt.Sprintf("FOUND %v PAGES", response.Pagination.Pages))
 
 	for !end {
-		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
+		jsonString, _, _ = r.retrieve(ctx, response.Pagination.Urls.Next[23:])
 		newResponse := &CollectionResponse{}
 		r.unmarshaller.Unmarshal(jsonString, &newResponse)
 
@@ -276,8 +277,8 @@ type InventoryEntry struct {
 }
 
 // GetInventory gets all the releases that are for sale
-func (r *DiscogsRetriever) GetInventory() ([]*ForSale, error) {
-	jsonString, _, err := r.retrieve("/users/brotherlogic/inventory?status=For%20Sale&per_page=100&token=" + r.userToken)
+func (r *DiscogsRetriever) GetInventory(ctx context.Context) ([]*ForSale, error) {
+	jsonString, _, err := r.retrieve(ctx, "/users/brotherlogic/inventory?status=For%20Sale&per_page=100&token="+r.userToken)
 	if err != nil {
 		return []*ForSale{}, err
 	}
@@ -291,7 +292,7 @@ func (r *DiscogsRetriever) GetInventory() ([]*ForSale, error) {
 	end := response.Pagination.Pages == response.Pagination.Page
 
 	for !end {
-		jsonString, _, err = r.retrieve(response.Pagination.Urls.Next[23:])
+		jsonString, _, err = r.retrieve(ctx, response.Pagination.Urls.Next[23:])
 		if err != nil {
 			return []*ForSale{}, err
 		}
@@ -321,8 +322,8 @@ func (r *DiscogsRetriever) GetInventory() ([]*ForSale, error) {
 }
 
 // GetSalePrice gets the sale price for a release
-func (r *DiscogsRetriever) GetSalePrice(releaseID int) (float32, error) {
-	jsonString, _, err := r.retrieve("/marketplace/price_suggestions/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
+func (r *DiscogsRetriever) GetSalePrice(ctx context.Context, releaseID int) (float32, error) {
+	jsonString, _, err := r.retrieve(ctx, "/marketplace/price_suggestions/"+strconv.Itoa(releaseID)+"?token="+r.userToken)
 	var resp map[string]Pricing
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 	value := resp["Mint (M)"].Value
@@ -334,25 +335,25 @@ func (r *DiscogsRetriever) GetSalePrice(releaseID int) (float32, error) {
 }
 
 // SellRecord sells a given release
-func (r *DiscogsRetriever) SellRecord(releaseID int, price float32, state string, condition, sleeve string, weight int) int {
+func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price float32, state string, condition, sleeve string, weight int) int {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + condition + "\", \"sleeve_condition\":\"" + sleeve + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"" + fmt.Sprintf("%v", weight) + "\"}"
-	databack, _ := r.post("/marketplace/listings?token="+r.userToken, data)
+	databack, _ := r.post(ctx, "/marketplace/listings?token="+r.userToken, data)
 	var resp SellResponse
 	r.unmarshaller.Unmarshal([]byte(databack), &resp)
 	return resp.ListingID
 }
 
 // GetCurrentSalePrice gets the current sale price
-func (r *DiscogsRetriever) GetCurrentSalePrice(saleID int) float32 {
-	jsonString, _, _ := r.retrieve("/marketplace/listings/" + strconv.Itoa(saleID) + "?curr_abbr=USD&token=" + r.userToken)
+func (r *DiscogsRetriever) GetCurrentSalePrice(ctx context.Context, saleID int) float32 {
+	jsonString, _, _ := r.retrieve(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abbr=USD&token="+r.userToken)
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 	return resp.Price.Value
 }
 
 // GetCurrentSaleState gets the current sale state
-func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
-	jsonString, _, _ := r.retrieve("/marketplace/listings/" + strconv.Itoa(saleID) + "?curr_abbr=USD&token=" + r.userToken)
+func (r *DiscogsRetriever) GetCurrentSaleState(ctx context.Context, saleID int) SaleState {
+	jsonString, _, _ := r.retrieve(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abbr=USD&token="+r.userToken)
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 
@@ -364,40 +365,40 @@ func (r *DiscogsRetriever) GetCurrentSaleState(saleID int) SaleState {
 		return SaleState_SOLD
 	}
 
-	r.Log(fmt.Sprintf("Unknown sale status: %v", resp.Status))
+	r.Log(ctx, fmt.Sprintf("Unknown sale status: %v", resp.Status))
 	return SaleState_NOT_FOR_SALE
 }
 
 // UpdateSalePrice updates the sale price
-func (r *DiscogsRetriever) UpdateSalePrice(saleID int, releaseID int, condition, sleeve string, price float32) error {
+func (r *DiscogsRetriever) UpdateSalePrice(ctx context.Context, saleID int, releaseID int, condition, sleeve string, price float32) error {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + condition + "\", \"sleeve_condition\":\"" + sleeve + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"For Sale\"}"
-	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
+	_, err := r.post(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
 	return err
 }
 
 // RemoveFromSale removes the listing from sale
-func (r *DiscogsRetriever) RemoveFromSale(saleID int, releaseID int) error {
+func (r *DiscogsRetriever) RemoveFromSale(ctx context.Context, saleID int, releaseID int) error {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":5.00, \"status\":\"Draft\"}"
-	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
+	_, err := r.post(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
 	return err
 }
 
 // ExpireSale removes the listing from sale
-func (r *DiscogsRetriever) ExpireSale(saleID int, releaseID int, price float32) error {
+func (r *DiscogsRetriever) ExpireSale(ctx context.Context, saleID int, releaseID int, price float32) error {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"Expired\"}"
-	_, err := r.post("/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
+	_, err := r.post(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
 	return err
 }
 
 // AddToWantlist adds a record to the wantlist
-func (r *DiscogsRetriever) AddToWantlist(releaseID int) error {
-	_, err := r.put("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+func (r *DiscogsRetriever) AddToWantlist(ctx context.Context, releaseID int) error {
+	_, err := r.put(ctx, "/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 	return err
 }
 
 // RemoveFromWantlist adds a record to the wantlist
-func (r *DiscogsRetriever) RemoveFromWantlist(releaseID int) error {
-	err := r.delete("/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+func (r *DiscogsRetriever) RemoveFromWantlist(ctx context.Context, releaseID int) error {
+	err := r.delete(ctx, "/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 	return err
 }
 
@@ -409,13 +410,13 @@ type AddToFolderResponse struct {
 }
 
 // MoveToFolder Moves the given release to the new folder
-func (r *DiscogsRetriever) MoveToFolder(folderID int, releaseID int, instanceID int, newFolderID int) (string, error) {
-	return r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
+func (r *DiscogsRetriever) MoveToFolder(ctx context.Context, folderID int, releaseID int, instanceID int, newFolderID int) (string, error) {
+	return r.post(ctx, "/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
 }
 
 // DeleteInstance removes a record from the collection
-func (r *DiscogsRetriever) DeleteInstance(folderID int, releaseID int, instanceID int) error {
-	return r.delete("/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
+func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, releaseID int, instanceID int) error {
+	return r.delete(ctx, "/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
 }
 
 //ReleaseBack what we get for a single release
@@ -436,8 +437,8 @@ type Stats struct {
 	NumWant int32 `json:"num_want"`
 }
 
-func (r *DiscogsRetriever) GetStats(rid int32) (*Stats, error) {
-	jsonString, _, err := r.retrieve(fmt.Sprintf("/releases/%v/stats?token=%v", rid, r.userToken))
+func (r *DiscogsRetriever) GetStats(ctx context.Context, rid int32) (*Stats, error) {
+	jsonString, _, err := r.retrieve(ctx, fmt.Sprintf("/releases/%v/stats?token=%v", rid, r.userToken))
 	if err != nil {
 		return nil, err
 	}
@@ -456,8 +457,8 @@ type InstanceInfo struct {
 }
 
 //GetInstanceInfo gets the info for an instance
-func (r *DiscogsRetriever) GetInstanceInfo(rid int32) (map[int32]*InstanceInfo, error) {
-	jsonString, _, err := r.retrieve(fmt.Sprintf("/users/brotherlogic/collection/releases/%v?token=%v", rid, r.userToken))
+func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[int32]*InstanceInfo, error) {
+	jsonString, _, err := r.retrieve(ctx, fmt.Sprintf("/users/brotherlogic/collection/releases/%v?token=%v", rid, r.userToken))
 	mapper := make(map[int32]*InstanceInfo)
 	if err != nil {
 		return mapper, err
@@ -497,8 +498,8 @@ type FoldersResponse struct {
 }
 
 // GetFolders gets all the folders for a given user
-func (r *DiscogsRetriever) GetFolders() []Folder {
-	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/folders?token=" + r.userToken)
+func (r *DiscogsRetriever) GetFolders(ctx context.Context) []Folder {
+	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/folders?token="+r.userToken)
 
 	var folders []Folder
 	var response FoldersResponse
@@ -533,21 +534,21 @@ var (
 	}, []string{"method"})
 )
 
-func (r *DiscogsRetriever) updateRateLimit(resp *http.Response, method string) {
+func (r *DiscogsRetriever) updateRateLimit(ctx context.Context, resp *http.Response, method string) {
 	limit, err := strconv.Atoi(resp.Header.Get("X-Discogs-Ratelimit"))
 	if err != nil {
-		r.Log(fmt.Sprintf("Unable to parse rate limit: %v", err))
+		r.Log(ctx, fmt.Sprintf("Unable to parse rate limit: %v", err))
 	}
 	rateLimit.With(prometheus.Labels{"method": method}).Set(float64(limit))
 
 	used, err := strconv.Atoi(resp.Header.Get("X-Discogs-Ratelimit-Used"))
 	if err != nil {
-		r.Log(fmt.Sprintf("Unable to parse rate limit used: %v", err))
+		r.Log(ctx, fmt.Sprintf("Unable to parse rate limit used: %v", err))
 	}
 	rateLimitUsed.With(prometheus.Labels{"method": method}).Set(float64(used))
 }
 
-func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
+func (r *DiscogsRetriever) retrieve(ctx context.Context, path string) ([]byte, http.Header, error) {
 	urlv := "https://api.discogs.com/" + path
 
 	t1 := time.Now()
@@ -558,16 +559,16 @@ func (r *DiscogsRetriever) retrieve(path string) ([]byte, http.Header, error) {
 	response, err := r.getter.Get(urlv)
 	RequestLatency.With(prometheus.Labels{"method": "GET", "path1": strings.Split(path, "/")[0]}).Observe(float64(time.Now().Sub(t).Milliseconds()))
 
-	r.Log(fmt.Sprintf("%v in %v with %v", urlv, time.Since(t2), t2.Sub(t1)))
+	r.Log(ctx, fmt.Sprintf("%v in %v with %v", urlv, time.Since(t2), t2.Sub(t1)))
 	if err != nil {
 		return make([]byte, 0), make(http.Header), err
 	}
-	r.updateRateLimit(response, "GET")
+	r.updateRateLimit(ctx, response, "GET")
 
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 && response.StatusCode != 0 {
-		r.Log(fmt.Sprintf("RETR (%v) %v -> %v", path, response.StatusCode, string(body)))
+		r.Log(ctx, fmt.Sprintf("RETR (%v) %v -> %v", path, response.StatusCode, string(body)))
 		if response.StatusCode == 404 {
 			return body, response.Header, status.Errorf(codes.NotFound, "Bad Read: (%v) %v", response.StatusCode, string(body))
 		}

@@ -2,6 +2,7 @@ package godiscogs
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -40,13 +41,13 @@ func (httpGetter prodHTTPGetter) Delete(url string, data string) (*http.Response
 }
 
 //Log out a value to the log function
-func (r *DiscogsRetriever) Log(text string) {
+func (r *DiscogsRetriever) Log(ctx context.Context, text string) {
 	if r.logger != nil {
-		r.logger(text)
+		r.logger(ctx, text)
 	}
 }
 
-func (r *DiscogsRetriever) setTrack(t *Track) {
+func (r *DiscogsRetriever) setTrack(ctx context.Context, t *Track) {
 	switch t.Type_ {
 	case "track":
 		t.TrackType = Track_TRACK
@@ -55,13 +56,13 @@ func (r *DiscogsRetriever) setTrack(t *Track) {
 	case "index":
 		// Pass
 	default:
-		r.Log(fmt.Sprintf("Unknown type: %v", t.Type_))
+		r.Log(ctx, fmt.Sprintf("Unknown type: %v", t.Type_))
 	}
 }
 
 // GetRelease returns a release from the discogs system
-func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
-	jsonString, _, _ := r.retrieve("/releases/" + strconv.Itoa(int(id)) + "?token=" + r.userToken)
+func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*Release, error) {
+	jsonString, _, _ := r.retrieve(ctx, "/releases/"+strconv.Itoa(int(id))+"?token="+r.userToken)
 	var release *Release
 	err := r.unmarshaller.Unmarshal(jsonString, &release)
 
@@ -71,16 +72,16 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 
 	// Work the tracks
 	for _, t := range release.GetTracklist() {
-		r.setTrack(t)
+		r.setTrack(ctx, t)
 		for _, st := range t.SubTracks {
-			r.setTrack(st)
+			r.setTrack(ctx, st)
 		}
 	}
 
 	var versions VersionsResponse
 	if release.MasterId != 0 {
 		// Now get the earliest release date
-		jsonString, _, _ = r.retrieve("/masters/" + strconv.Itoa(int(release.MasterId)) + "/versions?per_page=500&token=" + r.userToken)
+		jsonString, _, _ = r.retrieve(ctx, "/masters/"+strconv.Itoa(int(release.MasterId))+"/versions?per_page=500&token="+r.userToken)
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 	} else {
 		tmpVersion := Version{Released: release.Released, Format: ""}
@@ -151,7 +152,7 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 	end := versions.Pagination.Pages == versions.Pagination.Page
 
 	for !end {
-		jsonString, _, _ = r.retrieve(versions.Pagination.Urls.Next[23:])
+		jsonString, _, _ = r.retrieve(ctx, versions.Pagination.Urls.Next[23:])
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 
 		for _, version := range versions.Versions {
@@ -212,8 +213,8 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 }
 
 // GetWantlist returns the wantlist for the given user
-func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
-	jsonString, _, err := r.retrieve("/users/brotherlogic/wants?per_page=100&token=" + r.userToken)
+func (r *DiscogsRetriever) GetWantlist(ctx context.Context) ([]*Release, error) {
+	jsonString, _, err := r.retrieve(ctx, "/users/brotherlogic/wants?per_page=100&token="+r.userToken)
 
 	if err != nil {
 		return nil, err
@@ -227,7 +228,7 @@ func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
 	end := response.Pagination.Pages == response.Pagination.Page
 
 	for !end {
-		jsonString, _, _ = r.retrieve(response.Pagination.Urls.Next[23:])
+		jsonString, _, _ = r.retrieve(ctx, response.Pagination.Urls.Next[23:])
 		newResponse := &WantlistResponse{}
 		err := r.unmarshaller.Unmarshal(jsonString, &newResponse)
 		if err != nil {
@@ -243,8 +244,8 @@ func (r *DiscogsRetriever) GetWantlist() ([]*Release, error) {
 }
 
 // GetInstanceID Gets the instance ID for this release
-func (r *DiscogsRetriever) GetInstanceID(releaseID int) int32 {
-	jsonString, _, _ := r.retrieve("/users/brotherlogic/collection/releases/" + strconv.Itoa(releaseID) + "?token=" + r.userToken)
+func (r *DiscogsRetriever) GetInstanceID(ctx context.Context, releaseID int) int32 {
+	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/releases/"+strconv.Itoa(releaseID)+"?token="+r.userToken)
 	var response CollectionResponse
 	r.unmarshaller.Unmarshal(jsonString, &response)
 	if len(response.Releases) > 0 {
@@ -255,8 +256,8 @@ func (r *DiscogsRetriever) GetInstanceID(releaseID int) int32 {
 }
 
 // AddToFolder adds the release to the given folder
-func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) (int, error) {
-	jsonString, _ := r.post("/users/brotherlogic/collection/folders/"+strconv.Itoa(int(folderID))+"/releases/"+strconv.Itoa(int(releaseID))+"?token="+r.userToken, "")
+func (r *DiscogsRetriever) AddToFolder(ctx context.Context, folderID int32, releaseID int32) (int, error) {
+	jsonString, _ := r.post(ctx, "/users/brotherlogic/collection/folders/"+strconv.Itoa(int(folderID))+"/releases/"+strconv.Itoa(int(releaseID))+"?token="+r.userToken, "")
 	var response AddToFolderResponse
 	err := r.unmarshaller.Unmarshal([]byte(jsonString), &response)
 	if err != nil {
@@ -265,9 +266,9 @@ func (r *DiscogsRetriever) AddToFolder(folderID int32, releaseID int32) (int, er
 	return response.InstanceID, nil
 }
 
-func (r *DiscogsRetriever) post(path string, data string) (string, error) {
+func (r *DiscogsRetriever) post(ctx context.Context, path string, data string) (string, error) {
 	urlv := "https://api.discogs.com/" + path
-	r.Log(fmt.Sprintf("Posting %v to %v", data, urlv))
+	r.Log(ctx, fmt.Sprintf("Posting %v to %v", data, urlv))
 
 	//Sleep here
 	tv := r.throttle()
@@ -278,11 +279,11 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	if err != nil {
 		return fmt.Sprintf("POST ERROR ON RUN: %v", err), err
 	}
-	r.updateRateLimit(response, "POST")
+	r.updateRateLimit(ctx, response, "POST")
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 
-	r.Log(fmt.Sprintf("POST: %v", response.StatusCode))
+	r.Log(ctx, fmt.Sprintf("POST: %v", response.StatusCode))
 
 	// This means we're trying to modify something we shouldn't
 	if response.StatusCode == 422 {
@@ -301,7 +302,7 @@ func (r *DiscogsRetriever) post(path string, data string) (string, error) {
 	return string(body), nil
 }
 
-func (r *DiscogsRetriever) delete(path string, data string) error {
+func (r *DiscogsRetriever) delete(ctx context.Context, path string, data string) error {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -314,7 +315,7 @@ func (r *DiscogsRetriever) delete(path string, data string) error {
 	if err != nil {
 		return fmt.Errorf("POST ERROR: %v", err)
 	}
-	r.updateRateLimit(response, "DELETE")
+	r.updateRateLimit(ctx, response, "DELETE")
 	defer response.Body.Close()
 
 	body, _ := ioutil.ReadAll(response.Body)
@@ -327,7 +328,7 @@ func (r *DiscogsRetriever) delete(path string, data string) error {
 	return nil
 }
 
-func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
+func (r *DiscogsRetriever) put(ctx context.Context, path string, data string) ([]byte, error) {
 	urlv := "https://api.discogs.com/" + path
 
 	//Sleep here
@@ -341,13 +342,13 @@ func (r *DiscogsRetriever) put(path string, data string) ([]byte, error) {
 	if err != nil {
 		return make([]byte, 0), err
 	}
-	r.updateRateLimit(response, "PUT")
+	r.updateRateLimit(ctx, response, "PUT")
 
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if response.StatusCode != 200 && response.StatusCode != 201 {
-		r.Log(fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path))
+		r.Log(ctx, fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path))
 	}
 	if err != nil {
 		return make([]byte, 0), err
