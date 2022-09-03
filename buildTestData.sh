@@ -8,9 +8,16 @@ mkdir -p testdata/users/brotherlogic/collection/releases
 mkdir -p testdata/masters/67464
 mkdir -p testdata/masters/38998
 mkdir -p testdata/masters/38677
+mkdir -p testdata/masters/583779
 mkdir -p testdata/masters/5251
 mkdir -p testdata/marketplace/price_suggestion
 mkdir -p testdata/marketplace/listings
+curl --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/10543660?token=$1" > testdata/releases/10543660_token=token
+sleep 1
+exit
+curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/masters/583779/versions?per_page=500&token=$1" > testdata/masters/583779/versions_per_page=500_token=token
+sleep 1
+exit
 curl  --user-agent "GoDiscogsTestData" "https://api.discogs.com/releases/18121840/stats?token=$1" |  sed "s/$1/token/g" > testdata/releases/18121840/stats_token=token
 sleep 1
 exit

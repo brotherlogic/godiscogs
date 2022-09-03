@@ -92,13 +92,23 @@ func (r *DiscogsRetriever) GetRelease(id int32) (*Release, error) {
 	for _, version := range versions.Versions {
 		if version.ID > 0 {
 			release.OtherVersions = append(release.OtherVersions, version.ID)
+
+			official := true
+			if strings.Contains(version.Format, "Unofficial") {
+				official = false
+			}
+
 			if strings.Contains(version.Format, "CD") || strings.Contains(version.Format, "File") {
-				release.DigitalVersions = append(release.DigitalVersions, version.ID)
+				if official {
+					release.DigitalVersions = append(release.DigitalVersions, version.ID)
+				}
 			} else {
 				for _, format := range version.MajorFormats {
 					if strings.Contains(format, "CD") || strings.Contains(format, "File") {
-						release.DigitalVersions = append(release.DigitalVersions, version.ID)
-						break
+						if official {
+							release.DigitalVersions = append(release.DigitalVersions, version.ID)
+							break
+						}
 					}
 				}
 			}

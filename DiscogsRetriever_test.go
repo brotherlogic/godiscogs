@@ -303,6 +303,24 @@ func TestGetRelease(t *testing.T) {
 	}
 }
 
+func TestSkipUnofficial(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, _ := retr.GetRelease(10543660)
+	if release.Labels[0].Id != 694483 {
+		t.Errorf("Label ID has not been pulled correctly: %v", release.Labels[0])
+	}
+
+	if len(release.GetDigitalVersions()) == 0 {
+		t.Errorf("No digital versions picked up: %v", release)
+	}
+
+	for _, dv := range release.GetDigitalVersions() {
+		if dv == 3019086 {
+			t.Errorf("This unofficial release should not be included: %v", dv)
+		}
+	}
+}
+
 func TestGetReleaseNoData(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	release, _ := retr.GetRelease(2425133)
