@@ -2,6 +2,7 @@ package godiscogs
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -12,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	proto "github.com/golang/protobuf/proto"
+	proto "google.golang.org/protobuf/proto"
 )
 
 type testFileGetter struct {
@@ -83,7 +84,7 @@ func (httpGetter *testFileGetter) Delete(url string, data string) (*http.Respons
 
 func TestGetWantlist(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	wantlist, err := retr.GetWantlist()
+	wantlist, err := retr.GetWantlist(context.Background())
 
 	if err != nil {
 		t.Errorf("Error retrieving want list: %v", err)
@@ -106,7 +107,7 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 func TestGetImage(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	r, err := retr.GetRelease(4707982)
+	r, err := retr.GetRelease(context.Background(), 4707982)
 
 	if err != nil {
 		t.Fatalf("Error getting release: %v", err)
@@ -130,7 +131,7 @@ func TestGetImage(t *testing.T) {
 func TestGetReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	_, err := retr.GetRelease(2535152)
+	_, err := retr.GetRelease(context.Background(), 2535152)
 
 	if err != nil {
 		t.Fatalf("Error getting release: %v", err)
@@ -141,7 +142,7 @@ func TestGetReleaseDate(t *testing.T) {
 func TestGetTracks(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	r, err := retr.GetRelease(1161277)
+	r, err := retr.GetRelease(context.Background(), 1161277)
 
 	if err != nil {
 		t.Fatalf("Error getting release: %v", err)
@@ -172,7 +173,7 @@ func TestGetTracks(t *testing.T) {
 
 func TestGetStats(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	stats, err := retr.GetStats(18121840)
+	stats, err := retr.GetStats(context.Background(), 18121840)
 	if err != nil {
 		t.Fatalf("Bad retr: %v", err)
 	}
@@ -185,7 +186,7 @@ func TestGetStats(t *testing.T) {
 func TestSellRecord(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	id := retr.SellRecord(2576104, 12.345, "Draft", "blah", "blah", 12)
+	id := retr.SellRecord(context.Background(), 2576104, 12.345, "Draft", "blah", "blah", 12)
 
 	if id != 567306424 {
 		t.Errorf("Sale has failed: %v", id)
@@ -195,7 +196,7 @@ func TestSellRecord(t *testing.T) {
 func TestRemoveSale(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	err := retr.ExpireSale(1079257117, 1473369, float32(4.99))
+	err := retr.ExpireSale(context.Background(), 1079257117, 1473369, float32(4.99))
 
 	if err != nil {
 		t.Errorf("Sale has failed: %v", err)
@@ -205,7 +206,7 @@ func TestRemoveSale(t *testing.T) {
 func TestExpireSale(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	err := retr.RemoveFromSale(805055435, 1145342)
+	err := retr.RemoveFromSale(context.Background(), 805055435, 1145342)
 
 	if err != nil {
 		t.Errorf("Sale has failed: %v", err)
@@ -215,7 +216,7 @@ func TestExpireSale(t *testing.T) {
 func TestGetSuggestedPrice(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	salePrice, err := retr.GetSalePrice(2576104)
+	salePrice, err := retr.GetSalePrice(context.Background(), 2576104)
 	if err != nil {
 		t.Fatalf("Error in retrieve: %v", err)
 	}
@@ -228,7 +229,7 @@ func TestGetSuggestedPrice(t *testing.T) {
 func TestGetSuggestedPriceWithEmpty(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	salePrice, err := retr.GetSalePrice(2576105)
+	salePrice, err := retr.GetSalePrice(context.Background(), 2576105)
 
 	if err != nil || salePrice != 100 {
 		t.Errorf("Failure to get sale price: %v -> %v", salePrice, err)
@@ -238,7 +239,7 @@ func TestGetSuggestedPriceWithEmpty(t *testing.T) {
 func TestGetRateLimit(t *testing.T) {
 	retr := NewDiscogsRetriever("token", nil)
 
-	rateLimit := retr.GetRateLimit()
+	rateLimit := retr.GetRateLimit(context.Background())
 	if rateLimit != 60 {
 		t.Errorf("Rate limit has come back wrong: %v", rateLimit)
 	}
@@ -246,7 +247,7 @@ func TestGetRateLimit(t *testing.T) {
 
 func TestPost(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	retr.post("blah", "madeup")
+	retr.post(context.Background(), "blah", "madeup")
 }
 
 func TestRetrieveLimiting(t *testing.T) {
@@ -256,7 +257,7 @@ func TestRetrieveLimiting(t *testing.T) {
 	start := time.Now()
 
 	for i := 0; i < 3; i++ {
-		retr.retrieve("/releases/249504")
+		retr.retrieve(context.Background(), "/releases/249504")
 	}
 	end := time.Now()
 
@@ -268,10 +269,10 @@ func TestRetrieveLimiting(t *testing.T) {
 
 func TestBuildRelease(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(1018055)
+	release, _ := retr.GetRelease(context.Background(), 1018055)
 	data, _ := proto.Marshal(release)
 	ioutil.WriteFile("1018055.file", data, 0644)
-	release, _ = retr.GetRelease(565473)
+	release, _ = retr.GetRelease(context.Background(), 565473)
 	data, _ = proto.Marshal(release)
 	ioutil.WriteFile("565473.file", data, 0644)
 
@@ -279,7 +280,7 @@ func TestBuildRelease(t *testing.T) {
 
 func TestGetRelease(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(249504)
+	release, _ := retr.GetRelease(context.Background(), 249504)
 	if release.Title != "Never Gonna Give You Up" {
 		t.Errorf("Wrong title: %v", release)
 	}
@@ -305,7 +306,7 @@ func TestGetRelease(t *testing.T) {
 
 func TestSkipUnofficial(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(10543660)
+	release, _ := retr.GetRelease(context.Background(), 10543660)
 	if release.Labels[0].Id != 694483 {
 		t.Errorf("Label ID has not been pulled correctly: %v", release.Labels[0])
 	}
@@ -323,7 +324,7 @@ func TestSkipUnofficial(t *testing.T) {
 
 func TestGetReleaseNoData(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(2425133)
+	release, _ := retr.GetRelease(context.Background(), 2425133)
 	if release.Title != "Love, Love, Love, Love, Love" {
 		t.Errorf("Wrong title: %v", release)
 	}
@@ -331,18 +332,22 @@ func TestGetReleaseNoData(t *testing.T) {
 
 func TestGetEarliestReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(668315)
+	release, _ := retr.GetRelease(context.Background(), 668315)
 	if release.Title != "Totale's Turns (It's Now Or Never)" {
 		t.Errorf("Wrong title: %v", release.Title)
 	}
 	if time.Unix(release.EarliestReleaseDate, 0).In(time.UTC).Year() != 1980 {
 		t.Errorf("Release has wrong date: (%v->%v) %v", release.EarliestReleaseDate, time.Unix(release.EarliestReleaseDate, 0).Year(), time.Unix(release.EarliestReleaseDate, 0))
 	}
+
+	if time.Unix(release.EarliestReleaseDate, 0).Month() != time.December {
+		t.Errorf("Bad release parse: %v", time.Unix(release.EarliestReleaseDate, 0).Month())
+	}
 }
 
 func TestGetOtherVersions(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(668315)
+	release, _ := retr.GetRelease(context.Background(), 668315)
 	if release.Title != "Totale's Turns (It's Now Or Never)" {
 		t.Errorf("Wrong title: %v", release.Title)
 	}
@@ -353,7 +358,7 @@ func TestGetOtherVersions(t *testing.T) {
 
 func TestGetOtherVersionsHuh(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, err := retr.GetRelease(372019)
+	release, err := retr.GetRelease(context.Background(), 372019)
 	if err != nil {
 		t.Fatalf("Unable to read version: %v", err)
 	}
@@ -367,7 +372,7 @@ func TestGetOtherVersionsHuh(t *testing.T) {
 
 func TestGetEarliestReleaseDateOrdering(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(603365)
+	release, _ := retr.GetRelease(context.Background(), 603365)
 	if release.Title != "Live At The Witch Trials" {
 		t.Errorf("Wrong title: %v", release.Title)
 	}
@@ -378,7 +383,7 @@ func TestGetEarliestReleaseDateOrdering(t *testing.T) {
 
 func TestAddToFolder(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	v, err := retr.AddToFolder(812802, 10)
+	v, err := retr.AddToFolder(context.Background(), 812802, 10)
 
 	if err != nil {
 		t.Fatalf("Error running add: %v", err)
@@ -391,29 +396,29 @@ func TestAddToFolder(t *testing.T) {
 
 func TestMoveToUncateogrized(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	retr.MoveToFolder(10, 10, 10, 10)
+	retr.MoveToFolder(context.Background(), 10, 10, 10, 10)
 }
 
 func TestDelete(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	retr.DeleteInstance(673768, 10866041, 280210978)
+	retr.DeleteInstance(context.Background(), 673768, 10866041, 280210978)
 }
 
 func TestAddToWantlist(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	retr.AddToWantlist(100)
+	retr.AddToWantlist(context.Background(), 100)
 }
 
 func TestRemoveFromWantlist(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	retr.RemoveFromWantlist(100)
+	retr.RemoveFromWantlist(context.Background(), 100)
 }
 
 func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
 	retr := NewTestDiscogsRetriever()
 	retr.getter = prodHTTPGetter{}
-	body, _, err := retr.retrieve("/releases/249504")
+	body, _, err := retr.retrieve(context.Background(), "/releases/249504")
 	if !strings.Contains(string(body), "Astley") {
 		t.Errorf("Error in retrieving data: %v, %v", err, string(body))
 	}
@@ -445,7 +450,7 @@ func (httpGetter testFailGetter) Delete(url string, data string) (*http.Response
 func TestFailGet(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.getter = testFailGetter{}
-	_, err, _ := retr.retrieve("/releases/249504")
+	_, err, _ := retr.retrieve(context.Background(), "/releases/249504")
 	if err == nil {
 		t.Errorf("Get did not throw an error")
 	}
@@ -460,7 +465,7 @@ func (jsonUnmarshaller testFailUnmarshaller) Unmarshal(inp []byte, v interface{}
 func TestFailMarshal(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.unmarshaller = testFailUnmarshaller{}
-	_, err := retr.GetRelease(249504)
+	_, err := retr.GetRelease(context.Background(), 249504)
 	if err == nil {
 		t.Errorf("Error handling failed to fail on unmarshal")
 	}
@@ -468,7 +473,7 @@ func TestFailMarshal(t *testing.T) {
 
 func TestGetInstanceID(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	val := retr.GetInstanceID(11146958)
+	val := retr.GetInstanceID(context.Background(), 11146958)
 	if val != 261212718 {
 		t.Errorf("Error in getting instance ID: %v", val)
 	}
@@ -476,7 +481,7 @@ func TestGetInstanceID(t *testing.T) {
 
 func TestGetInventory(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	inventory, err := retr.GetInventory()
+	inventory, err := retr.GetInventory(context.Background())
 	if err != nil {
 		t.Fatalf("Bad pull: %v", err)
 	}
@@ -499,7 +504,7 @@ func TestGetInventory(t *testing.T) {
 func TestGetInventoryInitialFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.getter = &testFileGetter{count: 0}
-	_, err := retr.GetInventory()
+	_, err := retr.GetInventory(context.Background())
 	if err == nil {
 		t.Fatalf("Did not fail")
 	}
@@ -508,7 +513,7 @@ func TestGetInventoryInitialFail(t *testing.T) {
 func TestGetInventorySecondFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.getter = &testFileGetter{count: 1}
-	_, err := retr.GetInventory()
+	_, err := retr.GetInventory(context.Background())
 	if err == nil {
 		t.Fatalf("Did not fail")
 	}
@@ -516,7 +521,7 @@ func TestGetInventorySecondFail(t *testing.T) {
 
 func TestGetCollection(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	collection := retr.GetCollection()
+	collection := retr.GetCollection(context.Background())
 	if len(collection) != 3104 {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
@@ -571,7 +576,7 @@ func TestGetCollection(t *testing.T) {
 
 func TestGetInstanceInfo(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	info, err := retr.GetInstanceInfo(323005)
+	info, err := retr.GetInstanceInfo(context.Background(), 323005)
 	if err != nil {
 		t.Fatalf("Unable to pull iid: %v", err)
 	}
@@ -588,7 +593,7 @@ func TestGetInstanceInfo(t *testing.T) {
 
 func TestGetInstanceInfoFailRet(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	_, err := retr.GetInstanceInfo(12)
+	_, err := retr.GetInstanceInfo(context.Background(), 12)
 	if err == nil {
 		t.Fatalf("Bad pull did not fail: %v", err)
 	}
@@ -596,7 +601,7 @@ func TestGetInstanceInfoFailRet(t *testing.T) {
 
 func TestGetInstanceInfoFailParse(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	_, err := retr.GetInstanceInfo(323006)
+	_, err := retr.GetInstanceInfo(context.Background(), 323006)
 	if err == nil {
 		t.Fatalf("Bad pull did not fail: %v", err)
 	}
@@ -604,7 +609,7 @@ func TestGetInstanceInfoFailParse(t *testing.T) {
 
 func TestGetFolders(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	folders := retr.GetFolders()
+	folders := retr.GetFolders(context.Background())
 	if len(folders) == 0 {
 		t.Errorf("Folder retrieve is short: %v", len(folders))
 	}
@@ -622,7 +627,7 @@ func TestGetFolders(t *testing.T) {
 
 func TestBoxSet(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(2370027)
+	release, _ := retr.GetRelease(context.Background(), 2370027)
 	if !release.Boxset {
 		t.Errorf("Boxset has not been marked as such: %v", release)
 	}
@@ -630,7 +635,7 @@ func TestBoxSet(t *testing.T) {
 
 func TestGatefold(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(9082405)
+	release, _ := retr.GetRelease(context.Background(), 9082405)
 	if !release.Gatefold {
 		t.Errorf("Gatefold has not been marked as such: %v", release)
 	}
@@ -638,7 +643,7 @@ func TestGatefold(t *testing.T) {
 
 func TestGetSalePrice(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	price := retr.GetCurrentSalePrice(805377159)
+	price := retr.GetCurrentSalePrice(context.Background(), 805377159)
 	if price != 9.75 {
 		t.Errorf("Price is incorrect: %v", price)
 	}
@@ -646,7 +651,7 @@ func TestGetSalePrice(t *testing.T) {
 
 func TestGetSaleState(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(805377159)
+	state := retr.GetCurrentSaleState(context.Background(), 805377159)
 	if state != SaleState_FOR_SALE {
 		t.Errorf("State is incorrect: %v", state)
 	}
@@ -654,7 +659,7 @@ func TestGetSaleState(t *testing.T) {
 
 func TestGetSaleStateOnFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(805377158)
+	state := retr.GetCurrentSaleState(context.Background(), 805377158)
 	if state != SaleState_NOT_FOR_SALE {
 		t.Errorf("State is incorrect: %v", state)
 	}
@@ -662,7 +667,7 @@ func TestGetSaleStateOnFail(t *testing.T) {
 
 func TestGetSaleStateOnSold(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(805377157)
+	state := retr.GetCurrentSaleState(context.Background(), 805377157)
 	if state != SaleState_SOLD {
 		t.Errorf("State is incorrect: %v", state)
 	}
@@ -670,7 +675,7 @@ func TestGetSaleStateOnSold(t *testing.T) {
 
 func TestGetSaleStateExpired(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(805377156)
+	state := retr.GetCurrentSaleState(context.Background(), 805377156)
 	if state != SaleState_EXPIRED {
 		t.Errorf("State is incorrect: %v", state)
 	}
@@ -678,7 +683,7 @@ func TestGetSaleStateExpired(t *testing.T) {
 
 func TestUpdateSalePrice(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	err := retr.UpdateSalePrice(805377159, 11403112, "Very Good Plus (VG+)", "Very Good Plus (VG+)", 9.50)
+	err := retr.UpdateSalePrice(context.Background(), 805377159, 11403112, "Very Good Plus (VG+)", "Very Good Plus (VG+)", 9.50)
 	if err != nil {
 		t.Errorf("Update price failed!: %v", err)
 	}

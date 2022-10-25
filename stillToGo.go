@@ -117,7 +117,8 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*Release, 
 				if strings.Count(version.Released, "-") == 2 {
 					//Check that the date is legit
 					if strings.Split(version.Released, "-")[1] == "00" {
-						dateV, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
+						dateP, _ := time.Parse("2006", strings.Split(version.Released, "-")[0])
+						dateV := time.Date(dateP.Year(), time.December, 31, 0, 0, 0, 0, time.Local)
 						date := dateV.Unix()
 						if bestDate == 0 || date < bestDate {
 							bestDate = date
@@ -132,7 +133,8 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*Release, 
 						}
 					}
 				} else if strings.Count(version.Released, "-") == 0 && len(version.Released) > 0 {
-					dateV, _ := time.Parse("2006", version.Released)
+					dateP, _ := time.Parse("2006", version.Released)
+					dateV := time.Date(dateP.Year(), time.December, 31, 0, 0, 0, 0, time.Local)
 					date := dateV.Unix()
 					if bestDate == 0 || date < bestDate {
 						bestDate = date

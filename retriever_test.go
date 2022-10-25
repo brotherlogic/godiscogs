@@ -1,10 +1,13 @@
 package godiscogs
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestSetRating(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	err := retr.SetRating(10567529, 5)
+	err := retr.SetRating(context.Background(), 10567529, 5)
 	if err != nil {
 		t.Errorf("Rating has not been set")
 	}
@@ -12,7 +15,7 @@ func TestSetRating(t *testing.T) {
 
 func TestNullRating(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	err := retr.SetRating(10567529, 0)
+	err := retr.SetRating(context.Background(), 10567529, 0)
 	if err != nil {
 		t.Errorf("Rating has not been set")
 	}
@@ -20,7 +23,7 @@ func TestNullRating(t *testing.T) {
 
 func TestSetRatingFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	err := retr.SetRating(10567528, 5)
+	err := retr.SetRating(context.Background(), 10567528, 5)
 	if err == nil {
 		t.Errorf("Fail set rating has not failed")
 	}
@@ -29,7 +32,7 @@ func TestSetRatingFail(t *testing.T) {
 func TestSetRatingPutFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	retr.getter = testFailGetter{}
-	err := retr.SetRating(2000000000, 5)
+	err := retr.SetRating(context.Background(), 2000000000, 5)
 	if err == nil {
 		t.Errorf("Fail set rating has not failed")
 	}
