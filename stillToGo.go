@@ -40,7 +40,7 @@ func (httpGetter prodHTTPGetter) Delete(url string, data string) (*http.Response
 	return http.DefaultClient.Do(req)
 }
 
-//Log out a value to the log function
+// Log out a value to the log function
 func (r *DiscogsRetriever) Log(ctx context.Context, text string) {
 	if r.logger != nil {
 		r.logger(ctx, text)
@@ -62,9 +62,12 @@ func (r *DiscogsRetriever) setTrack(ctx context.Context, t *Track) {
 
 // GetRelease returns a release from the discogs system
 func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*Release, error) {
-	jsonString, _, _ := r.retrieve(ctx, "/releases/"+strconv.Itoa(int(id))+"?token="+r.userToken)
+	jsonString, _, err := r.retrieve(ctx, "/releases/"+strconv.Itoa(int(id))+"?token="+r.userToken)
+	if err != nil {
+		return nil, err
+	}
 	var release *Release
-	err := r.unmarshaller.Unmarshal(jsonString, &release)
+	err = r.unmarshaller.Unmarshal(jsonString, &release)
 
 	if err != nil {
 		return release, err
