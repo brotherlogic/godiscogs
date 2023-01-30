@@ -135,7 +135,7 @@ type PriceResponse struct {
 
 // SellResponse response from selling a record
 type SellResponse struct {
-	ListingID int `json:"listing_id"`
+	ListingID int64 `json:"listing_id"`
 }
 
 type OrderResponse struct {
@@ -335,7 +335,7 @@ func (r *DiscogsRetriever) GetSalePrice(ctx context.Context, releaseID int) (flo
 }
 
 // SellRecord sells a given release
-func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price float32, state string, condition, sleeve string, weight int) int {
+func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price float32, state string, condition, sleeve string, weight int) int64 {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + condition + "\", \"sleeve_condition\":\"" + sleeve + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"" + fmt.Sprintf("%v", weight) + "\"}"
 	databack, _ := r.post(ctx, "/marketplace/listings?token="+r.userToken, data)
 	var resp SellResponse
