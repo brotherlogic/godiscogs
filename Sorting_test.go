@@ -6,6 +6,8 @@ import (
 	"sort"
 	"testing"
 
+	pb "github.com/brotherlogic/godiscogs/proto"
+
 	"google.golang.org/protobuf/proto"
 )
 
@@ -33,107 +35,107 @@ func TestSplit(t *testing.T) {
 }
 
 var sortTests = []struct {
-	r1 Release
-	r2 Release
+	r1 pb.Release
+	r2 pb.Release
 }{
-	{Release{Labels: []*Label{&Label{Name: "TestOne"}}},
-		Release{Labels: []*Label{&Label{Name: "TestTwo"}}}},
+	{pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne"}}},
+		pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestTwo"}}}},
 
-	{Release{Title: "Low", Labels: []*Label{&Label{Name: "TestOne"}}},
-		Release{Title: "VeryLow", Labels: []*Label{&Label{Name: "TestOne"}}}},
+	{pb.Release{Title: "Low", Labels: []*pb.Label{&pb.Label{Name: "TestOne"}}},
+		pb.Release{Title: "VeryLow", Labels: []*pb.Label{&pb.Label{Name: "TestOne"}}}},
 
-	{Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "First"}}},
-		Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "Second"}}}},
+	{pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne", Catno: "First"}}},
+		pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne", Catno: "Second"}}}},
 
-	{Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "IM 2"}}},
-		Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "IM 12"}}}},
+	{pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne", Catno: "IM 2"}}},
+		pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne", Catno: "IM 12"}}}},
 }
 
 var defaultComp = []struct {
-	r1 Release
-	r2 Release
+	r1 pb.Release
+	r2 pb.Release
 }{
-	{Release{Labels: []*Label{&Label{Name: "TestOne"}}},
-		Release{Labels: []*Label{&Label{Name: "TestOne"}}}},
+	{pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne"}}},
+		pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne"}}}},
 }
 
 func TestFullSort(t *testing.T) {
-	var releases []*Release
-	releases = append(releases, &Release{Title: "First", Labels: []*Label{&Label{Name: "TestOne"}}})
-	releases = append(releases, &Release{Title: "Last", Labels: []*Label{&Label{Name: "TestTwo"}}})
-	releases = append(releases, &Release{Labels: []*Label{&Label{Name: "TestThree"}}})
-	sort.Sort(ByLabelCat(releases))
+	var Releases []*pb.Release
+	Releases = append(Releases, &pb.Release{Title: "First", Labels: []*pb.Label{&pb.Label{Name: "TestOne"}}})
+	Releases = append(Releases, &pb.Release{Title: "Last", Labels: []*pb.Label{&pb.Label{Name: "TestTwo"}}})
+	Releases = append(pb.Releases, &pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestThree"}}})
+	sort.Sort(ByLabelCat(pb.Releases))
 
-	if releases[0].Title != "First" || releases[2].Title != "Last" {
-		t.Errorf("Releases are not sorted correctly: %v", releases)
+	if pb.Releases[0].Title != "First" || pb.Releases[2].Title != "Last" {
+		t.Errorf("pb.Releases are not sorted correctly: %v", Releases)
 	}
 }
 
 func TestFullSortWithAmbigousLabels(t *testing.T) {
-	var releases []*Release
-	releases = append(releases, &Release{Title: "First", Labels: []*Label{&Label{Name: "ToBeIgnore"}, &Label{Name: "TestOne"}}})
-	releases = append(releases, &Release{Title: "Last", Labels: []*Label{&Label{Name: "ToBeIgnore"}, &Label{Name: "TestTwo"}}})
-	releases = append(releases, &Release{Labels: []*Label{&Label{Name: "TestThree"}}})
-	sort.Sort(ByLabelCat(releases))
+	var Releases []*pb.Release
+	Releases = append(Releases, &pb.Release{Title: "First", Labels: []*pb.Label{&pb.Label{Name: "ToBeIgnore"}, &pb.Label{Name: "TestOne"}}})
+	Releases = append(Releases, &pb.Release{Title: "Last", Labels: []*pb.Label{&pb.Label{Name: "ToBeIgnore"}, &pb.Label{Name: "TestTwo"}}})
+	Releases = append(Releases, &pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestThree"}}})
+	sort.Sort(ByLabelCat(Releases))
 
-	if releases[0].Title != "First" || releases[2].Title != "Last" {
-		t.Errorf("Releases are not sorted correctly: %v", releases)
+	if pb.Releases[0].Title != "First" || pb.Releases[2].Title != "Last" {
+		t.Errorf("pb.Releases are not sorted correctly: %v", Releases)
 	}
 }
 
 func TestSortingOrderConsistency(t *testing.T) {
-	data1, _ := ioutil.ReadFile("testdata/sort_test/1/3139381.release")
-	data2, _ := ioutil.ReadFile("testdata/sort_test/1/1531104.release")
-	data3, _ := ioutil.ReadFile("testdata/sort_test/1/6512427.release")
+	data1, _ := ioutil.ReadFile("testdata/sort_test/1/3139381.pb.Release")
+	data2, _ := ioutil.ReadFile("testdata/sort_test/1/1531104.pb.Release")
+	data3, _ := ioutil.ReadFile("testdata/sort_test/1/6512427.pb.Release")
 
-	release1 := &Release{}
-	release2 := &Release{}
-	release3 := &Release{}
-	proto.Unmarshal(data1, release1)
-	proto.Unmarshal(data2, release2)
-	proto.Unmarshal(data3, release3)
+	Release1 := &pb.Release{}
+	Release2 := &pb.Release{}
+	Release3 := &pb.Release{}
+	proto.Unmarshal(data1, pb.Release1)
+	proto.Unmarshal(data2, pb.Release2)
+	proto.Unmarshal(data3, pb.Release3)
 
-	var cReleases []*Release
-	cReleases = append(cReleases, release1)
-	cReleases = append(cReleases, release2)
-	cReleases = append(cReleases, release3)
+	var cReleases []*pb.Release
+	cReleases = append(cReleases, Release1)
+	cReleases = append(cReleases, Release2)
+	cReleases = append(cReleases, Release3)
 	sort.Sort(ByLabelCat(cReleases))
 
 	for i := 0; i < 100; i++ {
-		var releases []*Release
+		var Releases []*pb.Release
 		perm := rand.Perm(3)
-		releases = append(releases, cReleases[perm[0]])
-		releases = append(releases, cReleases[perm[1]])
-		releases = append(releases, cReleases[perm[2]])
-		sort.Sort(ByLabelCat(releases))
+		Releases = append(Releases, cReleases[perm[0]])
+		Releases = append(Releases, cReleases[perm[1]])
+		Releases = append(Releases, cReleases[perm[2]])
+		sort.Sort(ByLabelCat(pb.Releases))
 
 		failed := false
-		for i := range releases {
-			if releases[i].Id != cReleases[i].Id {
+		for i := range pb.Releases {
+			if Releases[i].Id != cReleases[i].Id {
 				failed = true
 			}
 		}
 
 		if failed {
 			t.Errorf("Sorting is not unique:")
-			for j := range releases {
-				t.Errorf("%v. %v -> %v", j, cReleases[j].Id, releases[j].Id)
+			for j := range pb.Releases {
+				t.Errorf("%v. %v -> %v", j, cReleases[j].Id, Releases[j].Id)
 			}
 		}
 	}
 }
 
 func TestSortingConsistencyWithMultipleLabels(t *testing.T) {
-	r1 := Release{Labels: []*Label{&Label{Name: "REally Though", Catno: "IM 12"}, &Label{Name: "Actually First", Catno: "DDD"}}}
-	r2 := Release{Labels: []*Label{&Label{Name: "TestOne", Catno: "IM 1"}, &Label{Name: "Behind", Catno: "BBB"}}}
+	r1 := pb.Release{Labels: []*pb.Label{&pb.Label{Name: "REally Though", Catno: "IM 12"}, &pb.Label{Name: "Actually First", Catno: "DDD"}}}
+	r2 := pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestOne", Catno: "IM 1"}, &pb.Label{Name: "Behind", Catno: "BBB"}}}
 
 	sValue := sortByLabelCat(r1, r2)
 	if sValue >= 0 {
-		t.Errorf("Sorting is off with mulitple labels")
+		t.Errorf("Sorting is off with mulitple Labels")
 	}
 	sValueR := sortByLabelCat(r2, r1)
 	if sValueR <= 0 {
-		t.Errorf("Reverse sorting is off with multiple labels")
+		t.Errorf("Reverse sorting is off with multiple Labels")
 	}
 }
 

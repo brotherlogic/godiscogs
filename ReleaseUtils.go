@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	pb "github.com/brotherlogic/godiscogs/proto"
 )
 
 func split(str string) []string {
@@ -12,7 +14,7 @@ func split(str string) []string {
 }
 
 // GetReleaseArtist Gets a string of the release artist of this record
-func GetReleaseArtist(rel *Release) string {
+func GetReleaseArtist(rel *pb.Release) string {
 	if len(rel.Artists) > 0 {
 		artistString := rel.Artists[0].Name
 		for _, artist := range rel.Artists[1:] {
@@ -24,13 +26,13 @@ func GetReleaseArtist(rel *Release) string {
 }
 
 // ByLabelCat is a sorting function that sorts by label name, then catalogue number
-type ByLabelCat []*Release
+type ByLabelCat []*pb.Release
 
 func (a ByLabelCat) Len() int           { return len(a) }
 func (a ByLabelCat) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByLabelCat) Less(i, j int) bool { return sortByLabelCat(*a[i], *a[j]) < 0 }
 
-func sortByLabelCat(rel1 Release, rel2 Release) int {
+func sortByLabelCat(rel1 pb.Release, rel2 pb.Release) int {
 	label1 := GetMainLabel(rel1.Labels)
 	label2 := GetMainLabel(rel2.Labels)
 
@@ -69,7 +71,7 @@ func sortByLabelCat(rel1 Release, rel2 Release) int {
 }
 
 // GetMainLabel gets the main label from the release - this is the label to be used in e.g. sorting
-func GetMainLabel(labels []*Label) *Label {
+func GetMainLabel(labels []*pb.Label) *pb.Label {
 	if len(labels) == 0 {
 		return nil
 	} else if len(labels) == 1 {

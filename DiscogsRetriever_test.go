@@ -13,7 +13,8 @@ import (
 	"testing"
 	"time"
 
-	proto "google.golang.org/protobuf/proto"
+	pb "github.com/brotherlogic/godiscogs/proto"
+	proto "google.golang.org/protobuf"
 )
 
 type testFileGetter struct {
@@ -154,12 +155,12 @@ func TestGetTracks(t *testing.T) {
 
 	count := 0
 	for _, t := range r.GetTracklist() {
-		if t.TrackType == Track_TRACK {
+		if t.TrackType == pb.Track_TRACK {
 			count++
 		}
 
 		for _, st := range t.SubTracks {
-			if st.TrackType == Track_TRACK {
+			if st.TrackType == pb.Track_TRACK {
 				count++
 			}
 
@@ -526,8 +527,8 @@ func TestGetCollection(t *testing.T) {
 		t.Errorf("Collection retrieve is short: %v", len(collection))
 	}
 	found := false
-	var foundRecord *Release
-	var bothHandsFree *Release
+	var foundRecord *pb.Release
+	var bothHandsFree *pb.Release
 	count := 0
 	for _, record := range collection {
 		if record.Id == 2180118 {
@@ -652,7 +653,7 @@ func TestGetSalePrice(t *testing.T) {
 func TestGetSaleState(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	state := retr.GetCurrentSaleState(context.Background(), 805377159)
-	if state != SaleState_FOR_SALE {
+	if state != pb.SaleState_FOR_SALE {
 		t.Errorf("State is incorrect: %v", state)
 	}
 }
@@ -660,7 +661,7 @@ func TestGetSaleState(t *testing.T) {
 func TestGetSaleStateOnFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	state := retr.GetCurrentSaleState(context.Background(), 805377158)
-	if state != SaleState_NOT_FOR_SALE {
+	if state != pb.SaleState_NOT_FOR_SALE {
 		t.Errorf("State is incorrect: %v", state)
 	}
 }
@@ -668,7 +669,7 @@ func TestGetSaleStateOnFail(t *testing.T) {
 func TestGetSaleStateOnSold(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	state := retr.GetCurrentSaleState(context.Background(), 805377157)
-	if state != SaleState_SOLD {
+	if state != pb.SaleState_SOLD {
 		t.Errorf("State is incorrect: %v", state)
 	}
 }
@@ -676,7 +677,7 @@ func TestGetSaleStateOnSold(t *testing.T) {
 func TestGetSaleStateExpired(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 	state := retr.GetCurrentSaleState(context.Background(), 805377156)
-	if state != SaleState_EXPIRED {
+	if state != pb.SaleState_EXPIRED {
 		t.Errorf("State is incorrect: %v", state)
 	}
 }

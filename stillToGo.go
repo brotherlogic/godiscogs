@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	pb "github.com/brotherlogic/godiscogs/proto"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -47,12 +49,12 @@ func (r *DiscogsRetriever) Log(ctx context.Context, text string) {
 	}
 }
 
-func (r *DiscogsRetriever) setTrack(ctx context.Context, t *Track) {
+func (r *DiscogsRetriever) setTrack(ctx context.Context, t *pb.Track) {
 	switch t.Type_ {
 	case "track":
-		t.TrackType = Track_TRACK
+		t.TrackType = pb.Track_TRACK
 	case "heading":
-		t.TrackType = Track_HEADING
+		t.TrackType = pb.Track_HEADING
 	case "index":
 		// Pass
 	default:
@@ -61,12 +63,12 @@ func (r *DiscogsRetriever) setTrack(ctx context.Context, t *Track) {
 }
 
 // GetRelease returns a release from the discogs system
-func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*Release, error) {
+func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*pb.Release, error) {
 	jsonString, _, err := r.retrieve(ctx, "/releases/"+strconv.Itoa(int(id))+"?token="+r.userToken)
 	if err != nil {
 		return nil, err
 	}
-	var release *Release
+	var release *pb.Release
 	err = r.unmarshaller.Unmarshal(jsonString, &release)
 
 	if err != nil {
@@ -220,14 +222,14 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*Release, 
 }
 
 // GetWantlist returns the wantlist for the given user
-func (r *DiscogsRetriever) GetWantlist(ctx context.Context) ([]*Release, error) {
+func (r *DiscogsRetriever) GetWantlist(ctx context.Context) ([]*pb.Release, error) {
 	jsonString, _, err := r.retrieve(ctx, "/users/brotherlogic/wants?per_page=100&token="+r.userToken)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var releases []*Release
+	var releases []*pb.Release
 	response := &WantlistResponse{}
 	r.unmarshaller.Unmarshal(jsonString, &response)
 
