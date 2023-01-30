@@ -340,7 +340,7 @@ func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price 
 	databack, _ := r.post(ctx, "/marketplace/listings?token="+r.userToken, data)
 	var resp SellResponse
 	r.unmarshaller.Unmarshal([]byte(databack), &resp)
-	r.Log(ctx, fmt.Sprintf("Receive Sale Response: %v", resp))
+	r.Log(ctx, fmt.Sprintf("Receive Sale Response: %v -> %v", resp, string(databack)))
 	return resp.ListingID
 }
 
