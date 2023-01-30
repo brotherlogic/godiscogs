@@ -148,13 +148,13 @@ type OrderResponse struct {
 }
 
 type Item struct {
-	ID    int32
+	ID    int64
 	Price Pricing
 }
 
 // GetCurrentSalePrice gets the current sale price
-func (r *DiscogsRetriever) GetOrder(ctx context.Context, order string) (map[int32]int32, time.Time, error) {
-	rMap := make(map[int32]int32)
+func (r *DiscogsRetriever) GetOrder(ctx context.Context, order string) (map[int64]int32, time.Time, error) {
+	rMap := make(map[int64]int32)
 	tRet := time.Now()
 
 	jsonString, _, err := r.retrieve(ctx, "/marketplace/orders/"+order+"?token="+r.userToken)
