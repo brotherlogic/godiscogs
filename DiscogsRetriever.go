@@ -273,7 +273,7 @@ type BasicRelease struct {
 // InventoryEntry returned from invetory pull
 type InventoryEntry struct {
 	Price   Pricing
-	ID      int `json:"id"`
+	ID      int64 `json:"id"`
 	Release BasicRelease
 	Posted  string `json:"posted"`
 }
@@ -315,7 +315,7 @@ func (r *DiscogsRetriever) GetInventory(ctx context.Context) ([]*pb.ForSale, err
 		sales = append(sales,
 			&pb.ForSale{
 				Id:         int32(re.Release.ID),
-				SaleId:     int32(re.ID),
+				SaleId:     re.ID,
 				DatePosted: int64(p.Unix()),
 				SalePrice:  int32(math.Round(float64(re.Price.Value * 100)))})
 	}
