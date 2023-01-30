@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package godiscogs;
 
-option go_package = "github.com/brotherlogic/godiscogs";
+option go_package = "github.com/brotherlogic/godiscogs/proto";
 
 message ForSale {
   // The id of the record
