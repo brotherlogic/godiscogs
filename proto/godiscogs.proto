@@ -9,7 +9,7 @@ message ForSale {
   int32 id = 1;
 
   // The id of the sale
-  int32 sale_id = 2;
+  int64 sale_id = 2;
 
   // The current price
   int32 sale_price = 3;

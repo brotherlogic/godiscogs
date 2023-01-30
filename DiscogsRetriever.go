@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	pb "github.com/brotherlogic/godiscogs/proto"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/grpc/codes"
@@ -98,13 +100,13 @@ type CollectionRelease struct {
 	FolderID   int `json:"folder_id"`
 	InstanceID int `json:"instance_id"`
 	Rating     int `json:"rating"`
-	Notes      []*Note
+	Notes      []*pb.Note
 }
 
 // WantlistResponse returned from discogs
 type WantlistResponse struct {
 	Pagination Pagination
-	Wants      []*Release
+	Wants      []*pb.Release
 }
 
 // Version a version of a master release
@@ -199,8 +201,8 @@ func (r *DiscogsRetriever) GetRateLimit(ctx context.Context) int {
 	return val
 }
 
-func (r *DiscogsRetriever) processCollectionRelease(re *CollectionRelease) *Release {
-	release := &Release{}
+func (r *DiscogsRetriever) processCollectionRelease(re *CollectionRelease) *pb.Release {
+	release := &pb.Release{}
 	for _, note := range re.Notes {
 		// Media condition
 		if note.FieldId == 1 {
@@ -227,7 +229,7 @@ func (r *DiscogsRetriever) SetNotes(iid, fid, id int32, value string) error {
 }
 
 // GetCollection gets all the releases in the users collection
-func (r *DiscogsRetriever) GetCollection(ctx context.Context) []*Release {
+func (r *DiscogsRetriever) GetCollection(ctx context.Context) []*pb.Release {
 	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/folders/0/releases?per_page=100&token="+r.userToken)
 
 	var releases []*CollectionRelease
@@ -249,7 +251,7 @@ func (r *DiscogsRetriever) GetCollection(ctx context.Context) []*Release {
 		response = newResponse
 	}
 
-	procReleases := []*Release{}
+	procReleases := []*pb.Release{}
 	for _, re := range releases {
 		procReleases = append(procReleases, r.processCollectionRelease(re))
 	}
@@ -277,10 +279,10 @@ type InventoryEntry struct {
 }
 
 // GetInventory gets all the releases that are for sale
-func (r *DiscogsRetriever) GetInventory(ctx context.Context) ([]*ForSale, error) {
+func (r *DiscogsRetriever) GetInventory(ctx context.Context) ([]*pb.ForSale, error) {
 	jsonString, _, err := r.retrieve(ctx, "/users/brotherlogic/inventory?status=For%20Sale&per_page=100&token="+r.userToken)
 	if err != nil {
-		return []*ForSale{}, err
+		return []*pb.ForSale{}, err
 	}
 	//log.Printf("JSON %v", string(jsonString))
 
@@ -294,7 +296,7 @@ func (r *DiscogsRetriever) GetInventory(ctx context.Context) ([]*ForSale, error)
 	for !end {
 		jsonString, _, err = r.retrieve(ctx, response.Pagination.Urls.Next[23:])
 		if err != nil {
-			return []*ForSale{}, err
+			return []*pb.ForSale{}, err
 		}
 		newResponse := &InventoryResponse{}
 		r.unmarshaller.Unmarshal(jsonString, &newResponse)
@@ -304,14 +306,14 @@ func (r *DiscogsRetriever) GetInventory(ctx context.Context) ([]*ForSale, error)
 		response = newResponse
 	}
 
-	sales := []*ForSale{}
+	sales := []*pb.ForSale{}
 	for _, re := range items {
 		p, err := time.Parse("2006-01-02T15:04:05-07:00", re.Posted)
 		if err != nil {
 			return nil, err
 		}
 		sales = append(sales,
-			&ForSale{
+			&pb.ForSale{
 				Id:         int32(re.Release.ID),
 				SaleId:     int32(re.ID),
 				DatePosted: int64(p.Unix()),
@@ -353,21 +355,21 @@ func (r *DiscogsRetriever) GetCurrentSalePrice(ctx context.Context, saleID int) 
 }
 
 // GetCurrentSaleState gets the current sale state
-func (r *DiscogsRetriever) GetCurrentSaleState(ctx context.Context, saleID int) SaleState {
+func (r *DiscogsRetriever) GetCurrentSaleState(ctx context.Context, saleID int) pb.SaleState {
 	jsonString, _, _ := r.retrieve(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abbr=USD&token="+r.userToken)
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 
 	if resp.Status == "For Sale" {
-		return SaleState_FOR_SALE
+		return pb.SaleState_FOR_SALE
 	} else if resp.Status == "Expired" {
-		return SaleState_EXPIRED
+		return pb.SaleState_EXPIRED
 	} else if resp.Status == "Sold" || resp.Status == "Draft" || resp.Status == "Deleted" {
-		return SaleState_SOLD
+		return pb.SaleState_SOLD
 	}
 
 	r.Log(ctx, fmt.Sprintf("Unknown sale status: %v", resp.Status))
-	return SaleState_NOT_FOR_SALE
+	return pb.SaleState_NOT_FOR_SALE
 }
 
 // UpdateSalePrice updates the sale price
@@ -422,9 +424,9 @@ func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, rel
 
 //ReleaseBack what we get for a single release
 type ReleaseBack struct {
-	DateAdded  string  `json:"date_added"`
-	InstanceID int32   `json:"instance_id"`
-	Notes      []*Note `json:"notes"`
+	DateAdded  string     `json:"date_added"`
+	InstanceID int32      `json:"instance_id"`
+	Notes      []*pb.Note `json:"notes"`
 }
 
 //ReleaseResponse what we get back from release
@@ -495,14 +497,14 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 // FoldersResponse returned from discogs
 type FoldersResponse struct {
 	Pagination Pagination
-	Folders    []Folder
+	Folders    []pb.Folder
 }
 
 // GetFolders gets all the folders for a given user
-func (r *DiscogsRetriever) GetFolders(ctx context.Context) []Folder {
+func (r *DiscogsRetriever) GetFolders(ctx context.Context) []pb.Folder {
 	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/folders?token="+r.userToken)
 
-	var folders []Folder
+	var folders []pb.Folder
 	var response FoldersResponse
 	r.unmarshaller.Unmarshal(jsonString, &response)
 
