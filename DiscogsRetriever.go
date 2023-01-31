@@ -347,16 +347,16 @@ func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price 
 }
 
 // GetCurrentSalePrice gets the current sale price
-func (r *DiscogsRetriever) GetCurrentSalePrice(ctx context.Context, saleID int) float32 {
-	jsonString, _, _ := r.retrieve(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abbr=USD&token="+r.userToken)
+func (r *DiscogsRetriever) GetCurrentSalePrice(ctx context.Context, saleID int64) float32 {
+	jsonString, _, _ := r.retrieve(ctx, fmt.Sprintf("/marketplace/listings/%v?curr_abbr=USD&token="+r.userToken, saleID))
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 	return resp.Price.Value
 }
 
 // GetCurrentSaleState gets the current sale state
-func (r *DiscogsRetriever) GetCurrentSaleState(ctx context.Context, saleID int) pb.SaleState {
-	jsonString, _, _ := r.retrieve(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abbr=USD&token="+r.userToken)
+func (r *DiscogsRetriever) GetCurrentSaleState(ctx context.Context, saleID int64) pb.SaleState {
+	jsonString, _, _ := r.retrieve(ctx, fmt.Sprintf("/marketplace/listings/%v?curr_abbr=USD&token="+r.userToken, saleID))
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 
