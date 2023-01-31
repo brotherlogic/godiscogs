@@ -14,7 +14,7 @@ import (
 	"time"
 
 	pb "github.com/brotherlogic/godiscogs/proto"
-	proto "google.golang.org/protobuf"
+	"google.golang.org/protobuf/proto"
 )
 
 type testFileGetter struct {
