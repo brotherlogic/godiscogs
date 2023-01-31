@@ -63,10 +63,10 @@ func TestFullSort(t *testing.T) {
 	var Releases []*pb.Release
 	Releases = append(Releases, &pb.Release{Title: "First", Labels: []*pb.Label{&pb.Label{Name: "TestOne"}}})
 	Releases = append(Releases, &pb.Release{Title: "Last", Labels: []*pb.Label{&pb.Label{Name: "TestTwo"}}})
-	Releases = append(pb.Releases, &pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestThree"}}})
-	sort.Sort(ByLabelCat(pb.Releases))
+	Releases = append(Releases, &pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestThree"}}})
+	sort.Sort(ByLabelCat(Releases))
 
-	if pb.Releases[0].Title != "First" || pb.Releases[2].Title != "Last" {
+	if Releases[0].Title != "First" || Releases[2].Title != "Last" {
 		t.Errorf("pb.Releases are not sorted correctly: %v", Releases)
 	}
 }
@@ -78,7 +78,7 @@ func TestFullSortWithAmbigousLabels(t *testing.T) {
 	Releases = append(Releases, &pb.Release{Labels: []*pb.Label{&pb.Label{Name: "TestThree"}}})
 	sort.Sort(ByLabelCat(Releases))
 
-	if pb.Releases[0].Title != "First" || pb.Releases[2].Title != "Last" {
+	if Releases[0].Title != "First" || Releases[2].Title != "Last" {
 		t.Errorf("pb.Releases are not sorted correctly: %v", Releases)
 	}
 }
@@ -91,9 +91,9 @@ func TestSortingOrderConsistency(t *testing.T) {
 	Release1 := &pb.Release{}
 	Release2 := &pb.Release{}
 	Release3 := &pb.Release{}
-	proto.Unmarshal(data1, pb.Release1)
-	proto.Unmarshal(data2, pb.Release2)
-	proto.Unmarshal(data3, pb.Release3)
+	proto.Unmarshal(data1, Release1)
+	proto.Unmarshal(data2, Release2)
+	proto.Unmarshal(data3, Release3)
 
 	var cReleases []*pb.Release
 	cReleases = append(cReleases, Release1)
@@ -107,10 +107,10 @@ func TestSortingOrderConsistency(t *testing.T) {
 		Releases = append(Releases, cReleases[perm[0]])
 		Releases = append(Releases, cReleases[perm[1]])
 		Releases = append(Releases, cReleases[perm[2]])
-		sort.Sort(ByLabelCat(pb.Releases))
+		sort.Sort(ByLabelCat(Releases))
 
 		failed := false
-		for i := range pb.Releases {
+		for i := range Releases {
 			if Releases[i].Id != cReleases[i].Id {
 				failed = true
 			}
@@ -118,7 +118,7 @@ func TestSortingOrderConsistency(t *testing.T) {
 
 		if failed {
 			t.Errorf("Sorting is not unique:")
-			for j := range pb.Releases {
+			for j := range Releases {
 				t.Errorf("%v. %v -> %v", j, cReleases[j].Id, Releases[j].Id)
 			}
 		}
