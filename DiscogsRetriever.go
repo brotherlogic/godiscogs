@@ -172,7 +172,7 @@ func (r *DiscogsRetriever) GetOrder(ctx context.Context, order string) (map[int6
 	if resp.Status != "Shipped" {
 		// If the order was cancelled, return an empty response
 		if strings.HasPrefix(resp.Status, "Cancelled") {
-			return rMap, tRet, nil
+			return rMap, tRet, status.Errorf(codes.DataLoss, "Order was cancelled")
 		}
 
 		if strings.HasPrefix(resp.Status, "Payment Received") {
@@ -405,7 +405,7 @@ func (r *DiscogsRetriever) RemoveFromWantlist(ctx context.Context, releaseID int
 	return err
 }
 
-//AddToFolderResponse the response back from an add request
+// AddToFolderResponse the response back from an add request
 type AddToFolderResponse struct {
 	InstanceID  int `json:"instance_id"`
 	ResourceURL string
@@ -422,14 +422,14 @@ func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, rel
 	return r.delete(ctx, "/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
 }
 
-//ReleaseBack what we get for a single release
+// ReleaseBack what we get for a single release
 type ReleaseBack struct {
 	DateAdded  string     `json:"date_added"`
 	InstanceID int32      `json:"instance_id"`
 	Notes      []*pb.Note `json:"notes"`
 }
 
-//ReleaseResponse what we get back from release
+// ReleaseResponse what we get back from release
 type ReleaseResponse struct {
 	Pagination Pagination
 	Releases   []ReleaseBack
@@ -452,14 +452,14 @@ func (r *DiscogsRetriever) GetStats(ctx context.Context, rid int32) (*Stats, err
 	return stats, nil
 }
 
-//InstanceInfo some basic details about the instance
+// InstanceInfo some basic details about the instance
 type InstanceInfo struct {
 	DateAdded       int64
 	RecordCondition string
 	SleeveCondition string
 }
 
-//GetInstanceInfo gets the info for an instance
+// GetInstanceInfo gets the info for an instance
 func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[int32]*InstanceInfo, error) {
 	jsonString, _, err := r.retrieve(ctx, fmt.Sprintf("/users/brotherlogic/collection/releases/%v?token=%v", rid, r.userToken))
 	mapper := make(map[int32]*InstanceInfo)
