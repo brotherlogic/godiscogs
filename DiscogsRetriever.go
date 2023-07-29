@@ -457,6 +457,7 @@ type InstanceInfo struct {
 	DateAdded       int64
 	RecordCondition string
 	SleeveCondition string
+	LastCleanDate   string
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -487,6 +488,11 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			// Sleeve condition
 			if note.FieldId == 2 {
 				mapper[entry.InstanceID].SleeveCondition = note.Value
+			}
+
+			// Last clean date
+			if note.FieldId == 5 {
+				mapper[entry.InstanceID].LastCleanDate = note.Value
 			}
 		}
 
