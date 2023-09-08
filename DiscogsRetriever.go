@@ -461,6 +461,7 @@ type InstanceInfo struct {
 	Width           string
 	Weight          string
 	Sleeve          string
+	Keep            string
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -507,6 +508,9 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			}
 			if note.FieldId == 9 {
 				mapper[entry.InstanceID].Sleeve = note.Value
+			}
+			if note.FieldId == 10 {
+				mapper[entry.InstanceID].Keep = note.Value
 			}
 		}
 
