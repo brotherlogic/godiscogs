@@ -395,13 +395,13 @@ func (r *DiscogsRetriever) ExpireSale(ctx context.Context, saleID int, releaseID
 
 // AddToWantlist adds a record to the wantlist
 func (r *DiscogsRetriever) AddToWantlist(ctx context.Context, releaseID int) error {
-	_, err := r.put(ctx, "/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+	_, err := r.put(ctx, "/users/BrotherLogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 	return err
 }
 
 // RemoveFromWantlist adds a record to the wantlist
 func (r *DiscogsRetriever) RemoveFromWantlist(ctx context.Context, releaseID int) error {
-	err := r.delete(ctx, "/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+	err := r.delete(ctx, "/users/BrotherLogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 	return err
 }
 
