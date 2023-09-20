@@ -223,7 +223,7 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*pb.Releas
 
 // GetWantlist returns the wantlist for the given user
 func (r *DiscogsRetriever) GetWantlist(ctx context.Context) ([]*pb.Release, error) {
-	jsonString, _, err := r.retrieve(ctx, "/users/BrotherLogic/wants?per_page=100&token="+r.userToken)
+	jsonString, _, err := r.retrieve(ctx, "users/BrotherLogic/wants?per_page=100&token="+r.userToken)
 
 	if err != nil {
 		return nil, err
