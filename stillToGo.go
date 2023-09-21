@@ -254,7 +254,7 @@ func (r *DiscogsRetriever) GetWantlist(ctx context.Context) ([]*pb.Release, erro
 
 // GetInstanceID Gets the instance ID for this release
 func (r *DiscogsRetriever) GetInstanceID(ctx context.Context, releaseID int) int32 {
-	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/releases/"+strconv.Itoa(releaseID)+"?token="+r.userToken)
+	jsonString, _, _ := r.retrieve(ctx, "users/brotherlogic/collection/releases/"+strconv.Itoa(releaseID)+"?token="+r.userToken)
 	var response CollectionResponse
 	r.unmarshaller.Unmarshal(jsonString, &response)
 	if len(response.Releases) > 0 {
@@ -266,7 +266,7 @@ func (r *DiscogsRetriever) GetInstanceID(ctx context.Context, releaseID int) int
 
 // AddToFolder adds the release to the given folder
 func (r *DiscogsRetriever) AddToFolder(ctx context.Context, folderID int32, releaseID int32) (int, error) {
-	jsonString, _ := r.post(ctx, "/users/brotherlogic/collection/folders/"+strconv.Itoa(int(folderID))+"/releases/"+strconv.Itoa(int(releaseID))+"?token="+r.userToken, "")
+	jsonString, _ := r.post(ctx, "users/brotherlogic/collection/folders/"+strconv.Itoa(int(folderID))+"/releases/"+strconv.Itoa(int(releaseID))+"?token="+r.userToken, "")
 	var response AddToFolderResponse
 	err := r.unmarshaller.Unmarshal([]byte(jsonString), &response)
 	if err != nil {
