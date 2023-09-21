@@ -276,6 +276,7 @@ func (r *DiscogsRetriever) AddToFolder(ctx context.Context, folderID int32, rele
 }
 
 func (r *DiscogsRetriever) post(ctx context.Context, path string, data string) (string, error) {
+	path = strings.TrimPrefix(path, "/")
 	urlv := "https://api.discogs.com/" + path
 	r.Log(ctx, fmt.Sprintf("Posting %v to %v", data, urlv))
 
