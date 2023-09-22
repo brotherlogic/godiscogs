@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	pb "github.com/BrotherLogic/godiscogs/proto"
+	pb "github.com/brotherlogic/godiscogs/proto"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc/codes"
