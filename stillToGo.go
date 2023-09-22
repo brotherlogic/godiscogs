@@ -223,7 +223,7 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*pb.Releas
 
 // GetWantlist returns the wantlist for the given user
 func (r *DiscogsRetriever) GetWantlist(ctx context.Context) ([]*pb.Release, error) {
-	jsonString, _, err := r.retrieve(ctx, "/users/BrotherLogic/wants?per_page=100&token="+r.userToken)
+	jsonString, _, err := r.retrieve(ctx, "users/BrotherLogic/wants?per_page=100&token="+r.userToken)
 
 	if err != nil {
 		return nil, err
@@ -276,6 +276,7 @@ func (r *DiscogsRetriever) AddToFolder(ctx context.Context, folderID int32, rele
 }
 
 func (r *DiscogsRetriever) post(ctx context.Context, path string, data string) (string, error) {
+	path = strings.TrimPrefix(path, "/")
 	urlv := "https://api.discogs.com/" + path
 	r.Log(ctx, fmt.Sprintf("Posting %v to %v", data, urlv))
 

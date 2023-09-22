@@ -599,6 +599,9 @@ func (r *DiscogsRetriever) retrieve(ctx context.Context, path string) ([]byte, h
 		if response.StatusCode == 404 {
 			return body, response.Header, status.Errorf(codes.NotFound, "Bad Read: (%v) %v", response.StatusCode, string(body))
 		}
+		if response.StatusCode == 429 {
+			return body, response.Header, status.Errorf(codes.ResourceExhausted, "Bad Read: (%v) %v", response.StatusCode, string(body))
+		}
 		return body, response.Header, fmt.Errorf("Bad Read: (%v) %v", response.StatusCode, string(body))
 	}
 
