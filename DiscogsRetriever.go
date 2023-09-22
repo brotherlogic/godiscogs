@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	pb "github.com/brotherlogic/godiscogs/proto"
+	pb "github.com/BrotherLogic/godiscogs/proto"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -224,13 +224,13 @@ func (r *DiscogsRetriever) processCollectionRelease(re *CollectionRelease) *pb.R
 }
 
 func (r *DiscogsRetriever) SetNotes(iid, fid, id int32, value string) error {
-	//_, err := r.post(fmt.Sprintf("/users/brotherlogic/collection/folders/%v/releases/%v/instances/%v/fields/3?value=%v&token=", fid, id, iid, value, r.userToken), "")
+	//_, err := r.post(fmt.Sprintf("/users/BrotherLogic/collection/folders/%v/releases/%v/instances/%v/fields/3?value=%v&token=", fid, id, iid, value, r.userToken), "")
 	return fmt.Errorf("Not finished yet")
 }
 
 // GetCollection gets all the releases in the users collection
 func (r *DiscogsRetriever) GetCollection(ctx context.Context) []*pb.Release {
-	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/folders/0/releases?per_page=100&token="+r.userToken)
+	jsonString, _, _ := r.retrieve(ctx, "/users/BrotherLogic/collection/folders/0/releases?per_page=100&token="+r.userToken)
 
 	var releases []*CollectionRelease
 	response := &CollectionResponse{}
@@ -280,7 +280,7 @@ type InventoryEntry struct {
 
 // GetInventory gets all the releases that are for sale
 func (r *DiscogsRetriever) GetInventory(ctx context.Context) ([]*pb.ForSale, error) {
-	jsonString, _, err := r.retrieve(ctx, "/users/brotherlogic/inventory?status=For%20Sale&per_page=100&token="+r.userToken)
+	jsonString, _, err := r.retrieve(ctx, "/users/BrotherLogic/inventory?status=For%20Sale&per_page=100&token="+r.userToken)
 	if err != nil {
 		return []*pb.ForSale{}, err
 	}
@@ -395,13 +395,13 @@ func (r *DiscogsRetriever) ExpireSale(ctx context.Context, saleID int, releaseID
 
 // AddToWantlist adds a record to the wantlist
 func (r *DiscogsRetriever) AddToWantlist(ctx context.Context, releaseID int) error {
-	_, err := r.put(ctx, "/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+	_, err := r.put(ctx, "/users/BrotherLogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 	return err
 }
 
 // RemoveFromWantlist adds a record to the wantlist
 func (r *DiscogsRetriever) RemoveFromWantlist(ctx context.Context, releaseID int) error {
-	err := r.delete(ctx, "/users/brotherlogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
+	err := r.delete(ctx, "/users/BrotherLogic/wants/"+strconv.Itoa(releaseID)+"?token="+r.userToken, "")
 	return err
 }
 
@@ -414,12 +414,12 @@ type AddToFolderResponse struct {
 
 // MoveToFolder Moves the given release to the new folder
 func (r *DiscogsRetriever) MoveToFolder(ctx context.Context, folderID int, releaseID int, instanceID int, newFolderID int) (string, error) {
-	return r.post(ctx, "/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
+	return r.post(ctx, "/users/BrotherLogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
 }
 
 // DeleteInstance removes a record from the collection
 func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, releaseID int, instanceID int) error {
-	return r.delete(ctx, "/users/brotherlogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
+	return r.delete(ctx, "/users/BrotherLogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
 }
 
 // ReleaseBack what we get for a single release
@@ -466,7 +466,7 @@ type InstanceInfo struct {
 
 // GetInstanceInfo gets the info for an instance
 func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[int32]*InstanceInfo, error) {
-	jsonString, _, err := r.retrieve(ctx, fmt.Sprintf("/users/brotherlogic/collection/releases/%v?token=%v", rid, r.userToken))
+	jsonString, _, err := r.retrieve(ctx, fmt.Sprintf("/users/BrotherLogic/collection/releases/%v?token=%v", rid, r.userToken))
 	mapper := make(map[int32]*InstanceInfo)
 	if err != nil {
 		return mapper, err
@@ -526,7 +526,7 @@ type FoldersResponse struct {
 
 // GetFolders gets all the folders for a given user
 func (r *DiscogsRetriever) GetFolders(ctx context.Context) []pb.Folder {
-	jsonString, _, _ := r.retrieve(ctx, "/users/brotherlogic/collection/folders?token="+r.userToken)
+	jsonString, _, _ := r.retrieve(ctx, "/users/BrotherLogic/collection/folders?token="+r.userToken)
 
 	var folders []pb.Folder
 	var response FoldersResponse
