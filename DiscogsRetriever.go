@@ -337,13 +337,16 @@ func (r *DiscogsRetriever) GetSalePrice(ctx context.Context, releaseID int) (flo
 }
 
 // SellRecord sells a given release
-func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price float32, state string, condition, sleeve string, weight int) int64 {
+func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price float32, state string, condition, sleeve string, weight int) (int64, error) {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + condition + "\", \"sleeve_condition\":\"" + sleeve + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"" + fmt.Sprintf("%v", weight) + "\"}"
-	databack, _ := r.post(ctx, "/marketplace/listings?token="+r.userToken, data)
+	databack, err := r.post(ctx, "/marketplace/listings?token="+r.userToken, data)
+	if err != nil {
+		return -1, fmt.Errorf("Bad return %v (%v)", err, string(databack))
+	}
 	var resp SellResponse
-	err := r.unmarshaller.Unmarshal([]byte(databack), &resp)
+	err = r.unmarshaller.Unmarshal([]byte(databack), &resp)
 	r.Log(ctx, fmt.Sprintf("Receive Sale Response: %v -> %v (%v)", resp, string(databack), err))
-	return resp.ListingID
+	return resp.ListingID, nil
 }
 
 // GetCurrentSalePrice gets the current sale price

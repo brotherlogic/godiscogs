@@ -187,7 +187,7 @@ func TestGetStats(t *testing.T) {
 func TestSellRecord(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	id := retr.SellRecord(context.Background(), 2576104, 12.345, "Draft", "blah", "blah", 12)
+	id, _ := retr.SellRecord(context.Background(), 2576104, 12.345, "Draft", "blah", "blah", 12)
 
 	if id != 2375135419 {
 		t.Errorf("Sale has failed: %v", id)
