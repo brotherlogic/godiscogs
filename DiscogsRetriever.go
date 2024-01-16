@@ -341,7 +341,7 @@ func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price 
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + strings.TrimSpace(condition) + "\", \"sleeve_condition\":\"" + strings.TrimSpace(sleeve) + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"" + fmt.Sprintf("%v", weight) + "\"}"
 	databack, err := r.post(ctx, "/marketplace/listings?token="+r.userToken, data)
 	if err != nil {
-		return -1, fmt.Errorf("Bad return %v (%v)", err, string(databack))
+		return -1, fmt.Errorf("Bad return %w (%v)", err, string(databack))
 	}
 	var resp SellResponse
 	err = r.unmarshaller.Unmarshal([]byte(databack), &resp)
