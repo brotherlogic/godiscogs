@@ -652,7 +652,7 @@ func TestGetSalePrice(t *testing.T) {
 
 func TestGetSaleState(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(context.Background(), 805377159)
+	state, _ := retr.GetCurrentSaleState(context.Background(), 805377159)
 	if state != pb.SaleState_FOR_SALE {
 		t.Errorf("State is incorrect: %v", state)
 	}
@@ -660,7 +660,7 @@ func TestGetSaleState(t *testing.T) {
 
 func TestGetSaleStateOnFail(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(context.Background(), 805377158)
+	state, _ := retr.GetCurrentSaleState(context.Background(), 805377158)
 	if state != pb.SaleState_NOT_FOR_SALE {
 		t.Errorf("State is incorrect: %v", state)
 	}
@@ -668,7 +668,7 @@ func TestGetSaleStateOnFail(t *testing.T) {
 
 func TestGetSaleStateOnSold(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(context.Background(), 805377157)
+	state, _ := retr.GetCurrentSaleState(context.Background(), 805377157)
 	if state != pb.SaleState_SOLD {
 		t.Errorf("State is incorrect: %v", state)
 	}
@@ -676,7 +676,7 @@ func TestGetSaleStateOnSold(t *testing.T) {
 
 func TestGetSaleStateExpired(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
-	state := retr.GetCurrentSaleState(context.Background(), 805377156)
+	state, _ := retr.GetCurrentSaleState(context.Background(), 805377156)
 	if state != pb.SaleState_EXPIRED {
 		t.Errorf("State is incorrect: %v", state)
 	}

@@ -355,21 +355,25 @@ func (r *DiscogsRetriever) GetCurrentSalePrice(ctx context.Context, saleID int64
 }
 
 // GetCurrentSaleState gets the current sale state
-func (r *DiscogsRetriever) GetCurrentSaleState(ctx context.Context, saleID int64) pb.SaleState {
-	jsonString, _, _ := r.retrieve(ctx, fmt.Sprintf("/marketplace/listings/%v?curr_abbr=USD&token="+r.userToken, saleID))
+func (r *DiscogsRetriever) GetCurrentSaleState(ctx context.Context, saleID int64) (pb.SaleState, error) {
+	jsonString, _, err := r.retrieve(ctx, fmt.Sprintf("/marketplace/listings/%v?curr_abbr=USD&token="+r.userToken, saleID))
+	if err != nil {
+		return pb.SaleState_NOT_FOR_SALE, err
+	}
+
 	var resp PriceResponse
 	r.unmarshaller.Unmarshal(jsonString, &resp)
 
 	if resp.Status == "For Sale" {
-		return pb.SaleState_FOR_SALE
+		return pb.SaleState_FOR_SALE, nil
 	} else if resp.Status == "Expired" {
-		return pb.SaleState_EXPIRED
+		return pb.SaleState_EXPIRED, nil
 	} else if resp.Status == "Sold" || resp.Status == "Draft" || resp.Status == "Deleted" {
-		return pb.SaleState_SOLD
+		return pb.SaleState_SOLD, nil
 	}
 
 	r.Log(ctx, fmt.Sprintf("Unknown sale status: %v", resp.Status))
-	return pb.SaleState_NOT_FOR_SALE
+	return pb.SaleState_NOT_FOR_SALE, nil
 }
 
 // UpdateSalePrice updates the sale price
