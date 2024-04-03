@@ -184,6 +184,10 @@ func (r *DiscogsRetriever) GetOrder(ctx context.Context, order string) (map[int6
 			return rMap, tRet, nil
 		}
 
+		if strings.HasPrefix(resp.Status, "Merged") {
+			return rMap, tRet, status.Errorf(codes.DataLoss, "Order was merged")
+		}
+
 		r.Log(ctx, fmt.Sprintf("Unable to process order: %v", resp))
 
 		return rMap, tRet, status.Errorf(codes.FailedPrecondition, "Cannot process order with status of %v (made on date %v -> %v)", resp.Status, tRet, resp.Archived)
