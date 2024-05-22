@@ -300,6 +300,10 @@ func (r *DiscogsRetriever) post(ctx context.Context, path string, data string) (
 		return "", status.Error(codes.FailedPrecondition, fmt.Sprintf("POST ERROR (STATUS CODE): %v, %v", response.StatusCode, string(body)))
 	}
 
+	if response.StatusCode == 429 {
+		return "", status.Errorf(codes.ResourceExhausted, "%v / %v", response.Header.Get("X-Discogs-Ratelimit"), response.Header.Get("X-Discogs-Ratelimit-Used"))
+	}
+
 	if response.StatusCode != 200 && response.StatusCode != 201 && response.StatusCode != 204 {
 		return fmt.Sprintf("RETR %v -> %v given %v", response.StatusCode, string(body), path), fmt.Errorf("POST ERROR (STATUS CODE): %v, %v (%v, %v) throttled %v", response.StatusCode, string(body), response.Header.Get("X-Discogs-Ratelimit"), response.Header.Get("X-Discogs-Ratelimit-Used"), tv)
 	}
