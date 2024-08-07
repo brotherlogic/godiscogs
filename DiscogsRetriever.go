@@ -439,6 +439,7 @@ func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, rel
 type ReleaseBack struct {
 	DateAdded  string     `json:"date_added"`
 	InstanceID int32      `json:"instance_id"`
+	FolderId   int32      `json:"folder_id"`
 	Notes      []*pb.Note `json:"notes"`
 }
 
@@ -476,6 +477,7 @@ type InstanceInfo struct {
 	Sleeve          string
 	Keep            string
 	Arrived         int64
+	FolderId        int32
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -496,6 +498,8 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			return mapper, err
 		}
 		mapper[entry.InstanceID] = &InstanceInfo{DateAdded: p.Unix()}
+
+		mapper[entry.InstanceID].FolderId = entry.FolderId
 
 		for _, note := range entry.Notes {
 			// Media condition
