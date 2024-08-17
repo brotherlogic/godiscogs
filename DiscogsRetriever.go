@@ -441,6 +441,7 @@ type ReleaseBack struct {
 	InstanceID int32      `json:"instance_id"`
 	FolderId   int32      `json:"folder_id"`
 	Notes      []*pb.Note `json:"notes"`
+	Rating     int32      `json:"rating"`
 }
 
 // ReleaseResponse what we get back from release
@@ -478,6 +479,7 @@ type InstanceInfo struct {
 	Keep            string
 	Arrived         int64
 	FolderId        int32
+	Rating          int32
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -498,6 +500,8 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			return mapper, err
 		}
 		mapper[entry.InstanceID] = &InstanceInfo{DateAdded: p.Unix()}
+
+		mapper[entry.InstanceID].Rating = entry.Rating
 
 		mapper[entry.InstanceID].FolderId = entry.FolderId
 

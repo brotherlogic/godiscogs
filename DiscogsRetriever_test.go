@@ -26,7 +26,7 @@ func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
 		return nil, fmt.Errorf("Built to fail")
 	}
 	response := &http.Response{}
-	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	strippedURL := strings.Replace(strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1), "BrotherLogic", "brotherlogic", -1)
 	blah, err := os.Open("testdata" + strippedURL)
 
 	log.Printf("Opened %v", "testdata"+strippedURL)
@@ -582,12 +582,16 @@ func TestGetInstanceInfo(t *testing.T) {
 		t.Fatalf("Unable to pull iid: %v", err)
 	}
 
-	if info[19867048].DateAdded != 1351323375 {
-		t.Errorf("Bad date: %v", info)
+	if info[19867048].DateAdded != 1351348575 {
+		t.Errorf("Bad date: %+v", info[19867048])
 	}
 
 	if info[19867048].RecordCondition != "Very Good Plus (VG+)" {
 		t.Errorf("Bad condition: %+v", info[19867048])
+	}
+
+	if info[19867048].Rating != 5 {
+		t.Errorf("Bad rating: %+v", info[19867048])
 	}
 
 }
