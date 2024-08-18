@@ -594,6 +594,10 @@ func TestGetInstanceInfo(t *testing.T) {
 		t.Errorf("Bad rating: %+v", info[19867048])
 	}
 
+	if info[19867048].LastListenTime != 1639008000 {
+		t.Errorf("Bad Listen Time: %+v", info[19867048])
+	}
+
 }
 
 func TestGetInstanceInfoFailRet(t *testing.T) {

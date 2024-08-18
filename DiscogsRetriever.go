@@ -480,6 +480,7 @@ type InstanceInfo struct {
 	Arrived         int64
 	FolderId        int32
 	Rating          int32
+	LastListenTime  int64
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -541,6 +542,14 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 					return mapper, err
 				}
 				mapper[entry.InstanceID].Arrived = pv.Unix()
+			}
+
+			if note.FieldId == 6 && note.Value != "" {
+				pv, err := time.Parse("2006-01-02", note.Value)
+				if err != nil {
+					return mapper, err
+				}
+				mapper[entry.InstanceID].LastListenTime = pv.Unix()
 			}
 		}
 
