@@ -616,6 +616,9 @@ func (r *DiscogsRetriever) updateRateLimit(ctx context.Context, resp *http.Respo
 
 func (r *DiscogsRetriever) retrieve(ctx context.Context, path string) ([]byte, http.Header, error) {
 	urlv := "https://api.discogs.com/" + path
+	if strings.HasPrefix(path, "/") {
+		urlv = "https://api.discogs.com/" + path[1:]
+	}
 
 	t1 := time.Now()
 	r.throttle()
