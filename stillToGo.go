@@ -86,7 +86,10 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*pb.Releas
 	var versions VersionsResponse
 	if release.MasterId != 0 {
 		// Now get the earliest release date
-		jsonString, _, _ = r.retrieve(ctx, "/masters/"+strconv.Itoa(int(release.MasterId))+"/versions?per_page=500&token="+r.userToken)
+		jsonString, _, err = r.retrieve(ctx, "/masters/"+strconv.Itoa(int(release.MasterId))+"/versions?per_page=500&token="+r.userToken)
+		if err != nil {
+			return nil, err
+		}
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 	} else {
 		tmpVersion := Version{Released: release.Released, Format: ""}
@@ -159,7 +162,10 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*pb.Releas
 	end := versions.Pagination.Pages == versions.Pagination.Page
 
 	for !end {
-		jsonString, _, _ = r.retrieve(ctx, versions.Pagination.Urls.Next[23:])
+		jsonString, _, err = r.retrieve(ctx, versions.Pagination.Urls.Next[23:])
+		if err != nil {
+			return nil, err
+		}
 		r.unmarshaller.Unmarshal(jsonString, &versions)
 
 		for _, version := range versions.Versions {
