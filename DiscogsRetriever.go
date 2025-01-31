@@ -400,9 +400,9 @@ func (r *DiscogsRetriever) RemoveFromSale(ctx context.Context, saleID int, relea
 }
 
 // ExpireSale removes the listing from sale
-func (r *DiscogsRetriever) ExpireSale(ctx context.Context, saleID int, releaseID int, price float32) error {
+func (r *DiscogsRetriever) ExpireSale(ctx context.Context, saleID int64, releaseID int, price float32) error {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"Expired\"}"
-	_, err := r.post(ctx, "/marketplace/listings/"+strconv.Itoa(saleID)+"?curr_abr=USD&token="+r.userToken, data)
+	_, err := r.post(ctx, fmt.Sprintf("/marketplace/listings/%v?curr_abr=USD&token=%v", saleID, r.userToken), data)
 	return err
 }
 
