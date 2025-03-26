@@ -325,6 +325,8 @@ func (r *DiscogsRetriever) post(ctx context.Context, path string, data string) (
 func (r *DiscogsRetriever) delete(ctx context.Context, path string, data string) error {
 	urlv := "https://api.discogs.com/" + path
 
+	r.Log(ctx, fmt.Sprintf("Deleting %v", urlv))
+
 	//Sleep here
 	r.throttle()
 	t := time.Now()
