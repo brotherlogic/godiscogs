@@ -340,6 +340,8 @@ func (r *DiscogsRetriever) delete(ctx context.Context, path string, data string)
 	r.updateRateLimit(ctx, response, "DELETE")
 	defer response.Body.Close()
 
+	r.logger(ctx, fmt.Sprintf("DELETE %v -> %v", path, response.StatusCode))
+
 	body, _ := ioutil.ReadAll(response.Body)
 	if response.StatusCode != 204 {
 		if response.StatusCode == 404 {
