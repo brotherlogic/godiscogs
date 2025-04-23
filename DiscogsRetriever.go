@@ -469,18 +469,20 @@ func (r *DiscogsRetriever) GetStats(ctx context.Context, rid int32) (*Stats, err
 
 // InstanceInfo some basic details about the instance
 type InstanceInfo struct {
-	DateAdded       int64
-	RecordCondition string
-	SleeveCondition string
-	LastCleanDate   string
-	Width           string
-	Weight          string
-	Sleeve          string
-	Keep            string
-	Arrived         int64
-	FolderId        int32
-	Rating          int32
-	LastListenTime  int64
+	DateAdded        int64
+	RecordCondition  string
+	SleeveCondition  string
+	LastCleanDate    string
+	Width            string
+	Weight           string
+	Sleeve           string
+	Keep             string
+	Arrived          int64
+	FolderId         int32
+	Rating           int32
+	LastListenTime   int64
+	PurchaseLocation string
+	PurchasePrice    int32
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -534,6 +536,17 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			}
 			if note.FieldId == 10 {
 				mapper[entry.InstanceID].Keep = note.Value
+			}
+			if note.FieldId == 13 {
+				mapper[entry.InstanceID].PurchaseLocation = note.Value
+			}
+			if note.FieldId == 14 {
+				// Remove decimal point - rc stores prices in cents
+				val, err := strconv.ParseInt(strings.ReplaceAll(note.Value, ".", ""), 10, 32)
+				if err != nil {
+					return mapper, err
+				}
+				mapper[entry.InstanceID].PurchasePrice = int32(val)
 			}
 
 			if note.FieldId == 12 && note.Value != "" {
