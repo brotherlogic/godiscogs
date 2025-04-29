@@ -240,7 +240,7 @@ func (r *DiscogsRetriever) GetWantlist(ctx context.Context) ([]*pb.Release, erro
 	r.unmarshaller.Unmarshal(jsonString, &response)
 
 	releases = append(releases, response.Wants...)
-	end := response.Pagination.Pages == response.Pagination.Page
+	end := response.Pagination.Pages <= response.Pagination.Page
 
 	for !end {
 		jsonString, _, _ = r.retrieve(ctx, response.Pagination.Urls.Next[23:])
