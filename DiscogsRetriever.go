@@ -537,10 +537,10 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			if note.FieldId == 10 {
 				mapper[entry.InstanceID].Keep = note.Value
 			}
-			if note.FieldId == 13 {
+			if note.FieldId == 14 {
 				mapper[entry.InstanceID].PurchaseLocation = note.Value
 			}
-			if note.FieldId == 14 {
+			if note.FieldId == 13 {
 				// Remove decimal point - rc stores prices in cents
 				val, err := strconv.ParseInt(strings.ReplaceAll(note.Value, ".", ""), 10, 32)
 				if err != nil {
