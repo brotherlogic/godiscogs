@@ -483,6 +483,7 @@ type InstanceInfo struct {
 	LastListenTime   int64
 	PurchaseLocation string
 	PurchasePrice    int32
+	Notes            string
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -517,6 +518,10 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			// Sleeve condition
 			if note.FieldId == 2 {
 				mapper[entry.InstanceID].SleeveCondition = note.Value
+			}
+
+			if note.FieldId == 3 {
+				mapper[entry.InstanceID].Notes = note.Value
 			}
 
 			// Last clean date
