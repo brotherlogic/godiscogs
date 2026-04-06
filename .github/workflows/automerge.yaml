@@ -7,10 +7,13 @@ on:
 jobs:
   enable-automerge:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Enable Auto-Merge for PR
         env:
-          GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }} # Same token used in pr.yml to ensure adequate permissions
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Switch from PERSONAL_TOKEN to GITHUB_TOKEN
         run: |
           # The --auto flag tells GitHub to wait for all required status checks to turn green before squashing!
           echo "Enabling Github Auto-Merge for PR #${{ github.event.pull_request.number }}"
