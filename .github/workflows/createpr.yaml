@@ -3,7 +3,7 @@ name: Auto Create PR
 on:
   push:
     branches-ignore:
-      - main
+      - master
 
 jobs:
   create-pr:
@@ -25,7 +25,7 @@ jobs:
             gh pr create \
               --title "Auto PR: ${{ github.ref_name }}" \
               --body "Automated PR created from branch ${{ github.ref_name }}" \
-              --base main \
+              --base master \
               --head "${{ github.ref_name }}"
           else
             echo "PR already exists for branch ${{ github.ref_name }}"
