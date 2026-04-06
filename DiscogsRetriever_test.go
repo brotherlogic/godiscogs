@@ -27,6 +27,9 @@ func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
 	}
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1), "BrotherLogic", "brotherlogic", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, err := os.Open("testdata" + strippedURL)
 
 	log.Printf("Opened %v", "testdata"+strippedURL)
@@ -61,6 +64,9 @@ func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
 func (httpGetter *testFileGetter) Post(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	response.StatusCode = 204
@@ -70,6 +76,9 @@ func (httpGetter *testFileGetter) Post(url string, data string) (*http.Response,
 func (httpGetter *testFileGetter) Put(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	return response, nil
@@ -78,6 +87,9 @@ func (httpGetter *testFileGetter) Put(url string, data string) (*http.Response, 
 func (httpGetter *testFileGetter) Delete(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	return response, nil
@@ -187,7 +199,7 @@ func TestGetStats(t *testing.T) {
 func TestSellRecord(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	id, _ := retr.SellRecord(context.Background(), 2576104, 12.345, "Draft", "blah", "blah", 12)
+	id, _ := retr.SellRecord(context.Background(), 2576104, 12.345, "Draft", "blah", "blah", 12, "some comments")
 
 	if id != 2375135419 {
 		t.Errorf("Sale has failed: %v", id)

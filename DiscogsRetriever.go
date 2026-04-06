@@ -343,9 +343,23 @@ func (r *DiscogsRetriever) GetSalePrice(ctx context.Context, releaseID int) (flo
 }
 
 // SellRecord sells a given release
-func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price float32, state string, condition, sleeve string, weight int) (int64, error) {
-	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"" + strings.TrimSpace(condition) + "\", \"sleeve_condition\":\"" + strings.TrimSpace(sleeve) + "\", \"price\":" + strconv.FormatFloat(float64(price), 'g', -1, 32) + ", \"status\":\"" + state + "\",\"weight\":\"" + fmt.Sprintf("%v", weight) + "\"}"
-	databack, err := r.post(ctx, "/marketplace/listings?token="+r.userToken, data)
+func (r *DiscogsRetriever) SellRecord(ctx context.Context, releaseID int, price float32, state string, condition, sleeve string, weight int, notes string) (int64, error) {
+	sellData := map[string]interface{}{
+		"release_id":       releaseID,
+		"condition":        strings.TrimSpace(condition),
+		"sleeve_condition": strings.TrimSpace(sleeve),
+		"price":            price,
+		"status":           state,
+		"weight":           weight,
+		"comments":         strings.TrimSpace(notes),
+	}
+
+	dataBytes, err := json.Marshal(sellData)
+	if err != nil {
+		return -1, fmt.Errorf("Failed to marshal sales data: %w", err)
+	}
+
+	databack, err := r.post(ctx, "/marketplace/listings?token="+r.userToken, string(dataBytes))
 	if err != nil {
 		return -1, fmt.Errorf("Bad return %w (%v)", err, string(databack))
 	}
