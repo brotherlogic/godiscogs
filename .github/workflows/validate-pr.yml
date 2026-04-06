@@ -1,0 +1,80 @@
+name: Validate PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["Gemini AI PR Reviewer"]
+    types:
+      - completed
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Ensure PR Code
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            PR_NUMBER=$(gh pr list -s open --limit 1 --json number --jq '.[0].number')
+            echo "Triggered by workflow_run. PR is $PR_NUMBER"
+            gh pr checkout $PR_NUMBER
+            echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          else
+            echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          fi
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build and Vet
+        run: |
+          go build -v ./...
+          go vet ./...
+
+      - name: Check AI Review Addressed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO=${{ github.repository }}
+
+          echo "Fetching latest commit timestamp..."
+          LATEST_COMMIT_DATE=$(gh api repos/$REPO/pulls/$PR_NUMBER/commits --jq '.[-1].commit.committer.date')
+          echo "Latest commit date: $LATEST_COMMIT_DATE"
+
+          echo "Fetching latest Gemini AI Code Review timestamp..."
+          # Fetch reviews, filter for github-actions[bot] and the specific comment string, get the last one's submitted_at
+          LATEST_REVIEW_DATE=$(gh api repos/$REPO/pulls/$PR_NUMBER/reviews --jq '[.[] | select(.user?.login == "github-actions[bot]" and (.body != null) and (.body | contains("Gemini AI Code Review")))] | last | .submitted_at')
+          
+          if [ -z "$LATEST_REVIEW_DATE" ] || [ "$LATEST_REVIEW_DATE" = "null" ]; then
+            echo "No Gemini AI Code Review found. Checking for /gemini-review command..."
+            HAS_REQUEST=$(gh api repos/$REPO/issues/$PR_NUMBER/comments --jq '[.[] | select(.body | contains("/gemini-review"))] | length')
+            if [ "$HAS_REQUEST" -gt 0 ]; then
+                echo "Gemini AI Code Review was requested but no output was produced. This means the reviewer found 0 issues. Passing validation."
+                exit 0
+            fi
+            echo "No Gemini AI Code Review or /gemini-review command found. Failing validation."
+            exit 1
+          fi
+
+          echo "Latest AI review date: $LATEST_REVIEW_DATE"
+
+          # Use Unix timestamps for accurate comparison
+          COMMIT_TS=$(date -d "$LATEST_COMMIT_DATE" +%s)
+          REVIEW_TS=$(date -d "$LATEST_REVIEW_DATE" +%s)
+
+          if [ "$REVIEW_TS" -gt "$COMMIT_TS" ]; then
+            echo "::error::There are unaddressed Gemini AI Code Review comments! Please push a new commit adjusting the code to satisfy the AI Review."
+            exit 1
+          fi
+
+          echo "All Gemini AI Code Reviews have been addressed by subsequent commits."

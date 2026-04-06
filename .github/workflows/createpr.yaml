@@ -1,0 +1,30 @@
+name: Auto Create PR
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        run: |
+          # Check if PR already exists for this branch
+          PR_EXISTS=$(gh pr list --head "${{ github.ref_name }}" --state open --json number --jq length)
+          if [ "$PR_EXISTS" -eq 0 ]; then
+            gh pr create \
+              --title "Auto PR: ${{ github.ref_name }}" \
+              --body "Automated PR created from branch ${{ github.ref_name }}" \
+              --base main \
+              --head "${{ github.ref_name }}"
+          else
+            echo "PR already exists for branch ${{ github.ref_name }}"
+          fi
