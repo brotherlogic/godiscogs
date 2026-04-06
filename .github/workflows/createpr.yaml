@@ -17,6 +17,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         run: |
+          # Strip any accidental newlines/carriage returns from the token
+          export GITHUB_TOKEN=$(echo -n "$GITHUB_TOKEN" | tr -d '\n\r ')
           # Check if PR already exists for this branch
           PR_EXISTS=$(gh pr list --head "${{ github.ref_name }}" --state open --json number --jq length)
           if [ "$PR_EXISTS" -eq 0 ]; then
