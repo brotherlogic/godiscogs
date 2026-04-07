@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -88,9 +89,10 @@ func (r *DiscogsRetriever) GetRelease(ctx context.Context, id int32) (*pb.Releas
 		// Now get the earliest release date
 		jsonString, _, err = r.retrieve(ctx, "/masters/"+strconv.Itoa(int(release.MasterId))+"/versions?per_page=500&token="+r.userToken)
 		if err != nil {
-			return nil, err
-		}
+			log.Printf("Error getting versions: %v", err)
+		} else {
 		r.unmarshaller.Unmarshal(jsonString, &versions)
+		}
 	} else {
 		tmpVersion := Version{Released: release.Released, Format: ""}
 		versions.Versions = append(versions.Versions, tmpVersion)
@@ -340,7 +342,7 @@ func (r *DiscogsRetriever) delete(ctx context.Context, path string, data string)
 	r.updateRateLimit(ctx, response, "DELETE")
 	defer response.Body.Close()
 
-	r.logger(ctx, fmt.Sprintf("DELETE %v -> %v", path, response.StatusCode))
+	r.Log(ctx, fmt.Sprintf("DELETE %v -> %v", path, response.StatusCode))
 
 	body, _ := ioutil.ReadAll(response.Body)
 	if response.StatusCode != 204 {

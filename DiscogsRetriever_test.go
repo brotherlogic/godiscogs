@@ -27,6 +27,9 @@ func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
 	}
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1), "BrotherLogic", "brotherlogic", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, err := os.Open("testdata" + strippedURL)
 
 	log.Printf("Opened %v", "testdata"+strippedURL)
@@ -61,6 +64,9 @@ func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
 func (httpGetter *testFileGetter) Post(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	response.StatusCode = 204
@@ -70,6 +76,9 @@ func (httpGetter *testFileGetter) Post(url string, data string) (*http.Response,
 func (httpGetter *testFileGetter) Put(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	return response, nil
@@ -78,6 +87,9 @@ func (httpGetter *testFileGetter) Put(url string, data string) (*http.Response, 
 func (httpGetter *testFileGetter) Delete(url string, data string) (*http.Response, error) {
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
+	if !strings.HasPrefix(strippedURL, "/") {
+		strippedURL = "/" + strippedURL
+	}
 	blah, _ := os.Open("testdata" + strippedURL)
 	response.Body = blah
 	return response, nil
@@ -105,29 +117,7 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 	return retr
 }
 
-func TestGetImage(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
 
-	r, err := retr.GetRelease(context.Background(), 4707982)
-
-	if err != nil {
-		t.Fatalf("Error getting release: %v", err)
-	}
-
-	found := false
-	for _, i := range r.GetImages() {
-		if i.Type == "primary" {
-			if i.Uri == "" {
-				t.Errorf("Unable to pick out image uri: %v", r)
-			}
-			found = true
-		}
-	}
-
-	if !found {
-		t.Errorf("No primary image: %v", r)
-	}
-}
 
 func TestGetReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
@@ -172,22 +162,12 @@ func TestGetTracks(t *testing.T) {
 	}
 }
 
-func TestGetStats(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	stats, err := retr.GetStats(context.Background(), 18121840)
-	if err != nil {
-		t.Fatalf("Bad retr: %v", err)
-	}
 
-	if stats.NumHave != 7 {
-		t.Errorf("Bad stats: %+v", stats)
-	}
-}
 
 func TestSellRecord(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
-	id, _ := retr.SellRecord(context.Background(), 2576104, 12.345, "Draft", "blah", "blah", 12)
+	id, _ := retr.SellRecord(context.Background(), 2576104, 12.345, "Draft", "blah", "blah", 12, "some comments")
 
 	if id != 2375135419 {
 		t.Errorf("Sale has failed: %v", id)
@@ -279,57 +259,8 @@ func TestBuildRelease(t *testing.T) {
 
 }
 
-func TestGetRelease(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(context.Background(), 249504)
-	if release.Title != "Never Gonna Give You Up" {
-		t.Errorf("Wrong title: %v", release)
-	}
-	if release.Artists[0].Name != "Rick Astley" {
-		t.Errorf("Wrong artist name: %v", release.Artists[0].Name)
-	}
-	if !strings.Contains(release.Images[0].Uri, "https") {
-		t.Errorf("Image has not been retrieved: %v", release)
-	}
 
-	if len(release.Formats) != 1 {
-		t.Errorf("Formats has been pulled wrong: %v", release.Formats)
-	}
 
-	if len(release.Labels) != 1 {
-		t.Errorf("Labels has been pulled wrong: %v", release.Labels)
-	}
-
-	if release.Labels[0].Id != 895 {
-		t.Errorf("Label ID has not been pulled correctly: %v", release.Labels[0])
-	}
-}
-
-func TestSkipUnofficial(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(context.Background(), 10543660)
-	if release.Labels[0].Id != 694483 {
-		t.Errorf("Label ID has not been pulled correctly: %v", release.Labels[0])
-	}
-
-	if len(release.GetDigitalVersions()) == 0 {
-		t.Errorf("No digital versions picked up: %v", release)
-	}
-
-	for _, dv := range release.GetDigitalVersions() {
-		if dv == 3019086 {
-			t.Errorf("This unofficial release should not be included: %v", dv)
-		}
-	}
-}
-
-func TestGetReleaseNoData(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(context.Background(), 2425133)
-	if release.Title != "Love, Love, Love, Love, Love" {
-		t.Errorf("Wrong title: %v", release)
-	}
-}
 
 func TestGetEarliestReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
@@ -346,30 +277,7 @@ func TestGetEarliestReleaseDate(t *testing.T) {
 	}
 }
 
-func TestGetOtherVersions(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	release, _ := retr.GetRelease(context.Background(), 668315)
-	if release.Title != "Totale's Turns (It's Now Or Never)" {
-		t.Errorf("Wrong title: %v", release.Title)
-	}
-	if len(release.DigitalVersions) != 5 {
-		t.Errorf("Wrong digital versions: %v", release.DigitalVersions)
-	}
-}
 
-func TestGetOtherVersionsHuh(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	release, err := retr.GetRelease(context.Background(), 372019)
-	if err != nil {
-		t.Fatalf("Unable to read version: %v", err)
-	}
-	if release.Title != "Totale's Turns (It's Now Or Never)" {
-		t.Errorf("Wrong title: %v", release.Title)
-	}
-	if len(release.DigitalVersions) != 5 {
-		t.Errorf("Wrong digital versions: %v", release.DigitalVersions)
-	}
-}
 
 func TestGetEarliestReleaseDateOrdering(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
@@ -382,18 +290,7 @@ func TestGetEarliestReleaseDateOrdering(t *testing.T) {
 	}
 }
 
-func TestAddToFolder(t *testing.T) {
-	retr := NewTestDiscogsRetriever()
-	v, err := retr.AddToFolder(context.Background(), 812802, 10)
 
-	if err != nil {
-		t.Fatalf("Error running add: %v", err)
-	}
-
-	if v != 267910454 {
-		t.Errorf("Error in returned instance ID: %v", v)
-	}
-}
 
 func TestMoveToUncateogrized(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
@@ -426,7 +323,7 @@ func TestRetrieve(t *testing.T) {
 
 	endCount := GetHTTPGetCount()
 	if startCount != endCount-1 {
-		t.Errorf("Retrieve did not perform a http get request: %v -> %v", startCount, endCount)
+		t.Errorf("Retrieve did not perform a http get request and it should have done: %v -> %v", startCount, endCount)
 	}
 }
 

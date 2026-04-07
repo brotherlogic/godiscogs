@@ -73,7 +73,7 @@ func sortByLabelCat(rel1 pb.Release, rel2 pb.Release) int {
 // GetMainLabel gets the main label from the release - this is the label to be used in e.g. sorting
 func GetMainLabel(labels []*pb.Label) *pb.Label {
 	if len(labels) == 0 {
-		return nil
+		return &pb.Label{Name: "Unknown", Catno: "Unknown"}
 	} else if len(labels) == 1 {
 		return labels[0]
 	} else {

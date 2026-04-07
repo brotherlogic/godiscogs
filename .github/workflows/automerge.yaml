@@ -1,0 +1,22 @@
+name: Auto Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+
+jobs:
+  enable-automerge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Enable Auto-Merge for PR
+        env:
+          GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }} # Same token used in pr.yml to ensure adequate permissions
+        run: |
+          # Strip any accidental newlines/carriage returns from the token
+          export GH_TOKEN=$(echo -n "$GH_TOKEN" | tr -d '\n\r ')
+          # The --auto flag tells GitHub to wait for all required status checks to turn green before squashing!
+          echo "Enabling Github Auto-Merge for PR #${{ github.event.pull_request.number }}"
+          gh pr merge "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --auto --squash || echo "Auto-merge might already be enabled or requires repo settings configuration."
