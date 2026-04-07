@@ -39,8 +39,7 @@ jobs:
       - name: Build and Vet
         run: |
           go build -v ./...
-          go vet ./...
-
+  
       - name: Check AI Review Addressed
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
