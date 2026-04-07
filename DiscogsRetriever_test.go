@@ -323,7 +323,7 @@ func TestRetrieve(t *testing.T) {
 
 	endCount := GetHTTPGetCount()
 	if startCount != endCount-1 {
-		t.Errorf("Retrieve did not perform a http get request: %v -> %v", startCount, endCount)
+		t.Errorf("Retrieve did not perform a http get request and it should have done: %v -> %v", startCount, endCount)
 	}
 }
 
