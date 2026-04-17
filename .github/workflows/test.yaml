@@ -29,6 +29,7 @@ jobs:
           PR_NUMBER=$(gh pr list -s open --limit 1 --json number --jq '.[0].number')
           echo "Triggered by workflow_run. PR is $PR_NUMBER"
           gh pr checkout $PR_NUMBER
+<<<<<<< HEAD
           echo "HEAD_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
         else
           echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
@@ -44,6 +45,9 @@ jobs:
           -f context='RunBasic' \
           -f description='Running basic tests...' \
           -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+=======
+        fi
+>>>>>>> origin/master
      
     - name: Setup Go
       uses: actions/setup-go@v2
@@ -60,6 +64,7 @@ jobs:
       uses: shogo82148/actions-goveralls@v1
       with:
         path-to-profile: profile.cov
+<<<<<<< HEAD
         ignore: recordcollection.go
 
     - name: Post Final Status
@@ -76,3 +81,6 @@ jobs:
           -f context='RunBasic' \
           -f description='Basic tests complete.' \
           -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+=======
+        ignore: recordcollection.go
+>>>>>>> origin/master
