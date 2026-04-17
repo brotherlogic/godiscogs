@@ -5,6 +5,10 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_run:
+    workflows: ["Gemini AI PR Reviewer"]
+    types:
+      - completed
 
 jobs:
   checks:
@@ -12,7 +16,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v4
+
+    - name: Ensure PR Code
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_run" ]; then
+          PR_NUMBER=$(gh pr list -s open --limit 1 --json number --jq '.[0].number')
+          echo "Triggered by workflow_run. PR is $PR_NUMBER"
+          gh pr checkout $PR_NUMBER
+        fi
      
     - name: Setup Go
       uses: actions/setup-go@v2
@@ -30,9 +44,3 @@ jobs:
       with:
         path-to-profile: profile.cov
         ignore: recordcollection.go
-    
-    - name: Run coverage
-      run: go test -race -coverprofile=coverage.out -covermode=atomic
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3

@@ -532,8 +532,12 @@ type Release struct {
 	SleeveCondition string   `protobuf:"bytes,18,opt,name=sleeve_condition,json=sleeveCondition,proto3" json:"sleeve_condition,omitempty"`
 	DigitalVersions []int32  `protobuf:"varint,20,rep,packed,name=digital_versions,json=digitalVersions,proto3" json:"digital_versions,omitempty"`
 	OtherVersions   []int32  `protobuf:"varint,21,rep,packed,name=other_versions,json=otherVersions,proto3" json:"other_versions,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// Is this release blocked from sale
+	BlockedFromSale bool `protobuf:"varint,22,opt,name=blocked_from_sale,json=blockedFromSale,proto3" json:"blocked_from_sale,omitempty"`
+	// The sort title for the artists
+	ArtistsSort   string `protobuf:"bytes,23,opt,name=artists_sort,json=artistsSort,proto3" json:"artists_sort,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Release) Reset() {
@@ -713,6 +717,20 @@ func (x *Release) GetOtherVersions() []int32 {
 	return nil
 }
 
+func (x *Release) GetBlockedFromSale() bool {
+	if x != nil {
+		return x.BlockedFromSale
+	}
+	return false
+}
+
+func (x *Release) GetArtistsSort() string {
+	if x != nil {
+		return x.ArtistsSort
+	}
+	return ""
+}
+
 type Note struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FieldId       int32                  `protobuf:"varint,1,opt,name=field_id,json=fieldId,proto3" json:"field_id,omitempty"`
@@ -870,7 +888,7 @@ const file_godiscogs_proto_rawDesc = "" +
 	"\fdescriptions\x18\x01 \x03(\tR\fdescriptions\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
 	"\x03qty\x18\x03 \x01(\tR\x03qty\x12\x12\n" +
-	"\x04text\x18\x04 \x01(\tR\x04text\"\x8d\x06\n" +
+	"\x04text\x18\x04 \x01(\tR\x04text\"\xdc\x06\n" +
 	"\aRelease\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12+\n" +
@@ -894,7 +912,9 @@ const file_godiscogs_proto_rawDesc = "" +
 	"\x10record_condition\x18\x11 \x01(\tR\x0frecordCondition\x12)\n" +
 	"\x10sleeve_condition\x18\x12 \x01(\tR\x0fsleeveCondition\x12)\n" +
 	"\x10digital_versions\x18\x14 \x03(\x05R\x0fdigitalVersions\x12%\n" +
-	"\x0eother_versions\x18\x15 \x03(\x05R\rotherVersions\"7\n" +
+	"\x0eother_versions\x18\x15 \x03(\x05R\rotherVersions\x12*\n" +
+	"\x11blocked_from_sale\x18\x16 \x01(\bR\x0fblockedFromSale\x12!\n" +
+	"\fartists_sort\x18\x17 \x01(\tR\vartistsSort\"7\n" +
 	"\x04Note\x12\x19\n" +
 	"\bfield_id\x18\x01 \x01(\x05R\afieldId\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value\"\xec\x01\n" +
