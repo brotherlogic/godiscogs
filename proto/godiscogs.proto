@@ -121,6 +121,12 @@ message Release {
 
   repeated int32 digital_versions = 20;
   repeated int32 other_versions = 21;
+
+  // Is this release blocked from sale
+  bool blocked_from_sale = 22;
+
+  // The sort title for the artists
+  string artists_sort = 23;
 }
 
 message Note {

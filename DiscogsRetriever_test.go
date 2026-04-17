@@ -119,6 +119,22 @@ func NewTestDiscogsRetriever() *DiscogsRetriever {
 
 
 
+func TestGetReleaseFields(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	release, err := retr.GetRelease(context.Background(), 249504)
+	if err != nil {
+		t.Fatalf("Error getting release: %v", err)
+	}
+
+	if !release.BlockedFromSale {
+		t.Errorf("BlockedFromSale should be true, got %v", release.BlockedFromSale)
+	}
+
+	if release.ArtistsSort != "Rick Astley" {
+		t.Errorf("ArtistsSort should be 'Rick Astley', got '%v'", release.ArtistsSort)
+	}
+}
+
 func TestGetReleaseDate(t *testing.T) {
 	retr := NewTestDiscogsRetriever()
 
