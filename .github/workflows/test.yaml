@@ -14,6 +14,9 @@ jobs:
   checks:
     name: basic_assess
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -26,7 +29,21 @@ jobs:
           PR_NUMBER=$(gh pr list -s open --limit 1 --json number --jq '.[0].number')
           echo "Triggered by workflow_run. PR is $PR_NUMBER"
           gh pr checkout $PR_NUMBER
+          echo "HEAD_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+        else
+          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
         fi
+
+    - name: Post Pending Status
+      if: github.event_name == 'workflow_run'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh api repos/${{ github.repository }}/statuses/$HEAD_SHA \
+          -f state='pending' \
+          -f context='RunBasic' \
+          -f description='Running basic tests...' \
+          -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
      
     - name: Setup Go
       uses: actions/setup-go@v2
@@ -44,3 +61,18 @@ jobs:
       with:
         path-to-profile: profile.cov
         ignore: recordcollection.go
+
+    - name: Post Final Status
+      if: always() && github.event_name == 'workflow_run'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        STATE="success"
+        if [ "${{ job.status }}" != "success" ]; then
+          STATE="failure"
+        fi
+        gh api repos/${{ github.repository }}/statuses/$HEAD_SHA \
+          -f state="$STATE" \
+          -f context='RunBasic' \
+          -f description='Basic tests complete.' \
+          -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
