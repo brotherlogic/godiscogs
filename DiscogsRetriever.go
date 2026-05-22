@@ -29,7 +29,7 @@ var (
 	// DiscogsRequests request out to discogs
 	RequestLatency = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "godiscogs_request_latency",
-		Help:    "The number of server requests",
+		Help:    "The number of server requestss",
 		Buckets: []float64{5, 10, 25, 50, 100, 250, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 1024000},
 	}, []string{"method", "path1"})
 )
