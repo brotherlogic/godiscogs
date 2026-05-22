@@ -506,7 +506,7 @@ type Release struct {
 	// Images associated with the release
 	Images []*Image `protobuf:"bytes,5,rep,name=images,proto3" json:"images,omitempty"`
 	// The instance id of this release
-	InstanceId int32 `protobuf:"varint,6,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	InstanceId int64 `protobuf:"varint,6,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
 	// The labels connected to this release
 	Labels []*Label `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty"`
 	// The number of discs in the release
@@ -605,7 +605,7 @@ func (x *Release) GetImages() []*Image {
 	return nil
 }
 
-func (x *Release) GetInstanceId() int32 {
+func (x *Release) GetInstanceId() int64 {
 	if x != nil {
 		return x.InstanceId
 	}
@@ -895,7 +895,7 @@ const file_godiscogs_proto_rawDesc = "" +
 	"\aartists\x18\x03 \x03(\v2\x11.godiscogs.ArtistR\aartists\x12\x1b\n" +
 	"\tfolder_id\x18\x04 \x01(\x05R\bfolderId\x12(\n" +
 	"\x06images\x18\x05 \x03(\v2\x10.godiscogs.ImageR\x06images\x12\x1f\n" +
-	"\vinstance_id\x18\x06 \x01(\x05R\n" +
+	"\vinstance_id\x18\x06 \x01(\x03R\n" +
 	"instanceId\x12(\n" +
 	"\x06labels\x18\a \x03(\v2\x10.godiscogs.LabelR\x06labels\x12'\n" +
 	"\x0fformat_quantity\x18\b \x01(\x05R\x0eformatQuantity\x12\x16\n" +

@@ -83,7 +83,7 @@ message Release {
   repeated Image images = 5;
 
   // The instance id of this release
-  int32 instance_id = 6;
+  int64 instance_id = 6;
 
   // The labels connected to this release
   repeated Label labels = 7;
