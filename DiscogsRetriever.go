@@ -222,7 +222,7 @@ func (r *DiscogsRetriever) processCollectionRelease(re *CollectionRelease) *pb.R
 	}
 
 	release.Id = int32(re.ID)
-	release.InstanceId = int32(re.InstanceID)
+	release.InstanceId = int64(re.InstanceID)
 	release.FolderId = int32(re.FolderID)
 	release.Rating = int32(re.Rating)
 
