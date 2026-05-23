@@ -22,6 +22,7 @@ type prodHTTPGetter struct{}
 
 func (httpGetter prodHTTPGetter) Get(url string) (*http.Response, error) {
 	httpCount++
+	log.Printf("Getting %v", url)
 	return http.Get(url)
 }
 

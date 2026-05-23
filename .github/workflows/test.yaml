@@ -34,18 +34,6 @@ jobs:
           echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
         fi
 
-    - name: Post Pending Status
-      if: github.event_name == 'workflow_run'
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh api repos/${{ github.repository }}/statuses/$HEAD_SHA \
-          -f state='pending' \
-          -f context='RunBasic' \
-          -f description='Running basic tests...' \
-          -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
-        fi
-     
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
