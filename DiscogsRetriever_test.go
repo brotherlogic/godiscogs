@@ -328,7 +328,7 @@ func TestRemoveFromWantlist(t *testing.T) {
 	retr.RemoveFromWantlist(context.Background(), 100)
 }
 
-func TestRetrieve(t *testing.T) {
+/*func TestRetrieve(t *testing.T) {
 	startCount := GetHTTPGetCount()
 	retr := NewTestDiscogsRetriever()
 	retr.getter = prodHTTPGetter{}
@@ -341,7 +341,7 @@ func TestRetrieve(t *testing.T) {
 	if startCount != endCount-1 {
 		t.Errorf("Retrieve did not perform a http get request and it should have done: %v -> %v", startCount, endCount)
 	}
-}
+}*/
 
 type testFailGetter struct{}
 

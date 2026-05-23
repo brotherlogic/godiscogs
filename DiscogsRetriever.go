@@ -452,7 +452,7 @@ func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, rel
 // ReleaseBack what we get for a single release
 type ReleaseBack struct {
 	DateAdded  string     `json:"date_added"`
-	InstanceID int32      `json:"instance_id"`
+	InstanceID int64      `json:"instance_id"`
 	FolderId   int32      `json:"folder_id"`
 	Notes      []*pb.Note `json:"notes"`
 	Rating     int32      `json:"rating"`
@@ -501,9 +501,9 @@ type InstanceInfo struct {
 }
 
 // GetInstanceInfo gets the info for an instance
-func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[int32]*InstanceInfo, error) {
+func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[int64]*InstanceInfo, error) {
 	jsonString, _, err := r.retrieve(ctx, fmt.Sprintf("/users/BrotherLogic/collection/releases/%v?token=%v", rid, r.userToken))
-	mapper := make(map[int32]*InstanceInfo)
+	mapper := make(map[int64]*InstanceInfo)
 	if err != nil {
 		return mapper, err
 	}
