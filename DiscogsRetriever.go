@@ -481,6 +481,11 @@ func (r *DiscogsRetriever) GetStats(ctx context.Context, rid int32) (*Stats, err
 	return stats, nil
 }
 
+const (
+	// FieldIdPackageScore is the Discogs custom field ID for Package Score
+	FieldIdPackageScore = 15
+)
+
 // InstanceInfo some basic details about the instance
 type InstanceInfo struct {
 	DateAdded        int64
@@ -560,7 +565,7 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			if note.FieldId == 14 {
 				mapper[entry.InstanceID].PurchaseLocation = note.Value
 			}
-			if note.FieldId == 15 {
+			if note.FieldId == FieldIdPackageScore {
 				mapper[entry.InstanceID].PackageScore = note.Value
 			}
 			if note.FieldId == 13 {
