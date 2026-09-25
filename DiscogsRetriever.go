@@ -481,6 +481,11 @@ func (r *DiscogsRetriever) GetStats(ctx context.Context, rid int32) (*Stats, err
 	return stats, nil
 }
 
+const (
+	// FieldIdPackageScore is the Discogs custom field ID for Package Score
+	FieldIdPackageScore = 15
+)
+
 // InstanceInfo some basic details about the instance
 type InstanceInfo struct {
 	DateAdded        int64
@@ -498,6 +503,7 @@ type InstanceInfo struct {
 	PurchaseLocation string
 	PurchasePrice    int32
 	Notes            string
+	PackageScore     string
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -558,6 +564,9 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			}
 			if note.FieldId == 14 {
 				mapper[entry.InstanceID].PurchaseLocation = note.Value
+			}
+			if note.FieldId == FieldIdPackageScore {
+				mapper[entry.InstanceID].PackageScore = note.Value
 			}
 			if note.FieldId == 13 {
 				// Remove decimal point - rc stores prices in cents
