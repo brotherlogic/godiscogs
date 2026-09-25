@@ -511,6 +511,9 @@ func TestGetInstanceInfo(t *testing.T) {
 		t.Errorf("Bad Listen Time: %+v", info[19867048])
 	}
 
+	if info[19867048].PackageScore != "5" {
+		t.Errorf("Bad PackageScore: %+v", info[19867048])
+	}
 }
 
 func TestGetInstanceInfoFailRet(t *testing.T) {

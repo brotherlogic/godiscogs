@@ -498,6 +498,7 @@ type InstanceInfo struct {
 	PurchaseLocation string
 	PurchasePrice    int32
 	Notes            string
+	PackageScore     string
 }
 
 // GetInstanceInfo gets the info for an instance
@@ -558,6 +559,9 @@ func (r *DiscogsRetriever) GetInstanceInfo(ctx context.Context, rid int32) (map[
 			}
 			if note.FieldId == 14 {
 				mapper[entry.InstanceID].PurchaseLocation = note.Value
+			}
+			if note.FieldId == 15 {
+				mapper[entry.InstanceID].PackageScore = note.Value
 			}
 			if note.FieldId == 13 {
 				// Remove decimal point - rc stores prices in cents
