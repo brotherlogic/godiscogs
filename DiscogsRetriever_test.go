@@ -3,6 +3,7 @@ package godiscogs
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -18,7 +19,9 @@ import (
 )
 
 type testFileGetter struct {
-	count int
+	count        int
+	lastPostURL  string
+	lastPostData string
 }
 
 func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
@@ -62,6 +65,8 @@ func (httpGetter *testFileGetter) Get(url string) (*http.Response, error) {
 }
 
 func (httpGetter *testFileGetter) Post(url string, data string) (*http.Response, error) {
+	httpGetter.lastPostURL = url
+	httpGetter.lastPostData = data
 	response := &http.Response{}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	if !strings.HasPrefix(strippedURL, "/") {
@@ -234,7 +239,7 @@ func TestGetSuggestedPriceWithEmpty(t *testing.T) {
 }
 
 func TestGetRateLimit(t *testing.T) {
-	retr := NewDiscogsRetriever("token", nil)
+	retr := NewTestDiscogsRetriever()
 
 	rateLimit := retr.GetRateLimit(context.Background())
 	if rateLimit != 60 {
@@ -611,6 +616,56 @@ func TestUpdateSalePrice(t *testing.T) {
 	err := retr.UpdateSalePrice(context.Background(), 805377159, 11403112, "Very Good Plus (VG+)", "Very Good Plus (VG+)", 9.50)
 	if err != nil {
 		t.Errorf("Update price failed!: %v", err)
+	}
+}
+
+func TestUpdateSaleListing(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	getter := &testFileGetter{count: -1}
+	retr.getter = getter
+
+	err := retr.UpdateSaleListing(context.Background(), 805377159, 11403112, " Very Good Plus (VG+) ", " Near Mint (NM or M-) ", "For Sale", " Refreshed description with \"quotes\"\nand newline ", 12.50)
+	if err != nil {
+		t.Fatalf("UpdateSaleListing failed: %v", err)
+	}
+
+	expectedURL := "https://api.discogs.com/marketplace/listings/805377159?curr_abr=USD&token=token"
+	if getter.lastPostURL != expectedURL {
+		t.Errorf("Unexpected POST URL: got %q, want %q", getter.lastPostURL, expectedURL)
+	}
+
+	var payload map[string]interface{}
+	if err := json.Unmarshal([]byte(getter.lastPostData), &payload); err != nil {
+		t.Fatalf("Failed to unmarshal POST data %q: %v", getter.lastPostData, err)
+	}
+
+	if int(payload["release_id"].(float64)) != 11403112 {
+		t.Errorf("Unexpected release_id: %v", payload["release_id"])
+	}
+	if payload["condition"] != "Very Good Plus (VG+)" {
+		t.Errorf("Unexpected condition: %q", payload["condition"])
+	}
+	if payload["sleeve_condition"] != "Near Mint (NM or M-)" {
+		t.Errorf("Unexpected sleeve_condition: %q", payload["sleeve_condition"])
+	}
+	if payload["status"] != "For Sale" {
+		t.Errorf("Unexpected status: %q", payload["status"])
+	}
+	if payload["comments"] != "Refreshed description with \"quotes\"\nand newline" {
+		t.Errorf("Unexpected comments: %q", payload["comments"])
+	}
+	if float32(payload["price"].(float64)) != 12.50 {
+		t.Errorf("Unexpected price: %v", payload["price"])
+	}
+}
+
+func TestUpdateSaleListingFail(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getter = testFailGetter{}
+
+	err := retr.UpdateSaleListing(context.Background(), 805377159, 11403112, "Very Good Plus (VG+)", "Very Good Plus (VG+)", "Expired", "some notes", 9.50)
+	if err == nil {
+		t.Errorf("Expected error on failed POST, got nil")
 	}
 }
 

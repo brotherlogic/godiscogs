@@ -406,6 +406,26 @@ func (r *DiscogsRetriever) UpdateSalePrice(ctx context.Context, saleID int, rele
 	return err
 }
 
+// UpdateSaleListing updates an existing sale listing in-place
+func (r *DiscogsRetriever) UpdateSaleListing(ctx context.Context, saleID int64, releaseID int, condition, sleeve, state, notes string, price float32) error {
+	listingData := map[string]interface{}{
+		"release_id":       releaseID,
+		"condition":        strings.TrimSpace(condition),
+		"sleeve_condition": strings.TrimSpace(sleeve),
+		"price":            price,
+		"status":           state,
+		"comments":         strings.TrimSpace(notes),
+	}
+
+	dataBytes, err := json.Marshal(listingData)
+	if err != nil {
+		return fmt.Errorf("Failed to marshal sales data: %w", err)
+	}
+
+	_, err = r.post(ctx, fmt.Sprintf("/marketplace/listings/%v?curr_abr=USD&token=%v", saleID, r.userToken), string(dataBytes))
+	return err
+}
+
 // RemoveFromSale removes the listing from sale
 func (r *DiscogsRetriever) RemoveFromSale(ctx context.Context, saleID int, releaseID int) error {
 	data := "{\"release_id\":" + strconv.Itoa(releaseID) + ", \"condition\":\"Near Mint (NM or M-)\", \"price\":5.00, \"status\":\"Draft\"}"
