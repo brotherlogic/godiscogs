@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	pb "github.com/brotherlogic/godiscogs/proto"
@@ -67,6 +68,8 @@ type DiscogsRetriever struct {
 	getter           httpGetter
 	getSleep         int
 	logger           func(context.Context, string)
+	baseURL          string
+	httpClient       *http.Client
 }
 
 // NewDiscogsRetriever Build a production retriever
@@ -74,7 +77,10 @@ func NewDiscogsRetriever(token string, logger func(context.Context, string)) *Di
 	return &DiscogsRetriever{unmarshaller: prodUnmarshaller{}, getter: prodHTTPGetter{}, userToken: token, getSleep: 500, lastRetrieveTime: time.Now().Unix(), logger: logger}
 }
 
-var lastTimeRetrieved time.Time
+var (
+	throttleMu        sync.Mutex
+	lastTimeRetrieved time.Time
+)
 
 // Urls list of urls in pagination
 type Urls struct {
@@ -637,15 +643,56 @@ func (r *DiscogsRetriever) GetFolders(ctx context.Context) []pb.Folder {
 	return folders
 }
 
-func (r *DiscogsRetriever) throttle() time.Duration {
-	//Sleep here
-	diff := time.Now().Sub(lastTimeRetrieved)
-	val := diff
-	if diff < time.Duration(r.getSleep)*time.Millisecond {
-		val = time.Duration(r.getSleep)*time.Millisecond - diff
-		time.Sleep(time.Duration(r.getSleep)*time.Millisecond - diff)
+func (r *DiscogsRetriever) throttleContext(ctx context.Context) (time.Duration, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
 	}
-	lastTimeRetrieved = time.Now()
+
+	sleepInterval := time.Duration(r.getSleep) * time.Millisecond
+	if sleepInterval <= 0 {
+		throttleMu.Lock()
+		if now := time.Now(); now.After(lastTimeRetrieved) {
+			lastTimeRetrieved = now
+		}
+		throttleMu.Unlock()
+		return 0, nil
+	}
+
+	throttleMu.Lock()
+	prev := lastTimeRetrieved
+	now := time.Now()
+	nextAllowed := prev.Add(sleepInterval)
+	var wait time.Duration
+	reserved := now
+	if nextAllowed.After(now) {
+		wait = nextAllowed.Sub(now)
+		reserved = nextAllowed
+	}
+	lastTimeRetrieved = reserved
+	throttleMu.Unlock()
+
+	if wait <= 0 {
+		return 0, nil
+	}
+
+	timer := time.NewTimer(wait)
+	defer timer.Stop()
+
+	select {
+	case <-timer.C:
+		return wait, nil
+	case <-ctx.Done():
+		throttleMu.Lock()
+		if lastTimeRetrieved.Equal(reserved) {
+			lastTimeRetrieved = prev
+		}
+		throttleMu.Unlock()
+		return 0, ctx.Err()
+	}
+}
+
+func (r *DiscogsRetriever) throttle() time.Duration {
+	val, _ := r.throttleContext(context.Background())
 	return val
 }
 
@@ -708,7 +755,11 @@ func (r *DiscogsRetriever) retrieve(ctx context.Context, path string) ([]byte, h
 		return body, response.Header, fmt.Errorf("Bad Read: (%v) %v", response.StatusCode, string(body))
 	}
 
-	lastTimeRetrieved = time.Now()
+	throttleMu.Lock()
+	if now := time.Now(); now.After(lastTimeRetrieved) {
+		lastTimeRetrieved = now
+	}
+	throttleMu.Unlock()
 
 	return body, response.Header, nil
 }
