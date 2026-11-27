@@ -102,10 +102,10 @@ type CollectionResponse struct {
 
 // CollectionRelease returned from collection pull
 type CollectionRelease struct {
-	ID         int `json:"id"`
-	FolderID   int `json:"folder_id"`
-	InstanceID int `json:"instance_id"`
-	Rating     int `json:"rating"`
+	ID         int   `json:"id"`
+	FolderID   int   `json:"folder_id"`
+	InstanceID int64 `json:"instance_id"`
+	Rating     int   `json:"rating"`
 	Notes      []*pb.Note
 }
 
@@ -228,7 +228,7 @@ func (r *DiscogsRetriever) processCollectionRelease(re *CollectionRelease) *pb.R
 	}
 
 	release.Id = int32(re.ID)
-	release.InstanceId = int64(re.InstanceID)
+	release.InstanceId = re.InstanceID
 	release.FolderId = int32(re.FolderID)
 	release.Rating = int32(re.Rating)
 
@@ -460,19 +460,19 @@ func (r *DiscogsRetriever) RemoveFromWantlist(ctx context.Context, releaseID int
 
 // AddToFolderResponse the response back from an add request
 type AddToFolderResponse struct {
-	InstanceID  int `json:"instance_id"`
+	InstanceID  int64 `json:"instance_id"`
 	ResourceURL string
 	Simple      int
 }
 
 // MoveToFolder Moves the given release to the new folder
-func (r *DiscogsRetriever) MoveToFolder(ctx context.Context, folderID int, releaseID int, instanceID int, newFolderID int) (string, error) {
-	return r.post(ctx, "/users/BrotherLogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
+func (r *DiscogsRetriever) MoveToFolder(ctx context.Context, folderID int, releaseID int, instanceID int64, newFolderID int) (string, error) {
+	return r.post(ctx, "/users/BrotherLogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.FormatInt(instanceID, 10)+"?token="+r.userToken, "{\"folder_id\": "+strconv.Itoa(newFolderID)+"}")
 }
 
 // DeleteInstance removes a record from the collection
-func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, releaseID int, instanceID int) error {
-	return r.delete(ctx, "/users/BrotherLogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.Itoa(instanceID)+"?token="+r.userToken, "")
+func (r *DiscogsRetriever) DeleteInstance(ctx context.Context, folderID int, releaseID int, instanceID int64) error {
+	return r.delete(ctx, "/users/BrotherLogic/collection/folders/"+strconv.Itoa(folderID)+"/releases/"+strconv.Itoa(releaseID)+"/instances/"+strconv.FormatInt(instanceID, 10)+"?token="+r.userToken, "")
 }
 
 // ReleaseBack what we get for a single release
