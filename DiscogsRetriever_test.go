@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -666,6 +667,198 @@ func TestUpdateSaleListingFail(t *testing.T) {
 	err := retr.UpdateSaleListing(context.Background(), 805377159, 11403112, "Very Good Plus (VG+)", "Very Good Plus (VG+)", "Expired", "some notes", 9.50)
 	if err == nil {
 		t.Errorf("Expected error on failed POST, got nil")
+	}
+}
+
+type mockHTTPGetter struct {
+	statusCode int
+	body       string
+	err        error
+	lastMethod string
+	lastURL    string
+	lastData   string
+}
+
+func (m *mockHTTPGetter) buildResp() (*http.Response, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return &http.Response{
+		StatusCode: m.statusCode,
+		Header:     make(http.Header),
+		Body:       io.NopCloser(strings.NewReader(m.body)),
+	}, nil
+}
+
+func (m *mockHTTPGetter) Get(url string) (*http.Response, error) {
+	m.lastMethod = http.MethodGet
+	m.lastURL = url
+	return m.buildResp()
+}
+
+func (m *mockHTTPGetter) Post(url string, data string) (*http.Response, error) {
+	m.lastMethod = http.MethodPost
+	m.lastURL = url
+	m.lastData = data
+	return m.buildResp()
+}
+
+func (m *mockHTTPGetter) Put(url string, data string) (*http.Response, error) {
+	m.lastMethod = http.MethodPut
+	m.lastURL = url
+	m.lastData = data
+	return m.buildResp()
+}
+
+func (m *mockHTTPGetter) Delete(url string, data string) (*http.Response, error) {
+	m.lastMethod = http.MethodDelete
+	m.lastURL = url
+	m.lastData = data
+	return m.buildResp()
+}
+
+const largeInstanceID int64 = 2182621358
+
+func TestAddToFolderLargeInstanceID(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	getter := &mockHTTPGetter{
+		statusCode: http.StatusCreated,
+		body:       `{"instance_id": 2182621358, "resource_url": "https://api.discogs.com/users/BrotherLogic/collection/folders/1/releases/12345/instances/2182621358"}`,
+	}
+	retr.getter = getter
+
+	id, err := retr.AddToFolder(context.Background(), 1, 12345)
+	if err != nil {
+		t.Fatalf("AddToFolder failed: %v", err)
+	}
+	if id != largeInstanceID {
+		t.Errorf("AddToFolder returned instance ID %d, want %d", id, largeInstanceID)
+	}
+	expectedURL := "https://api.discogs.com/users/BrotherLogic/collection/folders/1/releases/12345?token=token"
+	if getter.lastURL != expectedURL {
+		t.Errorf("Unexpected POST URL: got %q, want %q", getter.lastURL, expectedURL)
+	}
+}
+
+func TestAddToFolderPostError(t *testing.T) {
+	t.Run("transport failure", func(t *testing.T) {
+		retr := NewTestDiscogsRetriever()
+		retr.getter = testFailGetter{}
+
+		id, err := retr.AddToFolder(context.Background(), 1, 12345)
+		if err == nil {
+			t.Fatalf("Expected error on transport failure, got nil")
+		}
+		if id != -1 {
+			t.Errorf("Expected -1 on error, got %d", id)
+		}
+		if !strings.Contains(err.Error(), "Built To Fail") {
+			t.Errorf("Expected r.post transport error, got: %v", err)
+		}
+	})
+
+	t.Run("non-2xx status", func(t *testing.T) {
+		retr := NewTestDiscogsRetriever()
+		retr.getter = &mockHTTPGetter{
+			statusCode: http.StatusInternalServerError,
+			body:       "server error",
+		}
+
+		id, err := retr.AddToFolder(context.Background(), 1, 12345)
+		if err == nil {
+			t.Fatalf("Expected error on 500 response, got nil")
+		}
+		if id != -1 {
+			t.Errorf("Expected -1 on error, got %d", id)
+		}
+		if !strings.Contains(err.Error(), "POST ERROR") {
+			t.Errorf("Expected POST ERROR from r.post, got: %v", err)
+		}
+	})
+}
+
+func TestAddToFolderInvalidJSON(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getter = &mockHTTPGetter{
+		statusCode: http.StatusCreated,
+		body:       "invalid-json",
+	}
+
+	id, err := retr.AddToFolder(context.Background(), 1, 12345)
+	if err == nil {
+		t.Fatalf("Expected error on invalid JSON, got nil")
+	}
+	if id != -1 {
+		t.Errorf("Expected -1 on error, got %d", id)
+	}
+}
+
+func TestGetCollectionLargeInstanceID(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getter = &mockHTTPGetter{
+		statusCode: http.StatusOK,
+		body:       `{"pagination":{"pages":1,"page":1},"releases":[{"id":12345,"folder_id":1,"instance_id":2182621358,"rating":4}]}`,
+	}
+
+	collection := retr.GetCollection(context.Background())
+	if len(collection) != 1 {
+		t.Fatalf("Expected 1 release in collection, got %d", len(collection))
+	}
+	if collection[0].InstanceId != largeInstanceID {
+		t.Errorf("Expected InstanceId %d, got %d", largeInstanceID, collection[0].InstanceId)
+	}
+}
+
+func TestGetInstanceIDLargeInstanceID(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	retr.getter = &mockHTTPGetter{
+		statusCode: http.StatusOK,
+		body:       `{"pagination":{"pages":1,"page":1},"releases":[{"id":12345,"folder_id":1,"instance_id":2182621358}]}`,
+	}
+
+	val := retr.GetInstanceID(context.Background(), 12345)
+	if val != largeInstanceID {
+		t.Errorf("GetInstanceID returned %d, want %d", val, largeInstanceID)
+	}
+}
+
+func TestMoveToFolderLargeInstanceID(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	getter := &mockHTTPGetter{
+		statusCode: http.StatusNoContent,
+		body:       "",
+	}
+	retr.getter = getter
+
+	_, err := retr.MoveToFolder(context.Background(), 1, 12345, largeInstanceID, 2)
+	if err != nil {
+		t.Fatalf("MoveToFolder failed: %v", err)
+	}
+	expectedURL := "https://api.discogs.com/users/BrotherLogic/collection/folders/1/releases/12345/instances/2182621358?token=token"
+	if getter.lastURL != expectedURL {
+		t.Errorf("Unexpected POST URL: got %q, want %q", getter.lastURL, expectedURL)
+	}
+	expectedData := `{"folder_id": 2}`
+	if getter.lastData != expectedData {
+		t.Errorf("Unexpected POST data: got %q, want %q", getter.lastData, expectedData)
+	}
+}
+
+func TestDeleteInstanceLargeInstanceID(t *testing.T) {
+	retr := NewTestDiscogsRetriever()
+	getter := &mockHTTPGetter{
+		statusCode: http.StatusNoContent,
+		body:       "",
+	}
+	retr.getter = getter
+
+	err := retr.DeleteInstance(context.Background(), 1, 12345, largeInstanceID)
+	if err != nil {
+		t.Fatalf("DeleteInstance failed: %v", err)
+	}
+	expectedSuffix := "/users/BrotherLogic/collection/folders/1/releases/12345/instances/2182621358?token=token"
+	if !strings.HasSuffix(getter.lastURL, expectedSuffix) {
+		t.Errorf("Unexpected DELETE URL: got %q, want suffix %q", getter.lastURL, expectedSuffix)
 	}
 }
 
